@@ -11,6 +11,8 @@ Rank	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
 add_picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {$/;"	f
 after_adding_entries_length_is_updated	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
 at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
+can_move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
+cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
 current	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current(&self) -> Option<PictureEntry> {$/;"	f
 length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
