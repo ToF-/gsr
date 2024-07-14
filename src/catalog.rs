@@ -23,6 +23,10 @@ impl Catalog {
         self.picture_entries.len()
     }
 
+    pub fn index(&self) -> usize {
+        self.index
+    }
+
     pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {
         self.picture_entries.append(picture_entries)
     }
@@ -74,6 +78,30 @@ impl Catalog {
         } else {
             0
         };
+    }
+
+    pub fn move_next_col(&mut self) {
+        if self.index + 1 < self.length() {
+            self.index += 1
+        }
+    }
+
+    pub fn move_prev_col(&mut self) {
+        if self.index > 0 {
+            self.index -= 1
+        }
+    }
+
+    pub fn move_next_row(&mut self) {
+        if self.index + self.page_size < self.length() {
+            self.index += self.page_size
+        }
+    }
+
+    pub fn move_prev_row(&mut self) {
+        if self.index >= self.page_size {
+            self.index -= self.page_size
+        }
     }
 
     pub fn move_prev_page(&mut self) {
@@ -220,6 +248,29 @@ mod tests {
         { assert_eq!(0, catalog_rc.borrow().page_index()) };
         { catalog_rc.borrow_mut().move_prev_page() };
         { assert_eq!(4, catalog_rc.borrow().page_index()) };
+    }
+
+    #[test]
+    fn moving_next_picture_can_be_blocked_or_allowed() {
+        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
+        let mut example = my_entries();
+        let mut other_entries = vec![
+            make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
+            make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
+            make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
+        let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
+        { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
+        { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
+        { catalog_rc.borrow_mut().set_page_size(2) };
+        { catalog_rc.borrow_mut().move_to_index(0) };
+        { catalog_rc.borrow_mut().move_next_col() };
+        { assert_eq!(1, catalog_rc.borrow().index()) };
+        { catalog_rc.borrow_mut().move_next_row() };
+        { assert_eq!(3, catalog_rc.borrow().index()) };
+        { catalog_rc.borrow_mut().move_prev_col() };
+        { assert_eq!(2, catalog_rc.borrow().index()) };
+        { catalog_rc.borrow_mut().move_prev_row() };
+        { assert_eq!(0, catalog_rc.borrow().index()) };
     }
 
 }
