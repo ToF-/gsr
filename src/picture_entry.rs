@@ -15,15 +15,21 @@ pub struct PictureEntry {
     pub label: String
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {
     PictureEntry {
         file_path: file_path,
         file_size: file_size,
         colors: colors,
         modified_time: modified_time,
         rank: rank,
-        palette: [0;9],
-        label: String::new(),
+        palette: match palette_option {
+            Some(palette) => palette,
+            None => [0;9],
+        },
+        label: match label_option {
+            Some(label) => label.clone(),
+            None => String::new(),
+        },
     }
 }
 
@@ -72,7 +78,7 @@ mod tests {
     #[test]
     fn original_file_name_is_the_file_path_without_folders() {
         let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        let entry = make_picture_entry(String::from("photos/foo.jpeg"), 100, 5, day_a, Rank::NoStar);
+        let entry = make_picture_entry(String::from("photos/foo.jpeg"), 100, 5, day_a, Rank::NoStar, None, None);
         assert_eq!(entry.original_file_name(), String::from("foo.jpeg"));
     }
 

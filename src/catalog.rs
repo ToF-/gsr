@@ -42,6 +42,9 @@ impl Catalog {
             Order::Label => self.picture_entries.sort_by(|a, b| {
                 a.cmp_label(&b)
             }),
+            Order::Palette => self.picture_entries.sort_by(|a, b| {
+                a.palette.cmp(&b.palette)
+            }),
         }
     }
 
@@ -84,10 +87,10 @@ mod tests {
         let day_c: SystemTime = DateTime::parse_from_rfc2822("Mon, 1 Jan 2024 10:52:37 GMT").unwrap().into();
         let day_d: SystemTime = DateTime::parse_from_rfc2822("Mon, 1 Jan 2024 11:52:37 GMT").unwrap().into();
         vec!(
-            make_picture_entry(String::from("photos/foo.jpeg"), 100, 5, day_d, Rank::NoStar),
-            make_picture_entry(String::from("photos/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars),
-            make_picture_entry(String::from("photos/qux.jpeg"), 10, 25, day_c, Rank::TwoStars),
-            make_picture_entry(String::from("photos/bub.jpeg"), 100, 25, day_a, Rank::OneStar))
+            make_picture_entry(String::from("photos/foo.jpeg"), 100, 5, day_d, Rank::NoStar, None, Some(String::from("foo"))),
+            make_picture_entry(String::from("photos/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars, None, None),
+            make_picture_entry(String::from("photos/qux.jpeg"), 10, 25, day_c, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None),
+            make_picture_entry(String::from("photos/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo"))))
     }
 
     #[test]
@@ -138,11 +141,16 @@ mod tests {
         { catalog_rc.borrow_mut().move_to_index(3) };
         { assert_eq!(String::from("foo.jpeg"),
             catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().set_current_label(String::from("foo")) };
         { catalog_rc.borrow_mut().sort_by(Order::Label) };
         { catalog_rc.borrow_mut().move_to_index(0) };
-        { println!("{:?}", catalog_rc.borrow()) };
         { assert_eq!(String::from("foo.jpeg"),
+            catalog_rc.borrow().current().unwrap().original_file_name()) };
+        { catalog_rc.borrow_mut().move_to_index(1) };
+        { assert_eq!(String::from("bub.jpeg"),
+            catalog_rc.borrow().current().unwrap().original_file_name()) };
+        { catalog_rc.borrow_mut().sort_by(Order::Palette) };
+        { catalog_rc.borrow_mut().move_to_index(3) };
+        { assert_eq!(String::from("qux.jpeg"),
             catalog_rc.borrow().current().unwrap().original_file_name()) };
     }
 }
