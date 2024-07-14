@@ -6,6 +6,7 @@ use crate::order::Order;
 pub struct Catalog {
     picture_entries: Vec<PictureEntry>,
     index: usize,
+    page_size: usize,
 }
 
 impl Catalog {
@@ -14,6 +15,7 @@ impl Catalog {
         Catalog {
             picture_entries : Vec::new(),
             index: 0,
+            page_size: 1,
         }
     }
 
@@ -25,26 +27,35 @@ impl Catalog {
         self.picture_entries.append(picture_entries)
     }
 
+    pub fn set_page_size(&mut self, page_size: usize) {
+        assert!(page_size > 0 && page_size <= 10);
+        self.page_size = page_size;
+    }
+
+    pub fn page_size(&self) -> usize {
+        self.page_size
+    }
+
+    pub fn page_length(&self) -> usize {
+        self.page_size * self.page_size
+    }
+
+    pub fn page_index_of(&self, index: usize) -> usize {
+        index - (index % self.page_length())
+    }
+    pub fn page_index(&self) -> usize {
+        self.page_index_of(self.index)
+    }
+
     pub fn sort_by(&mut self, order: Order) {
         match order {
             Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
             Order::Date => self.picture_entries.sort_by(|a, b| { a.modified_time.cmp(&b.modified_time) }),
             Order::Name => self.picture_entries.sort_by(|a, b| { a.original_file_path().cmp(&b.original_file_path()) }),
             Order::Size => self.picture_entries.sort_by(|a, b| { a.file_size.cmp(&b.file_size)} ),
-            Order::Value => self.picture_entries.sort_by(|a, b|  {
-                let cmp = (a.rank.clone() as usize).cmp(&(b.rank.clone() as usize));
-                if cmp == Equal {
-                    a.original_file_path().cmp(&b.original_file_path())
-                } else {
-                    cmp
-                }
-            }),
-            Order::Label => self.picture_entries.sort_by(|a, b| {
-                a.cmp_label(&b)
-            }),
-            Order::Palette => self.picture_entries.sort_by(|a, b| {
-                a.palette.cmp(&b.palette)
-            }),
+            Order::Value => self.picture_entries.sort_by(|a, b|  { a.cmp_rank(&b) }),
+            Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(&b) }),
+            Order::Palette => self.picture_entries.sort_by(|a, b| { a.palette.cmp(&b.palette) }),
         }
     }
 
@@ -54,6 +65,23 @@ impl Catalog {
 
     pub fn move_to_index(&mut self, index: usize) {
         self.index = index
+    }
+
+    pub fn move_next_page(&mut self) {
+        let new_index = self.page_index() + self.page_length();
+        self.index = if new_index < self.length() {
+            new_index
+        } else {
+            0
+        };
+    }
+
+    pub fn move_prev_page(&mut self) {
+        self.index = if self.page_index() >= self.page_length() {
+            self.page_index() - self.page_length()
+        } else {
+            self.page_index_of(self.length()-1)
+        }
     }
 
     pub fn current(&self) -> Option<PictureEntry> {
@@ -153,4 +181,45 @@ mod tests {
         { assert_eq!(String::from("qux.jpeg"),
             catalog_rc.borrow().current().unwrap().original_file_name()) };
     }
+
+    #[test]
+    fn page_index_depends_on_page_size_and_index() {
+        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
+        let mut example = my_entries();
+        let mut other_entries = vec![
+            make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
+            make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
+            make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
+        let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
+        { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
+        { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
+        { catalog_rc.borrow_mut().set_page_size(2) };
+        { assert_eq!(4, catalog_rc.borrow().page_length()) };
+        { catalog_rc.borrow_mut().move_to_index(0) };
+        { assert_eq!(0, catalog_rc.borrow().page_index()) };
+        { catalog_rc.borrow_mut().move_to_index(6) };
+        { assert_eq!(4, catalog_rc.borrow().page_index()) };
+    }
+
+    #[test]
+    fn after_moving_next_page_index_depends_on_page_size() {
+        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
+        let mut example = my_entries();
+        let mut other_entries = vec![
+            make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
+            make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
+            make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
+        let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
+        { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
+        { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
+        { catalog_rc.borrow_mut().set_page_size(2) };
+        { catalog_rc.borrow_mut().move_to_index(2) };
+        { catalog_rc.borrow_mut().move_next_page() };
+        { assert_eq!(4, catalog_rc.borrow().page_index()) };
+        { catalog_rc.borrow_mut().move_next_page() };
+        { assert_eq!(0, catalog_rc.borrow().page_index()) };
+        { catalog_rc.borrow_mut().move_prev_page() };
+        { assert_eq!(4, catalog_rc.borrow().page_index()) };
+    }
+
 }

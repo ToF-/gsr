@@ -68,6 +68,15 @@ impl PictureEntry {
     pub fn set_label(&mut self, label: String) {
         self.label = label
     }
+
+    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {
+        let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
+        if cmp == Equal {
+            self.original_file_path().cmp(&other.original_file_path())
+        } else {
+            cmp
+        }
+    }
 }
 
 #[cfg(test)]
