@@ -1,3 +1,3 @@
 pub enum Order {
-    Colors, Date, Name, Size, Value,
+    Colors, Date, Label, Name, Size, Value,
 }

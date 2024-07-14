@@ -2,6 +2,7 @@ use crate::picture_entry::PictureEntry;
 use std::cmp::Ordering::Equal;
 use crate::order::Order;
 
+#[derive(Debug)]
 pub struct Catalog {
     picture_entries: Vec<PictureEntry>,
     index: usize,
@@ -38,8 +39,10 @@ impl Catalog {
                     cmp
                 }
             }),
+            Order::Label => self.picture_entries.sort_by(|a, b| {
+                a.cmp_label(&b)
+            }),
         }
-        
     }
 
     pub fn can_move_to_index(&self, index: usize) -> bool {
@@ -55,6 +58,12 @@ impl Catalog {
             Some(self.picture_entries[self.index].clone())
         } else {
             None
+        }
+    }
+
+    pub fn set_current_label(&mut self, label: String) {
+        if self.index < self.picture_entries.len() {
+            self.picture_entries[self.index].set_label(label)
         }
     }
 }
@@ -127,6 +136,12 @@ mod tests {
             catalog_rc.borrow().current().unwrap().original_file_name()) };
         { catalog_rc.borrow_mut().sort_by(Order::Value) };
         { catalog_rc.borrow_mut().move_to_index(3) };
+        { assert_eq!(String::from("foo.jpeg"),
+            catalog_rc.borrow().current().unwrap().original_file_name()) };
+        { catalog_rc.borrow_mut().set_current_label(String::from("foo")) };
+        { catalog_rc.borrow_mut().sort_by(Order::Label) };
+        { catalog_rc.borrow_mut().move_to_index(0) };
+        { println!("{:?}", catalog_rc.borrow()) };
         { assert_eq!(String::from("foo.jpeg"),
             catalog_rc.borrow().current().unwrap().original_file_name()) };
     }

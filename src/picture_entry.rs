@@ -1,14 +1,18 @@
 use std::path::PathBuf;
+use std::cmp::Ordering;
+use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PictureEntry {
     pub file_path: String,
     pub file_size: u64,
     pub colors: usize,
     pub modified_time: SystemTime,
     pub rank: Rank,
+    pub palette: [u32;9],
+    pub label: String
 }
 
 pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank) -> PictureEntry {
@@ -18,6 +22,8 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
         colors: colors,
         modified_time: modified_time,
         rank: rank,
+        palette: [0;9],
+        label: String::new(),
     }
 }
 
@@ -30,6 +36,31 @@ impl PictureEntry {
 
     pub fn original_file_path(&self) -> String {
         self.file_path.clone()
+    }
+
+    pub fn label(&self) -> Option<String> {
+        if self.label.len() > 0 {
+            Some(self.label.clone())
+        } else {
+            None
+        }
+    }
+
+    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {
+        match self.label() {
+            Some(label_a) => match other.label() {
+                Some(label_b) => label_a.cmp(&label_b),
+                None => Less,
+            },
+            None => match other.label() {
+                Some(_) => Greater,
+                None => Equal,
+            },
+        }
+    }
+
+    pub fn set_label(&mut self, label: String) {
+        self.label = label
     }
 }
 
