@@ -3,45 +3,47 @@
 !_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
-!_TAG_PROGRAM_VERSION	5.8	//
-Catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
-Order	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
-PictureEntry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub struct PictureEntry {$/;"	s
-Rank	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
-add_picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {$/;"	f
-after_adding_entries_length_is_updated	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
-after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
-at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
-can_move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
-cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
-cmp_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
-cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
-current	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current(&self) -> Option<PictureEntry> {$/;"	f
-index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn index(&self) -> usize {$/;"	f
-label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
-length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
-main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
-make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {$/;"	f
-move_next_col	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_next_col(&mut self) {$/;"	f
-move_next_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_next_page(&mut self) {$/;"	f
-move_next_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_next_row(&mut self) {$/;"	f
-move_prev_col	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_col(&mut self) {$/;"	f
-move_prev_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_page(&mut self) {$/;"	f
-move_prev_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_row(&mut self) {$/;"	f
-move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_index(&mut self, index: usize) {$/;"	f
-moving_next_picture_can_be_blocked_or_allowed	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn moving_next_picture_can_be_blocked_or_allowed() {$/;"	f
-my_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn my_entries() -> Vec<PictureEntry> {$/;"	f
-new	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn new() -> Self {$/;"	f
-original_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_name(&self) -> String {$/;"	f
-original_file_name_is_the_file_path_without_folders	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn original_file_name_is_the_file_path_without_folders() {$/;"	f
-original_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_path(&self) -> String {$/;"	f
-page_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_index(&self) -> usize {$/;"	f
-page_index_depends_on_page_size_and_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn page_index_depends_on_page_size_and_index() {$/;"	f
-page_index_of	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_index_of(&self, index: usize) -> usize {$/;"	f
-page_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_length(&self) -> usize {$/;"	f
-page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
-set_current_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_current_label(&mut self, label: String) {$/;"	f
-set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
-set_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
-sort_by	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(&mut self, order: Order) {$/;"	f
-sorting_catalog_by_different_criteria	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn sorting_catalog_by_different_criteria() {$/;"	f
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+Catalog	/home/tof/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
+Order	/home/tof/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
+PictureEntry	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub struct PictureEntry {$/;"	s
+Rank	/home/tof/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
+add_picture_entries	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {$/;"	f
+after_adding_entries_length_is_updated	/home/tof/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
+after_moving_next_page_index_depends_on_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
+at_creation_length_is_0	/home/tof/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
+can_move_to_index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
+cannot_move_beyond_length	/home/tof/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
+cmp_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
+cmp_rank	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
+current	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn current(&self) -> Option<PictureEntry> {$/;"	f
+index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn index(&self) -> usize {$/;"	f
+label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
+length	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
+main	/home/tof/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
+make_picture_entry	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {$/;"	f
+move_next_col	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_next_col(&mut self) {$/;"	f
+move_next_page	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_next_page(&mut self) {$/;"	f
+move_next_row	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_next_row(&mut self) {$/;"	f
+move_prev_col	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_col(&mut self) {$/;"	f
+move_prev_page	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_page(&mut self) {$/;"	f
+move_prev_row	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_row(&mut self) {$/;"	f
+move_to_index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_to_index(&mut self, index: usize) {$/;"	f
+moving_next_picture_can_be_blocked_or_allowed	/home/tof/Coding/gsr/src/catalog.rs	/^    fn moving_next_picture_can_be_blocked_or_allowed() {$/;"	f
+my_entries	/home/tof/Coding/gsr/src/catalog.rs	/^    fn my_entries() -> Vec<PictureEntry> {$/;"	f
+new	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn new() -> Self {$/;"	f
+original_file_name	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_name(&self) -> String {$/;"	f
+original_file_name_is_the_file_path_without_folders	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn original_file_name_is_the_file_path_without_folders() {$/;"	f
+original_file_path	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_path(&self) -> String {$/;"	f
+page_index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_index(&self) -> usize {$/;"	f
+page_index_depends_on_page_size_and_index	/home/tof/Coding/gsr/src/catalog.rs	/^    fn page_index_depends_on_page_size_and_index() {$/;"	f
+page_index_of	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_index_of(&self, index: usize) -> usize {$/;"	f
+page_length	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_length(&self) -> usize {$/;"	f
+page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
+set_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
+set_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
+setting_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn setting_label() {$/;"	f
+sort_by	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(&mut self, order: Order) {$/;"	f
+sorting_catalog_by_different_criteria	/home/tof/Coding/gsr/src/catalog.rs	/^    fn sorting_catalog_by_different_criteria() {$/;"	f
+tests	/home/tof/Coding/gsr/src/catalog.rs	/^mod tests {$/;"	m
+tests	/home/tof/Coding/gsr/src/picture_entry.rs	/^mod tests {$/;"	m

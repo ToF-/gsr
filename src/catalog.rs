@@ -1,5 +1,4 @@
 use crate::picture_entry::PictureEntry;
-use std::cmp::Ordering::Equal;
 use crate::order::Order;
 
 #[derive(Debug)]
@@ -119,12 +118,6 @@ impl Catalog {
             None
         }
     }
-
-    pub fn set_current_label(&mut self, label: String) {
-        if self.index < self.picture_entries.len() {
-            self.picture_entries[self.index].set_label(label)
-        }
-    }
 }
 
 #[cfg(test)]
@@ -241,6 +234,7 @@ mod tests {
         { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
         { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
         { catalog_rc.borrow_mut().set_page_size(2) };
+        { assert_eq!(2, catalog_rc.borrow().page_size()) };
         { catalog_rc.borrow_mut().move_to_index(2) };
         { catalog_rc.borrow_mut().move_next_page() };
         { assert_eq!(4, catalog_rc.borrow().page_index()) };

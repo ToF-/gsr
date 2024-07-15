@@ -91,5 +91,12 @@ mod tests {
         assert_eq!(entry.original_file_name(), String::from("foo.jpeg"));
     }
 
+    #[test]
+    fn setting_label() {
+        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
+        let mut entry = make_picture_entry(String::from("photos/foo.jpeg"), 100, 5, day_a, Rank::NoStar, None, None);
+        entry.set_label(String::from("foo"));
+        assert_eq!(Some(String::from("foo")), entry.label());
+    }
 }
 
