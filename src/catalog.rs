@@ -1,5 +1,6 @@
 use crate::picture_entry::PictureEntry;
 use crate::order::Order;
+use crate::direction::Direction;
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -79,27 +80,28 @@ impl Catalog {
         };
     }
 
-    pub fn move_next_col(&mut self) {
-        if self.index + 1 < self.length() {
-            self.index += 1
-        }
-    }
-
-    pub fn move_prev_col(&mut self) {
-        if self.index > 0 {
-            self.index -= 1
-        }
-    }
-
-    pub fn move_next_row(&mut self) {
-        if self.index + self.page_size < self.length() {
-            self.index += self.page_size
-        }
-    }
-
-    pub fn move_prev_row(&mut self) {
-        if self.index >= self.page_size {
-            self.index -= self.page_size
+    pub fn move_towards(&mut self, direction: Direction) {
+        match direction {
+            Direction::Right => {
+                if self.index + 1 < self.length() {
+                    self.index += 1
+                }
+            },
+            Direction::Left => {
+                if self.index > 0 {
+                    self.index -= 1
+                }
+            },
+            Direction::Down => {
+                if self.index + self.page_size < self.length() {
+                    self.index += self.page_size
+                }
+            },
+            Direction::Up => {
+                if self.index >= self.page_size {
+                    self.index -= self.page_size
+                }
+            },
         }
     }
 
@@ -257,13 +259,13 @@ mod tests {
         { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
         { catalog_rc.borrow_mut().set_page_size(2) };
         { catalog_rc.borrow_mut().move_to_index(0) };
-        { catalog_rc.borrow_mut().move_next_col() };
+        { catalog_rc.borrow_mut().move_towards(Direction::Right) };
         { assert_eq!(1, catalog_rc.borrow().index()) };
-        { catalog_rc.borrow_mut().move_next_row() };
+        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
         { assert_eq!(3, catalog_rc.borrow().index()) };
-        { catalog_rc.borrow_mut().move_prev_col() };
+        { catalog_rc.borrow_mut().move_towards(Direction::Left) };
         { assert_eq!(2, catalog_rc.borrow().index()) };
-        { catalog_rc.borrow_mut().move_prev_row() };
+        { catalog_rc.borrow_mut().move_towards(Direction::Up) };
         { assert_eq!(0, catalog_rc.borrow().index()) };
     }
 

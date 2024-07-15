@@ -5,6 +5,7 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
 Catalog	/home/tof/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
+Direction	/home/tof/Coding/gsr/src/direction.rs	/^pub enum Direction {$/;"	g
 Order	/home/tof/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
 PictureEntry	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub struct PictureEntry {$/;"	s
 Rank	/home/tof/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
@@ -22,13 +23,10 @@ label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Opt
 length	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
 main	/home/tof/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
 make_picture_entry	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {$/;"	f
-move_next_col	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_next_col(&mut self) {$/;"	f
 move_next_page	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_next_page(&mut self) {$/;"	f
-move_next_row	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_next_row(&mut self) {$/;"	f
-move_prev_col	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_col(&mut self) {$/;"	f
 move_prev_page	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_page(&mut self) {$/;"	f
-move_prev_row	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_row(&mut self) {$/;"	f
 move_to_index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_to_index(&mut self, index: usize) {$/;"	f
+move_towards	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn move_towards(&mut self, direction: Direction) {$/;"	f
 moving_next_picture_can_be_blocked_or_allowed	/home/tof/Coding/gsr/src/catalog.rs	/^    fn moving_next_picture_can_be_blocked_or_allowed() {$/;"	f
 my_entries	/home/tof/Coding/gsr/src/catalog.rs	/^    fn my_entries() -> Vec<PictureEntry> {$/;"	f
 new	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn new() -> Self {$/;"	f
