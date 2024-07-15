@@ -15,6 +15,9 @@ pub struct PictureEntry {
     pub label: String
 }
 
+pub const THUMB_SUFFIX: &str = "THUMB";
+pub const IMAGE_DATA: &str = "IMAGE_DATA";
+
 pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {
     PictureEntry {
         file_path: file_path,
@@ -34,6 +37,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
 }
 
 impl PictureEntry {
+
     pub fn original_file_name(&self) -> String {
         let original = &self.file_path;
         let path = PathBuf::from(original);
@@ -41,7 +45,45 @@ impl PictureEntry {
     }
 
     pub fn original_file_path(&self) -> String {
-        self.file_path.clone()
+        if !self.file_path.contains(&THUMB_SUFFIX) {
+            self.file_path.clone()
+        } else {
+            let path = PathBuf::from(self.file_path.clone());
+            let parent = path.parent().unwrap();
+            let extension = path.extension().unwrap();
+            let file_stem = path.file_stem().unwrap().to_str().unwrap();
+            let new_file_stem = match file_stem.strip_suffix("THUMB") {
+                Some(s) => s,
+                None => &file_stem,
+            };
+            let new_file_name = format!("{}.{}", new_file_stem, extension.to_str().unwrap());
+            let new_path = parent.join(new_file_name);
+            new_path.to_str().unwrap().to_string()
+        }
+    }
+
+    pub fn thumbnail_file_path(&self) -> String {
+        if self.file_path.contains(&THUMB_SUFFIX) {
+            self.file_path.to_string()
+        } else {
+            let path = PathBuf::from(self.file_path.clone());
+            let parent = path.parent().unwrap();
+            let extension = path.extension().unwrap();
+            let file_stem = path.file_stem().unwrap();
+            let new_file_name = format!("{}{}.{}", file_stem.to_str().unwrap(), THUMB_SUFFIX, extension.to_str().unwrap());
+            let new_path = parent.join(new_file_name);
+            new_path.to_str().unwrap().to_string()
+        }
+    }
+
+    pub fn image_data_file_path(&self) -> String {
+        let image_file_path = self.original_file_path();
+        let path = PathBuf::from(image_file_path);
+        let parent = path.parent().unwrap();
+        let file_stem = path.file_stem().unwrap().to_str().unwrap();
+        let new_file_name = format!("{}{}.json", file_stem, IMAGE_DATA);
+        let new_path = parent.join(new_file_name);
+        new_path.to_str().unwrap().to_string()
     }
 
     pub fn label(&self) -> Option<String> {
@@ -84,17 +126,38 @@ mod tests {
     use super::*;
     use chrono::DateTime;
 
+    fn my_entry(file_path: &str) -> PictureEntry {
+        let day: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
+        make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None)
+    }
+
     #[test]
     fn original_file_name_is_the_file_path_without_folders() {
-        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        let entry = make_picture_entry(String::from("photos/foo.jpeg"), 100, 5, day_a, Rank::NoStar, None, None);
-        assert_eq!(entry.original_file_name(), String::from("foo.jpeg"));
+        let entry = my_entry("photos/foo.jpeg");
+        assert_eq!(String::from("foo.jpeg"), entry.original_file_name());
+    }
+
+    #[test]
+    fn thumbnail_path_is_the_file_path_with_thumbnail_suffix() {
+        let entry = my_entry("photos/foo.jpeg");
+        assert_eq!(String::from("photos/fooTHUMB.jpeg"), entry.thumbnail_file_path());
+    }
+
+    #[test]
+    fn original_file_path_is_the_file_path_without_thumb_suffix() {
+        let entry = my_entry("photos/fooTHUMB.jpeg");
+        assert_eq!(String::from("photos/foo.jpeg"), entry.original_file_path());
+    }
+
+    #[test]
+    fn image_data_file_path_is_the_file_path_with_json_extension() {
+        let entry = my_entry("photos/foo.jpeg");
+        assert_eq!(String::from("photos/fooIMAGE_DATA.json"), entry.image_data_file_path());
     }
 
     #[test]
     fn setting_label() {
-        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        let mut entry = make_picture_entry(String::from("photos/foo.jpeg"), 100, 5, day_a, Rank::NoStar, None, None);
+        let mut entry = my_entry("photos/foo.jpeg");
         entry.set_label(String::from("foo"));
         assert_eq!(Some(String::from("foo")), entry.label());
     }

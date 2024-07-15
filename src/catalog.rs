@@ -7,7 +7,7 @@ pub struct Catalog {
     picture_entries: Vec<PictureEntry>,
     index: usize,
     page_size: usize,
-    page_limit: bool,
+    page_limit_on: bool,
 }
 
 impl Catalog {
@@ -17,7 +17,7 @@ impl Catalog {
             picture_entries : Vec::new(),
             index: 0,
             page_size: 1,
-            page_limit: true,
+            page_limit_on: true,
         }
     }
 
@@ -50,12 +50,12 @@ impl Catalog {
         self.page_size * self.page_size
     }
 
-    pub fn page_limit(&self) -> bool {
-        self.page_limit
+    pub fn page_limit_on(&self) -> bool {
+        self.page_limit_on
     }
 
     pub fn toggle_page_limit(&mut self) {
-        self.page_limit = !self.page_limit
+        self.page_limit_on = !self.page_limit_on
     }
 
     pub fn page_index_of(&self, index: usize) -> usize {
@@ -95,7 +95,7 @@ impl Catalog {
     }
 
     pub fn can_move_towards(&self, direction: Direction) -> bool {
-        ! self.page_limit ||
+        ! self.page_limit_on ||
             match direction {
                 Direction::Left => self.page_size > 1 && self.index % self.page_size > 0,
                 Direction::Right => self.page_size > 1 && (self.index+1) % self.page_size > 0,
@@ -293,7 +293,7 @@ mod tests {
         catalog.add_picture_entries(&mut example);
         catalog.add_picture_entries(&mut other_entries);
         assert_eq!(7, catalog.length());
-        assert_eq!(true, catalog.page_limit());
+        assert_eq!(true, catalog.page_limit_on());
         catalog.set_page_size(2);
         catalog.move_to_index(0);
         catalog.move_towards(Direction::Right);
@@ -314,7 +314,7 @@ mod tests {
         catalog.move_towards(Direction::Down);
         assert_eq!(false, catalog.can_move_towards(Direction::Down));
         catalog.toggle_page_limit();
-        assert_eq!(false, catalog.page_limit());
+        assert_eq!(false, catalog.page_limit_on());
         assert_eq!(3, catalog.index());
         catalog.move_towards(Direction::Down);
         assert_eq!(5, catalog.index());
