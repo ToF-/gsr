@@ -162,8 +162,6 @@ impl Catalog {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::rc::Rc;
-    use std::cell::RefCell;
     use crate::rank::Rank;
     use crate::picture_entry::make_picture_entry;
     use std::time::SystemTime;
@@ -207,39 +205,39 @@ mod tests {
     #[test]
     fn sorting_catalog_by_different_criteria() {
         let mut example = my_entries();
-        let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
-        { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
-        { catalog_rc.borrow_mut().sort_by(Order::Size) };
-        { catalog_rc.borrow_mut().move_to_index(0) };
-        { assert_eq!(String::from("qux.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().sort_by(Order::Date) };
-        { catalog_rc.borrow_mut().move_to_index(0) };
-        { assert_eq!(String::from("bub.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().sort_by(Order::Name) };
-        { catalog_rc.borrow_mut().move_to_index(0) };
-        { assert_eq!(String::from("bar.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().sort_by(Order::Colors) };
-        { catalog_rc.borrow_mut().move_to_index(0) };
-        { assert_eq!(String::from("foo.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().sort_by(Order::Value) };
-        { catalog_rc.borrow_mut().move_to_index(3) };
-        { assert_eq!(String::from("foo.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().sort_by(Order::Label) };
-        { catalog_rc.borrow_mut().move_to_index(0) };
-        { assert_eq!(String::from("foo.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().move_to_index(1) };
-        { assert_eq!(String::from("bub.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
-        { catalog_rc.borrow_mut().sort_by(Order::Palette) };
-        { catalog_rc.borrow_mut().move_to_index(3) };
-        { assert_eq!(String::from("qux.jpeg"),
-            catalog_rc.borrow().current().unwrap().original_file_name()) };
+        let mut catalog = Catalog::new();
+        catalog.add_picture_entries(&mut example);
+        catalog.sort_by(Order::Size);
+        catalog.move_to_index(0);
+        assert_eq!(String::from("qux.jpeg"),
+            catalog.current().unwrap().original_file_name());
+        catalog.sort_by(Order::Date);
+        catalog.move_to_index(0);
+        assert_eq!(String::from("bub.jpeg"),
+            catalog.current().unwrap().original_file_name());
+        catalog.sort_by(Order::Name);
+        catalog.move_to_index(0);
+        assert_eq!(String::from("bar.jpeg"),
+            catalog.current().unwrap().original_file_name());
+        catalog.sort_by(Order::Colors);
+        catalog.move_to_index(0);
+        assert_eq!(String::from("foo.jpeg"),
+            catalog.current().unwrap().original_file_name());
+        catalog.sort_by(Order::Value);
+        catalog.move_to_index(3);
+        assert_eq!(String::from("foo.jpeg"),
+            catalog.current().unwrap().original_file_name());
+        catalog.sort_by(Order::Label);
+        catalog.move_to_index(0);
+        assert_eq!(String::from("foo.jpeg"),
+            catalog.current().unwrap().original_file_name());
+        catalog.move_to_index(1);
+        assert_eq!(String::from("bub.jpeg"),
+            catalog.current().unwrap().original_file_name());
+        catalog.sort_by(Order::Palette);
+        catalog.move_to_index(3);
+        assert_eq!(String::from("qux.jpeg"),
+            catalog.current().unwrap().original_file_name());
     }
 
     #[test]
@@ -250,15 +248,15 @@ mod tests {
             make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
             make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
             make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
-        let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
-        { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
-        { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
-        { catalog_rc.borrow_mut().set_page_size(2) };
-        { assert_eq!(4, catalog_rc.borrow().page_length()) };
-        { catalog_rc.borrow_mut().move_to_index(0) };
-        { assert_eq!(0, catalog_rc.borrow().page_index()) };
-        { catalog_rc.borrow_mut().move_to_index(6) };
-        { assert_eq!(4, catalog_rc.borrow().page_index()) };
+        let mut catalog = Catalog::new();
+        catalog.add_picture_entries(&mut example);
+        catalog.add_picture_entries(&mut other_entries);
+        catalog.set_page_size(2);
+        assert_eq!(4, catalog.page_length());
+        catalog.move_to_index(0);
+        assert_eq!(0, catalog.page_index());
+        catalog.move_to_index(6);
+        assert_eq!(4, catalog.page_index());
     }
 
     #[test]
@@ -269,18 +267,18 @@ mod tests {
             make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
             make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
             make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
-        let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
-        { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
-        { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
-        { catalog_rc.borrow_mut().set_page_size(2) };
-        { assert_eq!(2, catalog_rc.borrow().page_size()) };
-        { catalog_rc.borrow_mut().move_to_index(2) };
-        { catalog_rc.borrow_mut().move_next_page() };
-        { assert_eq!(4, catalog_rc.borrow().page_index()) };
-        { catalog_rc.borrow_mut().move_next_page() };
-        { assert_eq!(0, catalog_rc.borrow().page_index()) };
-        { catalog_rc.borrow_mut().move_prev_page() };
-        { assert_eq!(4, catalog_rc.borrow().page_index()) };
+        let mut catalog = Catalog::new();
+        catalog.add_picture_entries(&mut example);
+        catalog.add_picture_entries(&mut other_entries);
+        catalog.set_page_size(2);
+        assert_eq!(2, catalog.page_size());
+        catalog.move_to_index(2);
+        catalog.move_next_page();
+        assert_eq!(4, catalog.page_index());
+        catalog.move_next_page();
+        assert_eq!(0, catalog.page_index());
+        catalog.move_prev_page();
+        assert_eq!(4, catalog.page_index());
     }
 
     #[test]
@@ -291,48 +289,47 @@ mod tests {
             make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
             make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
             make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
-        let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
-        { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
-        { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
-        { assert_eq!(7, catalog_rc.borrow().length()) };
-        { assert_eq!(true, catalog_rc.borrow().page_limit()) };
-        { catalog_rc.borrow_mut().set_page_size(2) };
-        { catalog_rc.borrow_mut().move_to_index(0) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Right) };
-        { assert_eq!(1, catalog_rc.borrow().index()) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
-        { assert_eq!(3, catalog_rc.borrow().index()) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Left) };
-        { assert_eq!(2, catalog_rc.borrow().index()) };
-        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Up)) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Up) };
-        { assert_eq!(0, catalog_rc.borrow().index()) };
-        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Left)) };
-        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Up)) };
-        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Right)) };
-        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Down)) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Right) };
-        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Right)) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
-        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Down)) };
-        { catalog_rc.borrow_mut().toggle_page_limit() };
-        { assert_eq!(false, catalog_rc.borrow().page_limit()) };
-        { assert_eq!(3, catalog_rc.borrow().index()) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
-        { assert_eq!(5, catalog_rc.borrow().index()) };
-        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Down)) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
-        { assert_eq!(0, catalog_rc.borrow().index()) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Right) };
-        { assert_eq!(1, catalog_rc.borrow().index()) };
-        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Up)) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Up) };
-        { assert_eq!(6, catalog_rc.borrow().index()) }; // because there's no picture entry in pos 7
-        { catalog_rc.borrow_mut().move_to_index(5) };
-        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Down)) };
-        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
-        { assert_eq!(0, catalog_rc.borrow().index()) }; // because there's no picture entry in pos 7
-
+        let mut catalog = Catalog::new();
+        catalog.add_picture_entries(&mut example);
+        catalog.add_picture_entries(&mut other_entries);
+        assert_eq!(7, catalog.length());
+        assert_eq!(true, catalog.page_limit());
+        catalog.set_page_size(2);
+        catalog.move_to_index(0);
+        catalog.move_towards(Direction::Right);
+        assert_eq!(1, catalog.index());
+        catalog.move_towards(Direction::Down);
+        assert_eq!(3, catalog.index());
+        catalog.move_towards(Direction::Left);
+        assert_eq!(2, catalog.index());
+        assert_eq!(true, catalog.can_move_towards(Direction::Up));
+        catalog.move_towards(Direction::Up);
+        assert_eq!(0, catalog.index());
+        assert_eq!(false, catalog.can_move_towards(Direction::Left));
+        assert_eq!(false, catalog.can_move_towards(Direction::Up));
+        assert_eq!(true, catalog.can_move_towards(Direction::Right));
+        assert_eq!(true, catalog.can_move_towards(Direction::Down));
+        catalog.move_towards(Direction::Right);
+        assert_eq!(false, catalog.can_move_towards(Direction::Right));
+        catalog.move_towards(Direction::Down);
+        assert_eq!(false, catalog.can_move_towards(Direction::Down));
+        catalog.toggle_page_limit();
+        assert_eq!(false, catalog.page_limit());
+        assert_eq!(3, catalog.index());
+        catalog.move_towards(Direction::Down);
+        assert_eq!(5, catalog.index());
+        assert_eq!(true, catalog.can_move_towards(Direction::Down));
+        catalog.move_towards(Direction::Down);
+        assert_eq!(0, catalog.index());
+        catalog.move_towards(Direction::Right);
+        assert_eq!(1, catalog.index());
+        assert_eq!(true, catalog.can_move_towards(Direction::Up));
+        catalog.move_towards(Direction::Up);
+        assert_eq!(6, catalog.index()); // because there's no picture entry in pos 7
+        catalog.move_to_index(5);
+        assert_eq!(true, catalog.can_move_towards(Direction::Down));
+        catalog.move_towards(Direction::Down);
+        assert_eq!(0, catalog.index()); // because there's no picture entry in pos 7
     }
 
 }
