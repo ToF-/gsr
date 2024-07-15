@@ -99,6 +99,22 @@ impl Catalog {
         })
     }
 
+    pub fn find_input_pattern(&mut self) -> bool {
+        let result = if let Some(pattern) = &self.input {
+            if let Some(index) = self.picture_entries.iter().position(|entry|
+                entry.original_file_name().contains(&*pattern)) {
+                self.move_to_index(index);
+                true
+            } else {
+                false
+            }
+        } else {
+            false
+        };
+        self.input = None;
+        result
+    }
+
     pub fn sort_by(&mut self, order: Order) {
         match order {
             Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
@@ -381,5 +397,24 @@ mod tests {
         assert_eq!(String::from("Foo"), catalog.input());
         catalog.cancel_input();
         assert_eq!(false, catalog.input_on());
+    }
+
+    #[test]
+    fn finding_a_picture_entry_by_input_pattern() {
+        let mut example = my_entries();
+        let mut catalog = Catalog::new();
+        catalog.add_picture_entries(&mut example);
+        catalog.sort_by(Order::Size);
+        catalog.move_to_index(0);
+        assert_eq!(String::from("qux.jpeg"),catalog.current().unwrap().original_file_name());
+        catalog.begin_input();
+        catalog.add_input_char('f');
+        catalog.add_input_char('o');
+        assert_eq!(true, catalog.find_input_pattern());
+        assert_eq!(String::from("foo.jpeg"), catalog.current().unwrap().original_file_name());
+        catalog.begin_input();
+        catalog.add_input_char('q');
+        catalog.add_input_char('a');
+        assert_eq!(false, catalog.find_input_pattern());
     }
 }
