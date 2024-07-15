@@ -11,19 +11,26 @@ Order	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
 PictureEntry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub struct PictureEntry {$/;"	s
 Rank	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
 THUMB_SUFFIX	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub const THUMB_SUFFIX: &str = "THUMB";$/;"	c
+add_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_input_char(&mut self, ch: char) {$/;"	f
 add_picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {$/;"	f
 after_adding_entries_length_is_updated	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
 after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
 at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
+begin_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self) {$/;"	f
 can_move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
 can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_towards(&self, direction: Direction) -> bool {$/;"	f
+cancel_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_input(&mut self) {$/;"	f
 cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
 cmp_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
 cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
 current	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current(&self) -> Option<PictureEntry> {$/;"	f
+del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
+editing_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
 image_data_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn image_data_file_path(&self) -> String {$/;"	f
 image_data_file_path_is_the_file_path_with_json_extension	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn image_data_file_path_is_the_file_path_with_json_extension() {$/;"	f
 index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn index(&self) -> usize {$/;"	f
+input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input(&self) -> String {$/;"	f
+input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
 last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn last(&self) -> usize {$/;"	f
 length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f

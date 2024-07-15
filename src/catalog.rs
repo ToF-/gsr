@@ -8,6 +8,7 @@ pub struct Catalog {
     index: usize,
     page_size: usize,
     page_limit_on: bool,
+    input: Option<String>,
 }
 
 impl Catalog {
@@ -18,6 +19,7 @@ impl Catalog {
             index: 0,
             page_size: 1,
             page_limit_on: true,
+            input: None,
         }
     }
 
@@ -63,6 +65,38 @@ impl Catalog {
     }
     pub fn page_index(&self) -> usize {
         self.page_index_of(self.index)
+    }
+
+    pub fn input_on(&self) -> bool {
+        self.input.is_some()
+    }
+
+    pub fn cancel_input(&mut self) {
+        self.input = None
+    }
+
+    pub fn input(&self) -> String {
+        self.input.clone().unwrap()
+    }
+
+    pub fn begin_input(&mut self) {
+        self.input = Some(String::from(""))
+    }
+
+    pub fn add_input_char(&mut self, ch: char) {
+        self.input = self.input.clone().map( |s| {
+            let mut t = s.clone();
+            t.push(ch);
+            t
+        })
+    }
+
+    pub fn del_input_char(&mut self) {
+        self.input = self.input.clone().map( |s| {
+            let mut t = s.clone();
+            t.pop();
+            t
+        })
     }
 
     pub fn sort_by(&mut self, order: Order) {
@@ -332,4 +366,20 @@ mod tests {
         assert_eq!(0, catalog.index()); // because there's no picture entry in pos 7
     }
 
+    #[test]
+    fn editing_input() {
+        let mut catalog = Catalog::new();
+        assert_eq!(false, catalog.input_on());
+        catalog.begin_input();
+        assert_eq!(true, catalog.input_on());
+        catalog.add_input_char('F');
+        catalog.add_input_char('o');
+        catalog.add_input_char('o');
+        catalog.add_input_char('-');
+        assert_eq!(String::from("Foo-"), catalog.input());
+        catalog.del_input_char();
+        assert_eq!(String::from("Foo"), catalog.input());
+        catalog.cancel_input();
+        assert_eq!(false, catalog.input_on());
+    }
 }
