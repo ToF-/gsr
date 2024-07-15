@@ -7,6 +7,7 @@ pub struct Catalog {
     picture_entries: Vec<PictureEntry>,
     index: usize,
     page_size: usize,
+    page_limit: bool,
 }
 
 impl Catalog {
@@ -16,6 +17,7 @@ impl Catalog {
             picture_entries : Vec::new(),
             index: 0,
             page_size: 1,
+            page_limit: true,
         }
     }
 
@@ -42,6 +44,14 @@ impl Catalog {
 
     pub fn page_length(&self) -> usize {
         self.page_size * self.page_size
+    }
+
+    pub fn page_limit(&self) -> bool {
+        self.page_limit
+    }
+
+    pub fn toggle_page_limit(&mut self) {
+        self.page_limit = !self.page_limit
     }
 
     pub fn page_index_of(&self, index: usize) -> usize {
@@ -80,28 +90,40 @@ impl Catalog {
         };
     }
 
+    pub fn can_move_towards(&self, direction: Direction) -> bool {
+        ! self.page_limit ||
+            match direction {
+                Direction::Left => self.page_size > 1 && self.index % self.page_size > 0,
+                Direction::Right => self.page_size > 1 && (self.index+1) % self.page_size > 0,
+                Direction::Up => self.page_size > 1 && self.index >= self.page_size,
+                Direction::Down => self.page_size > 1 && (self.index + self.page_size) < self.page_length(),
+            }
+    }
+
     pub fn move_towards(&mut self, direction: Direction) {
-        match direction {
-            Direction::Right => {
-                if self.index + 1 < self.length() {
-                    self.index += 1
-                }
-            },
-            Direction::Left => {
-                if self.index > 0 {
-                    self.index -= 1
-                }
-            },
-            Direction::Down => {
-                if self.index + self.page_size < self.length() {
-                    self.index += self.page_size
-                }
-            },
-            Direction::Up => {
-                if self.index >= self.page_size {
-                    self.index -= self.page_size
-                }
-            },
+        if self.can_move_towards(direction.clone()) {
+            match direction {
+                Direction::Right => {
+                    if self.index + 1 < self.length() {
+                        self.index += 1
+                    }
+                },
+                Direction::Left => {
+                    if self.index > 0 {
+                        self.index -= 1
+                    }
+                },
+                Direction::Down => {
+                    if self.index + self.page_size < self.length() {
+                        self.index += self.page_size
+                    }
+                },
+                Direction::Up => {
+                    if self.index >= self.page_size {
+                        self.index -= self.page_size
+                    }
+                },
+            }
         }
     }
 
@@ -257,6 +279,8 @@ mod tests {
         let catalog_rc = Rc::new(RefCell::new(Catalog::new()));
         { catalog_rc.borrow_mut().add_picture_entries(&mut example) };
         { catalog_rc.borrow_mut().add_picture_entries(&mut other_entries) };
+        { assert_eq!(7, catalog_rc.borrow().length()) };
+        { assert_eq!(true, catalog_rc.borrow().page_limit()) };
         { catalog_rc.borrow_mut().set_page_size(2) };
         { catalog_rc.borrow_mut().move_to_index(0) };
         { catalog_rc.borrow_mut().move_towards(Direction::Right) };
@@ -265,8 +289,23 @@ mod tests {
         { assert_eq!(3, catalog_rc.borrow().index()) };
         { catalog_rc.borrow_mut().move_towards(Direction::Left) };
         { assert_eq!(2, catalog_rc.borrow().index()) };
+        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Up)) };
         { catalog_rc.borrow_mut().move_towards(Direction::Up) };
         { assert_eq!(0, catalog_rc.borrow().index()) };
+        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Left)) };
+        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Up)) };
+        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Right)) };
+        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Down)) };
+        { catalog_rc.borrow_mut().move_towards(Direction::Right) };
+        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Right)) };
+        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
+        { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Down)) };
+        { catalog_rc.borrow_mut().toggle_page_limit() };
+        { assert_eq!(false, catalog_rc.borrow().page_limit()) };
+        let index = { catalog_rc.borrow().index() };
+        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
+        { assert_eq!(index+2, catalog_rc.borrow().index()) };
+        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Down)) };
     }
 
 }

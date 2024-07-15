@@ -14,6 +14,7 @@ after_adding_entries_length_is_updated	/home/tof/Coding/gsr/src/catalog.rs	/^   
 after_moving_next_page_index_depends_on_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
 at_creation_length_is_0	/home/tof/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
 can_move_to_index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
+can_move_towards	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn can_move_towards(&self, direction: Direction) -> bool {$/;"	f
 cannot_move_beyond_length	/home/tof/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
 cmp_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
 cmp_rank	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
@@ -37,6 +38,7 @@ page_index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_index(&self) ->
 page_index_depends_on_page_size_and_index	/home/tof/Coding/gsr/src/catalog.rs	/^    fn page_index_depends_on_page_size_and_index() {$/;"	f
 page_index_of	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_index_of(&self, index: usize) -> usize {$/;"	f
 page_length	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_length(&self) -> usize {$/;"	f
+page_limit	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_limit(&self) -> bool {$/;"	f
 page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 set_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
 set_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
@@ -45,3 +47,4 @@ sort_by	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(&mut self, orde
 sorting_catalog_by_different_criteria	/home/tof/Coding/gsr/src/catalog.rs	/^    fn sorting_catalog_by_different_criteria() {$/;"	f
 tests	/home/tof/Coding/gsr/src/catalog.rs	/^mod tests {$/;"	m
 tests	/home/tof/Coding/gsr/src/picture_entry.rs	/^mod tests {$/;"	m
+toggle_page_limit	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn toggle_page_limit(&mut self) {$/;"	f
