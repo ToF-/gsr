@@ -25,6 +25,10 @@ impl Catalog {
         self.picture_entries.len()
     }
 
+    pub fn last(&self) -> usize {
+        self.length()-1
+    }
+
     pub fn index(&self) -> usize {
         self.index
     }
@@ -116,11 +120,22 @@ impl Catalog {
                 Direction::Down => {
                     if self.index + self.page_size < self.length() {
                         self.index += self.page_size
+                    } else {
+                        self.index = 0
                     }
                 },
                 Direction::Up => {
                     if self.index >= self.page_size {
                         self.index -= self.page_size
+                    } else {
+                        let offset = self.index - self.page_index();
+                        let new_page_index = self.last() - (self.last() % self.page_length());
+                        let new_index = new_page_index + self.page_length() - self.page_size() + offset;
+                        self.index = if new_index < self.length() {
+                            new_index
+                        } else {
+                            self.last()
+                        }
                     }
                 },
             }
@@ -302,10 +317,22 @@ mod tests {
         { assert_eq!(false, catalog_rc.borrow().can_move_towards(Direction::Down)) };
         { catalog_rc.borrow_mut().toggle_page_limit() };
         { assert_eq!(false, catalog_rc.borrow().page_limit()) };
-        let index = { catalog_rc.borrow().index() };
+        { assert_eq!(3, catalog_rc.borrow().index()) };
         { catalog_rc.borrow_mut().move_towards(Direction::Down) };
-        { assert_eq!(index+2, catalog_rc.borrow().index()) };
+        { assert_eq!(5, catalog_rc.borrow().index()) };
         { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Down)) };
+        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
+        { assert_eq!(0, catalog_rc.borrow().index()) };
+        { catalog_rc.borrow_mut().move_towards(Direction::Right) };
+        { assert_eq!(1, catalog_rc.borrow().index()) };
+        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Up)) };
+        { catalog_rc.borrow_mut().move_towards(Direction::Up) };
+        { assert_eq!(6, catalog_rc.borrow().index()) }; // because there's no picture entry in pos 7
+        { catalog_rc.borrow_mut().move_to_index(5) };
+        { assert_eq!(true, catalog_rc.borrow().can_move_towards(Direction::Down)) };
+        { catalog_rc.borrow_mut().move_towards(Direction::Down) };
+        { assert_eq!(0, catalog_rc.borrow().index()) }; // because there's no picture entry in pos 7
+
     }
 
 }

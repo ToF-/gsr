@@ -21,6 +21,7 @@ cmp_rank	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, 
 current	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn current(&self) -> Option<PictureEntry> {$/;"	f
 index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn index(&self) -> usize {$/;"	f
 label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
+last	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn last(&self) -> usize {$/;"	f
 length	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
 main	/home/tof/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
 make_picture_entry	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {$/;"	f
