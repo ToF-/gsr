@@ -107,6 +107,19 @@ impl Catalog {
         }
     }
 
+    pub fn index_input_number(&mut self) -> Option<usize> {
+        if let Some(number) = &self.input {
+            let index = number.parse::<usize>().unwrap();
+            if index < self.length() {
+                Some(index)
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
+
     pub fn sort_by(&mut self, order: Order) {
         match order {
             Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
@@ -411,4 +424,23 @@ mod tests {
         catalog.add_input_char('a');
         assert_eq!(None, catalog.index_input_pattern());
     }
+
+    #[test]
+    fn index_of_entry_by_input() {
+        let mut example = my_entries();
+        let mut catalog = Catalog::new();
+        catalog.add_picture_entries(&mut example);
+        catalog.sort_by(Order::Size);
+        catalog.move_to_index(0);
+        catalog.begin_input();
+        catalog.add_input_char('3');
+        let index = catalog.index_input_number();
+        assert_eq!(true, index.is_some());
+        catalog.move_to_index(index.unwrap());
+        assert_eq!(String::from("bar.jpeg"), catalog.current().unwrap().original_file_name());
+        catalog.add_input_char('3');
+        let wrong = catalog.index_input_number();
+        assert_eq!(true, wrong.is_none());
+    }
+
 }
