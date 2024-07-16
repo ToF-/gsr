@@ -1,6 +1,6 @@
 use std::io::{Result, Error, ErrorKind};
 use std::path::Path;
-use std::fs::read_to_string;
+use std::fs::{File, read_to_string};
 use crate::rank::Rank;
 use crate::image_data::ImageData;
 use crate::palette::{Colors, get_colors, Palette, get_palette};
@@ -18,6 +18,19 @@ pub fn get_image_data(file_path: &str) -> Result<ImageData> {
         }
     } else {
         Err(Error::new(ErrorKind::Other, format!("image_data {} not found", file_path)))
+    }
+}
+
+pub fn set_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {
+    let path = Path::new(&file_path);
+    match File::create(path) {
+        Ok(file) => {
+            match serde_json::to_writer(file, &image_data) {
+                Ok(_) => Ok(()),
+                Err(err) => Err(err.into()),
+            }
+        },
+        Err(err) => Err(err),
     }
 }
 
@@ -43,7 +56,7 @@ mod tests {
     }
     
     #[test]
-    fn get_image_data_from_a_picture_file() {
+    fn get_image_data_deserializes_image_data() {
         let result = get_image_data("testdata/flowerIMAGE_DATA.json");
         let expected = ImageData {
             colors: 37181,
@@ -52,6 +65,22 @@ mod tests {
             palette: [ 0x9c8474, 0xaf382d, 0xccbcb4, 0xd4ab3e, 0xde777a, 0xde978a, 0xe3acb8, 0xeacac0, 0xfbfbfb],
             label: String::from(""),
         };
+        assert_eq!(true, result.is_ok());
+        assert_eq!(expected, result.unwrap());
+    }
+
+    #[test]
+    fn set_new_image_data() {
+        let expected = ImageData {
+            colors: 9,
+            rank: Rank::ThreeStars,
+            selected: true,
+            palette: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            label: String::from("foo"),
+        };
+        let saved = set_image_data(&expected, "testdata/dummyIMAGE_DATA.json");
+        assert_eq!(true, saved.is_ok());
+        let result = get_image_data("testdata/dummyIMAGE_DATA.json");
         assert_eq!(true, result.is_ok());
         assert_eq!(expected, result.unwrap());
     }

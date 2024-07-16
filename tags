@@ -33,7 +33,7 @@ finding_a_picture_entry_by_input_pattern	/Users/christophethibaut/Coding/gsr/src
 full_size_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn full_size_on(&self) -> bool {$/;"	f
 get_colors	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn get_colors(image: &DynamicImage) -> usize {$/;"	f
 get_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn get_image_data(file_path: &str) -> Result<ImageData> {$/;"	f
-get_image_data_from_a_picture_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn get_image_data_from_a_picture_file() {$/;"	f
+get_image_data_deserializes_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn get_image_data_deserializes_image_data() {$/;"	f
 get_palette	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn get_palette(image: &DynamicImage) -> Palette {$/;"	f
 get_palette_from_a_picture_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn get_palette_from_a_picture_file() {$/;"	f
 get_palette_from_picture	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {$/;"	f
@@ -70,7 +70,9 @@ page_limit_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn pa
 page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 palette_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
+set_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn set_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
+set_new_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn set_new_image_data() {$/;"	f
 set_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
 setting_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn setting_label() {$/;"	f
 sort_by	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(&mut self, order: Order) {$/;"	f
