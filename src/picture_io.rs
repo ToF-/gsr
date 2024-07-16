@@ -37,7 +37,8 @@ mod tests {
         assert_eq!(true, result.is_ok());
         assert_eq!(expected, result.unwrap());
     }
-
+    
+    #[test]
     fn get_image_data_from_a_picture_file() {
         let result = get_image_data("testdata/flowerIMAGE_DATA.json");
         let expected = ImageData {
