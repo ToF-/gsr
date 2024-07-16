@@ -3,7 +3,7 @@ use std::path::Path;
 use std::fs::read_to_string;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
-use crate::palette::{Palette, get_palette};
+use crate::palette::{Colors, get_colors, Palette, get_palette};
 
 
 pub fn get_image_data(file_path: &str) -> Result<ImageData> {
@@ -21,10 +21,13 @@ pub fn get_image_data(file_path: &str) -> Result<ImageData> {
     }
 }
 
-pub fn get_palette_from_picture(file_path: &str) -> Result<Palette> {
+pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {
     let image = image::open(file_path).expect("can't open image file for palette extraction");
-    Ok(get_palette(image))
+    let palette = get_palette(&image);
+    let colors = get_colors(&image);
+    Ok((palette,colors))
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -33,9 +36,10 @@ mod tests {
     #[test]
     fn get_palette_from_a_picture_file() {
         let result = get_palette_from_picture("testdata/flower.jpg");
-        let expected: Palette = [ 0x9c8474, 0xaf382d, 0xccbcb4, 0xd4ab3e, 0xde777a, 0xde978a, 0xe3acb8, 0xeacac0, 0xfbfbfb];
+        let expected_palette: Palette = [ 0x9c8474, 0xaf382d, 0xccbcb4, 0xd4ab3e, 0xde777a, 0xde978a, 0xe3acb8, 0xeacac0, 0xfbfbfb];
+        let expected_colors = 37181; 
         assert_eq!(true, result.is_ok());
-        assert_eq!(expected, result.unwrap());
+        assert_eq!((expected_palette, expected_colors), result.unwrap());
     }
     
     #[test]
