@@ -26,11 +26,11 @@ cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn c
 current	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current(&self) -> Option<PictureEntry> {$/;"	f
 del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 editing_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
-find_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_input_pattern(&mut self) -> bool {$/;"	f
 finding_a_picture_entry_by_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn finding_a_picture_entry_by_input_pattern() {$/;"	f
 image_data_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn image_data_file_path(&self) -> String {$/;"	f
 image_data_file_path_is_the_file_path_with_json_extension	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn image_data_file_path_is_the_file_path_with_json_extension() {$/;"	f
 index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn index(&self) -> usize {$/;"	f
+index_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn index_input_pattern(&mut self) -> Option<usize> {$/;"	f
 input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input(&self) -> String {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f

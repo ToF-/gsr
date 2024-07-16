@@ -99,20 +99,12 @@ impl Catalog {
         })
     }
 
-    pub fn find_input_pattern(&mut self) -> bool {
-        let result = if let Some(pattern) = &self.input {
-            if let Some(index) = self.picture_entries.iter().position(|entry|
-                entry.original_file_name().contains(&*pattern)) {
-                self.move_to_index(index);
-                true
-            } else {
-                false
-            }
+    pub fn index_input_pattern(&mut self) -> Option<usize> {
+        if let Some(pattern) = &self.input {
+            self.picture_entries.iter().position(|entry| entry.original_file_name().contains(&*pattern))
         } else {
-            false
-        };
-        self.input = None;
-        result
+            None
+        }
     }
 
     pub fn sort_by(&mut self, order: Order) {
@@ -410,11 +402,13 @@ mod tests {
         catalog.begin_input();
         catalog.add_input_char('f');
         catalog.add_input_char('o');
-        assert_eq!(true, catalog.find_input_pattern());
+        let index = catalog.index_input_pattern();
+        assert_eq!(true, index.is_some());
+        catalog.move_to_index(index.unwrap());
         assert_eq!(String::from("foo.jpeg"), catalog.current().unwrap().original_file_name());
         catalog.begin_input();
         catalog.add_input_char('q');
         catalog.add_input_char('a');
-        assert_eq!(false, catalog.find_input_pattern());
+        assert_eq!(None, catalog.index_input_pattern());
     }
 }
