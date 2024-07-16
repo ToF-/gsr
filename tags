@@ -27,6 +27,7 @@ current	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn current(&self) -> Optio
 del_input_char	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 editing_input	/home/tof/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
 finding_a_picture_entry_by_input_pattern	/home/tof/Coding/gsr/src/catalog.rs	/^    fn finding_a_picture_entry_by_input_pattern() {$/;"	f
+full_size_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn full_size_on(&self) -> bool {$/;"	f
 image_data_file_path	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn image_data_file_path(&self) -> String {$/;"	f
 image_data_file_path_is_the_file_path_with_json_extension	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn image_data_file_path_is_the_file_path_with_json_extension() {$/;"	f
 index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn index(&self) -> usize {$/;"	f
@@ -58,13 +59,17 @@ page_index_of	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_index_of(&se
 page_length	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_length(&self) -> usize {$/;"	f
 page_limit_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_limit_on(&self) -> bool {$/;"	f
 page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
+palette_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 set_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
 set_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
 setting_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn setting_label() {$/;"	f
 sort_by	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(&mut self, order: Order) {$/;"	f
 sorting_catalog_by_different_criteria	/home/tof/Coding/gsr/src/catalog.rs	/^    fn sorting_catalog_by_different_criteria() {$/;"	f
+state_indicators	/home/tof/Coding/gsr/src/catalog.rs	/^    fn state_indicators() {$/;"	f
 tests	/home/tof/Coding/gsr/src/catalog.rs	/^mod tests {$/;"	m
 tests	/home/tof/Coding/gsr/src/picture_entry.rs	/^mod tests {$/;"	m
 thumbnail_file_path	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn thumbnail_file_path(&self) -> String {$/;"	f
 thumbnail_path_is_the_file_path_with_thumbnail_suffix	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn thumbnail_path_is_the_file_path_with_thumbnail_suffix() {$/;"	f
+toggle_full_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn toggle_full_size(&mut self) {$/;"	f
 toggle_page_limit	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn toggle_page_limit(&mut self) {$/;"	f
+toggle_palette	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn toggle_palette(&mut self) {$/;"	f

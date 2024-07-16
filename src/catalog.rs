@@ -9,6 +9,8 @@ pub struct Catalog {
     page_size: usize,
     page_limit_on: bool,
     input: Option<String>,
+    palette_on: bool,
+    full_size_on: bool,
 }
 
 impl Catalog {
@@ -20,6 +22,8 @@ impl Catalog {
             page_size: 1,
             page_limit_on: true,
             input: None,
+            palette_on: false,
+            full_size_on: false,
         }
     }
 
@@ -118,6 +122,22 @@ impl Catalog {
         } else {
             None
         }
+    }
+
+    pub fn palette_on(&self) -> bool {
+        self.palette_on
+    }
+
+    pub fn toggle_palette(&mut self) {
+        self.palette_on = !self.palette_on
+    }
+
+    pub fn toggle_full_size(&mut self) {
+        self.full_size_on = !self.full_size_on
+    }
+
+    pub fn full_size_on(&self) -> bool {
+        self.full_size_on
     }
 
     pub fn sort_by(&mut self, order: Order) {
@@ -443,4 +463,15 @@ mod tests {
         assert_eq!(true, wrong.is_none());
     }
 
+    #[test]
+    fn state_indicators() {
+        let mut catalog = Catalog::new();
+        assert_eq!(false, catalog.palette_on());
+        assert_eq!(false, catalog.full_size_on());
+        catalog.toggle_palette();
+        catalog.toggle_full_size();
+        assert_eq!(true, catalog.palette_on());
+        assert_eq!(true, catalog.full_size_on());
+
+    }
 }
