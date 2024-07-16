@@ -8,6 +8,7 @@ Catalog	/home/tof/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
 Direction	/home/tof/Coding/gsr/src/direction.rs	/^pub enum Direction {$/;"	g
 IMAGE_DATA	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub const IMAGE_DATA: &str = "IMAGE_DATA";$/;"	c
 Order	/home/tof/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
+Palette	/home/tof/Coding/gsr/src/picture_io.rs	/^type Palette = [u32;9];$/;"	T
 PictureEntry	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub struct PictureEntry {$/;"	s
 Rank	/home/tof/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
 THUMB_SUFFIX	/home/tof/Coding/gsr/src/picture_entry.rs	/^pub const THUMB_SUFFIX: &str = "THUMB";$/;"	c
@@ -28,6 +29,8 @@ del_input_char	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&
 editing_input	/home/tof/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
 finding_a_picture_entry_by_input_pattern	/home/tof/Coding/gsr/src/catalog.rs	/^    fn finding_a_picture_entry_by_input_pattern() {$/;"	f
 full_size_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn full_size_on(&self) -> bool {$/;"	f
+get_palette_from_a_picture_file	/home/tof/Coding/gsr/src/picture_io.rs	/^    fn get_palette_from_a_picture_file() {$/;"	f
+get_palette_from_picture	/home/tof/Coding/gsr/src/picture_io.rs	/^pub fn get_palette_from_picture(file_path: &str) -> Result<Palette> {$/;"	f
 image_data_file_path	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn image_data_file_path(&self) -> String {$/;"	f
 image_data_file_path_is_the_file_path_with_json_extension	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn image_data_file_path_is_the_file_path_with_json_extension() {$/;"	f
 index	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn index(&self) -> usize {$/;"	f
@@ -68,6 +71,7 @@ sorting_catalog_by_different_criteria	/home/tof/Coding/gsr/src/catalog.rs	/^    
 state_indicators	/home/tof/Coding/gsr/src/catalog.rs	/^    fn state_indicators() {$/;"	f
 tests	/home/tof/Coding/gsr/src/catalog.rs	/^mod tests {$/;"	m
 tests	/home/tof/Coding/gsr/src/picture_entry.rs	/^mod tests {$/;"	m
+tests	/home/tof/Coding/gsr/src/picture_io.rs	/^mod tests {$/;"	m
 thumbnail_file_path	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn thumbnail_file_path(&self) -> String {$/;"	f
 thumbnail_path_is_the_file_path_with_thumbnail_suffix	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn thumbnail_path_is_the_file_path_with_thumbnail_suffix() {$/;"	f
 toggle_full_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn toggle_full_size(&mut self) {$/;"	f
