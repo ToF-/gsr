@@ -78,6 +78,7 @@ page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_s
 palette_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 paste_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn paste_label(&mut self) {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
+save_image_data	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn save_image_data(&self) {$/;"	f
 set_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn set_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_label(&mut self) {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f

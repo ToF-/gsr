@@ -132,7 +132,8 @@ impl Catalog {
         if self.current_entry().is_some() {
             let index = self.index();
             let entry = &mut self.picture_entries[index];
-            entry.set_label(label)
+            entry.set_label(label);
+            entry.save_image_data();
         }
     }
 
@@ -189,7 +190,6 @@ impl Catalog {
                         for i in start..end+1 {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
                             entry.set_label(label.to_string());
-                            // todo!("save image data");
                         }
                     }
                 }

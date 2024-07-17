@@ -3,6 +3,8 @@ use std::cmp::Ordering;
 use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
+use crate::image_data::ImageData;
+use crate::picture_io::set_image_data;
 
 #[derive(Clone, Debug)]
 pub struct PictureEntry {
@@ -12,7 +14,8 @@ pub struct PictureEntry {
     pub modified_time: SystemTime,
     pub rank: Rank,
     pub palette: [u32;9],
-    pub label: String
+    pub label: String,
+    pub selected: bool,
 }
 
 pub const THUMB_SUFFIX: &str = "THUMB";
@@ -33,6 +36,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
             Some(label) => label.clone(),
             None => String::new(),
         },
+        selected: false,
     }
 }
 
@@ -117,6 +121,21 @@ impl PictureEntry {
             self.original_file_path().cmp(&other.original_file_path())
         } else {
             cmp
+        }
+    }
+
+    pub fn save_image_data(&self) {
+        let image_data = ImageData {
+            colors: self.colors,
+            rank: self.rank.clone(),
+            selected: self.selected,
+            palette: self.palette,
+            label: self.label.clone(),
+        };
+        let image_data_file_path = self.image_data_file_path();
+        match set_image_data(&image_data, &image_data_file_path) {
+            Ok(()) => {},
+            Err(err) => eprintln!("error: {}", err),
         }
     }
 }
