@@ -189,6 +189,17 @@ impl Catalog {
         }
     }
 
+    pub fn unlabel(&mut self) -> Result<()> {
+        match self.index() {
+            Some(index) => {
+                let entry: &mut PictureEntry = &mut self.picture_entries[index];
+                entry.unlabel();
+                entry.save_image_data()
+            },
+            None => Ok(()),
+        }
+    }
+
     pub fn end_set_label(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
@@ -216,6 +227,28 @@ impl Catalog {
         }
     }
 
+    pub fn end_set_unlabel(&mut self) -> Result<()> {
+        match self.index() {
+            Some(index) => {
+                match self.start_index {
+                    None => self.unlabel(),
+                    Some(other) => {
+                        let (start,end) = if other <= index { (other,index) } else { (index,other) };
+                        for i in start..end+1 {
+                            let entry: &mut PictureEntry = &mut self.picture_entries[i];
+                            entry.unlabel();
+                            match entry.save_image_data() {
+                                Ok(()) => {},
+                                Err(err) => return Err(err),
+                            }
+                        };
+                        Ok(())
+                    },
+                }
+            },
+            None => Err(Error::new(ErrorKind::Other, "empty catalog")),
+        }
+    }
     pub fn select(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
@@ -635,7 +668,7 @@ mod tests {
     }
 
     #[test]
-    fn label_entries() {
+    fn label_and_unlabel_entries() {
         let mut catalog = my_catalog();
         catalog.move_to_index(0);
         catalog.copy_label();
@@ -648,10 +681,23 @@ mod tests {
         assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
         catalog.move_to_index(2);
         assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
+        catalog.move_to_index(0);
+        catalog.start_set();
+        catalog.move_to_index(2);
+        assert_eq!(true, catalog.end_set_unlabel().is_ok());
+        catalog.move_to_index(1);
+        assert_eq!(None, catalog.current_entry().unwrap().label());
+        catalog.move_to_index(1);
+        assert_eq!(None, catalog.current_entry().unwrap().label());
+        catalog.move_to_index(2);
+        assert_eq!(None, catalog.current_entry().unwrap().label());
+        catalog.move_to_index(3);
+        assert_eq!(true, catalog.unlabel().is_ok());
+        assert_eq!(None, catalog.current_entry().unwrap().label());
     }
 
     #[test]
-    fn select_entries() {
+    fn select_and_unselect_entries() {
         let mut catalog = my_larger_catalog();
         catalog.set_page_size(2);
         catalog.move_to_index(0);
