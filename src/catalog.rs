@@ -252,9 +252,28 @@ impl Catalog {
 
     pub fn unselect_page(&mut self) -> Result<()> {
         match self.index() {
-            Some(index) => {
+            Some(_) => {
                 let start = self.page_index();
                 let end = start + self.page_length();
+                for i in start..end {
+                    let entry: &mut PictureEntry = &mut self.picture_entries[i];
+                    entry.selected = false;
+                    match entry.save_image_data() {
+                        Ok(()) => {},
+                        Err(err) => return Err(err),
+                    }
+                };
+                Ok(())
+            },
+            None => Err(Error::new(ErrorKind::Other, "empty catalog")),
+        }
+    }
+
+    pub fn unselect_all(&mut self) -> Result<()> {
+        match self.index() {
+            Some(_) => {
+                let start = 0;
+                let end = self.length();
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
                     entry.selected = false;
@@ -670,6 +689,13 @@ mod tests {
         catalog.move_to_index(2);
         assert_eq!(false, catalog.current_entry().unwrap().selected);
         catalog.move_to_index(3);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        assert_eq!(true, catalog.unselect_all().is_ok());
+        catalog.move_to_index(4);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(5);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(6);
         assert_eq!(false, catalog.current_entry().unwrap().selected);
     }
 }
