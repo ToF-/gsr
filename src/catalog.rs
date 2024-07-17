@@ -9,6 +9,7 @@ pub struct Catalog {
     page_size: usize,
     page_limit_on: bool,
     input: Option<String>,
+    label: Option<String>,
     palette_on: bool,
     full_size_on: bool,
 }
@@ -22,6 +23,7 @@ impl Catalog {
             page_size: 1,
             page_limit_on: true,
             input: None,
+            label: None,
             palette_on: false,
             full_size_on: false,
         }
@@ -121,6 +123,34 @@ impl Catalog {
             }
         } else {
             None
+        }
+    }
+
+    fn apply_label(&mut self, label: String) {
+        if self.current_entry().is_some() {
+            let index = self.index();
+            let entry = &mut self.picture_entries[index];
+            entry.set_label(label)
+        }
+    }
+
+    pub fn set_label(&mut self) {
+        self.label = self.input.clone();
+        if let Some(label) = &self.label {
+            self.apply_label(label.clone());
+        };
+        self.input = None
+    }
+
+    pub fn copy_label(&mut self) {
+        if let Some(entry) = self.current_entry() {
+            self.label = entry.label()
+        }
+    }
+
+    pub fn paste_label(&mut self) {
+        if let Some(label) = &self.label {
+            self.apply_label(label.clone())
         }
     }
 
@@ -225,13 +255,14 @@ impl Catalog {
         }
     }
 
-    pub fn current(&self) -> Option<PictureEntry> {
+    pub fn current_entry(&self) -> Option<&PictureEntry> {
         if self.index < self.picture_entries.len() {
-            Some(self.picture_entries[self.index].clone())
+            Some(&self.picture_entries[self.index])
         } else {
             None
         }
     }
+
 }
 
 #[cfg(test)]
@@ -254,78 +285,82 @@ mod tests {
             make_picture_entry(String::from("photos/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo"))))
     }
 
+    fn my_catalog() -> Catalog {
+        let mut catalog = Catalog::new();
+        let mut example = my_entries();
+        catalog.add_picture_entries(&mut example);
+        catalog
+    }
+
+    fn my_larger_catalog() -> Catalog {
+        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
+        let mut other_entries = vec![
+            make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
+            make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
+            make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
+        let mut catalog = my_catalog();
+        catalog.add_picture_entries(&mut other_entries);
+        catalog
+    }
+
     #[test]
     fn at_creation_length_is_0() {
         let catalog = Catalog::new();
         assert_eq!(catalog.length(), 0);
-        assert_eq!(true, catalog.current().is_none());
+        assert_eq!(true, catalog.current_entry().is_none());
     }
 
     #[test]
     fn after_adding_entries_length_is_updated() {
-        let mut catalog = Catalog::new();
-        let mut example = my_entries();
-        catalog.add_picture_entries(&mut example);
+        let catalog = my_catalog();
         assert_eq!(catalog.length(), 4);
     }
 
     #[test]
     fn cannot_move_beyond_length() {
-        let mut catalog = Catalog::new();
-        let mut example = my_entries();
-        catalog.add_picture_entries(&mut example);
+        let catalog = my_catalog();
         assert_eq!(false, catalog.can_move_to_index(4));
     }
 
     #[test]
     fn sorting_catalog_by_different_criteria() {
-        let mut example = my_entries();
-        let mut catalog = Catalog::new();
-        catalog.add_picture_entries(&mut example);
+        let mut catalog = my_catalog();
         catalog.sort_by(Order::Size);
         catalog.move_to_index(0);
         assert_eq!(String::from("qux.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
         catalog.sort_by(Order::Date);
         catalog.move_to_index(0);
         assert_eq!(String::from("bub.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
         catalog.sort_by(Order::Name);
         catalog.move_to_index(0);
         assert_eq!(String::from("bar.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
         catalog.sort_by(Order::Colors);
         catalog.move_to_index(0);
         assert_eq!(String::from("foo.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
         catalog.sort_by(Order::Value);
         catalog.move_to_index(3);
         assert_eq!(String::from("foo.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
         catalog.sort_by(Order::Label);
         catalog.move_to_index(0);
         assert_eq!(String::from("foo.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
         catalog.move_to_index(1);
         assert_eq!(String::from("bub.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
         catalog.sort_by(Order::Palette);
         catalog.move_to_index(3);
         assert_eq!(String::from("qux.jpeg"),
-            catalog.current().unwrap().original_file_name());
+            catalog.current_entry().unwrap().original_file_name());
     }
 
     #[test]
     fn page_index_depends_on_page_size_and_index() {
-        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        let mut example = my_entries();
-        let mut other_entries = vec![
-            make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
-            make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
-            make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
-        let mut catalog = Catalog::new();
-        catalog.add_picture_entries(&mut example);
-        catalog.add_picture_entries(&mut other_entries);
+        let mut catalog = my_larger_catalog();
         catalog.set_page_size(2);
         assert_eq!(4, catalog.page_length());
         catalog.move_to_index(0);
@@ -336,15 +371,7 @@ mod tests {
 
     #[test]
     fn after_moving_next_page_index_depends_on_page_size() {
-        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        let mut example = my_entries();
-        let mut other_entries = vec![
-            make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
-            make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
-            make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
-        let mut catalog = Catalog::new();
-        catalog.add_picture_entries(&mut example);
-        catalog.add_picture_entries(&mut other_entries);
+        let mut catalog = my_larger_catalog();
         catalog.set_page_size(2);
         assert_eq!(2, catalog.page_size());
         catalog.move_to_index(2);
@@ -358,15 +385,7 @@ mod tests {
 
     #[test]
     fn moving_next_picture_can_be_blocked_or_allowed() {
-        let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        let mut example = my_entries();
-        let mut other_entries = vec![
-            make_picture_entry(String::from("photos/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo"))),
-            make_picture_entry(String::from("photos/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None),
-            make_picture_entry(String::from("photos/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None)];
-        let mut catalog = Catalog::new();
-        catalog.add_picture_entries(&mut example);
-        catalog.add_picture_entries(&mut other_entries);
+        let mut catalog = my_larger_catalog();
         assert_eq!(7, catalog.length());
         assert_eq!(true, catalog.page_limit_on());
         catalog.set_page_size(2);
@@ -431,14 +450,14 @@ mod tests {
         catalog.add_picture_entries(&mut example);
         catalog.sort_by(Order::Size);
         catalog.move_to_index(0);
-        assert_eq!(String::from("qux.jpeg"),catalog.current().unwrap().original_file_name());
+        assert_eq!(String::from("qux.jpeg"),catalog.current_entry().unwrap().original_file_name());
         catalog.begin_input();
         catalog.add_input_char('f');
         catalog.add_input_char('o');
         let index = catalog.index_input_pattern();
         assert_eq!(true, index.is_some());
         catalog.move_to_index(index.unwrap());
-        assert_eq!(String::from("foo.jpeg"), catalog.current().unwrap().original_file_name());
+        assert_eq!(String::from("foo.jpeg"), catalog.current_entry().unwrap().original_file_name());
         catalog.begin_input();
         catalog.add_input_char('q');
         catalog.add_input_char('a');
@@ -457,7 +476,7 @@ mod tests {
         let index = catalog.index_input_number();
         assert_eq!(true, index.is_some());
         catalog.move_to_index(index.unwrap());
-        assert_eq!(String::from("bar.jpeg"), catalog.current().unwrap().original_file_name());
+        assert_eq!(String::from("bar.jpeg"), catalog.current_entry().unwrap().original_file_name());
         catalog.add_input_char('3');
         let wrong = catalog.index_input_number();
         assert_eq!(true, wrong.is_none());
@@ -472,6 +491,29 @@ mod tests {
         catalog.toggle_full_size();
         assert_eq!(true, catalog.palette_on());
         assert_eq!(true, catalog.full_size_on());
+
+    }
+
+    #[test]
+    fn label_entry() {
+        let mut catalog = my_catalog();
+        catalog.move_to_index(1);
+        assert_eq!(None, catalog.current_entry().unwrap().label());
+        catalog.begin_input();
+        assert_eq!(true, catalog.input_on());
+        catalog.add_input_char('R');
+        catalog.add_input_char('E');
+        catalog.add_input_char('X');
+        catalog.set_label();
+        assert_eq!(Some(String::from("REX")), catalog.current_entry().unwrap().label());
+        assert_eq!(false, catalog.input_on());
+        catalog.move_to_index(0);
+        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
+        catalog.copy_label();
+        catalog.move_to_index(1);
+        assert_eq!(Some(String::from("REX")), catalog.current_entry().unwrap().label());
+        catalog.paste_label();
+        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
 
     }
 }
