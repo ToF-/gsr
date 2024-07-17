@@ -1,3 +1,4 @@
+use std::io::{Result};
 use std::path::PathBuf;
 use std::cmp::Ordering;
 use std::cmp::Ordering::*;
@@ -124,7 +125,7 @@ impl PictureEntry {
         }
     }
 
-    pub fn save_image_data(&self) {
+    pub fn save_image_data(&self) -> Result<()> {
         let image_data = ImageData {
             colors: self.colors,
             rank: self.rank.clone(),
@@ -133,10 +134,7 @@ impl PictureEntry {
             label: self.label.clone(),
         };
         let image_data_file_path = self.image_data_file_path();
-        match set_image_data(&image_data, &image_data_file_path) {
-            Ok(()) => {},
-            Err(err) => eprintln!("error: {}", err),
-        }
+        set_image_data(&image_data, &image_data_file_path)
     }
 }
 

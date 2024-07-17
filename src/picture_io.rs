@@ -23,7 +23,6 @@ pub fn get_image_data(file_path: &str) -> Result<ImageData> {
 
 pub fn set_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {
     let path = Path::new(&file_path);
-    println!("saving {}",path.display());
     match File::create(path) {
         Ok(file) => {
             match serde_json::to_writer(file, &image_data) {
