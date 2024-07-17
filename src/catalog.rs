@@ -189,6 +189,11 @@ impl Catalog {
         }
     }
 
+    pub fn cancel_set(&mut self) {
+        if self.current_entry().is_some() {
+            self.start_index = None
+        }
+    }
     pub fn unlabel(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
@@ -227,7 +232,7 @@ impl Catalog {
         }
     }
 
-    pub fn end_set_unlabel(&mut self) -> Result<()> {
+    pub fn end_unlabel(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 match self.start_index {
@@ -684,7 +689,7 @@ mod tests {
         catalog.move_to_index(0);
         catalog.start_set();
         catalog.move_to_index(2);
-        assert_eq!(true, catalog.end_set_unlabel().is_ok());
+        assert_eq!(true, catalog.end_unlabel().is_ok());
         catalog.move_to_index(1);
         assert_eq!(None, catalog.current_entry().unwrap().label());
         catalog.move_to_index(1);
