@@ -749,4 +749,8 @@ mod tests {
         catalog.move_to_index(6);
         assert_eq!(false, catalog.current_entry().unwrap().selected);
     }
+
+    #[test]
+    fn deleting_en_entry_makes_it_non_selectable() {
+    }
 }

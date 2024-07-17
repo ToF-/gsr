@@ -48,7 +48,7 @@ mod tests {
 
     #[test]
     fn get_palette_from_a_picture_file() {
-        let result = get_palette_from_picture("testdata/flower.jpg");
+        let result = get_palette_from_picture("testdata/nature/flower.jpg");
         let expected_palette: Palette = [ 0x9c8474, 0xaf382d, 0xccbcb4, 0xd4ab3e, 0xde777a, 0xde978a, 0xe3acb8, 0xeacac0, 0xfbfbfb];
         let expected_colors = 37181; 
         assert_eq!(true, result.is_ok());
@@ -57,7 +57,7 @@ mod tests {
     
     #[test]
     fn get_image_data_deserializes_image_data() {
-        let result = get_image_data("testdata/flowerIMAGE_DATA.json");
+        let result = get_image_data("testdata/nature/flowerIMAGE_DATA.json");
         let expected = ImageData {
             colors: 37181,
             rank: Rank::NoStar,
@@ -83,5 +83,18 @@ mod tests {
         let result = get_image_data("testdata/dummyIMAGE_DATA.json");
         assert_eq!(true, result.is_ok());
         assert_eq!(expected, result.unwrap());
+    }
+
+    pub fn get_picture_file_paths(path: &str) -> Result<Vec<String>> {
+        let files: Vec<String> = Vec::new();
+        Ok(files.clone())
+    }
+
+    #[test]
+    fn get_all_pictures_including_sub_folders_except_thumbnails() {
+        let result = get_picture_file_paths("testdata");
+        assert_eq!(true, result.is_ok());
+        let file_paths = result.unwrap();
+        assert_eq!(10, file_paths.len());
     }
 }

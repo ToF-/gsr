@@ -17,6 +17,7 @@ pub struct PictureEntry {
     pub palette: [u32;9],
     pub label: String,
     pub selected: bool,
+    pub deleted: bool,
 }
 
 pub const THUMB_SUFFIX: &str = "THUMB";
@@ -38,6 +39,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
             None => String::new(),
         },
         selected: false,
+        deleted: false,
     }
 }
 
