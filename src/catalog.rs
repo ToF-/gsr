@@ -12,6 +12,7 @@ pub struct Catalog {
     label: Option<String>,
     palette_on: bool,
     full_size_on: bool,
+    start_index: Option<usize>,
 }
 
 impl Catalog {
@@ -26,6 +27,7 @@ impl Catalog {
             label: None,
             palette_on: false,
             full_size_on: false,
+            start_index: None,
         }
     }
 
@@ -168,6 +170,32 @@ impl Catalog {
 
     pub fn full_size_on(&self) -> bool {
         self.full_size_on
+    }
+
+    pub fn start_set(&mut self) {
+        if self.current_entry().is_some() {
+            self.start_index = Some(self.index)
+        }
+    }
+
+    pub fn end_set_label(&mut self) {
+        if self.current_entry().is_some() {
+            if let Some(label) = &self.label {
+                let index = self.index;
+                match self.start_index {
+                    None => self.set_label(),
+                    Some(other) => {
+                        let (start,end) = if other <= index { (other,index) } else { (index,other) };
+                        for i in start..end+1 {
+                            let entry: &mut PictureEntry = &mut self.picture_entries[i];
+                            entry.set_label(label.to_string());
+                            // todo!("save image data");
+                        }
+                    }
+                }
+            }
+
+        }
     }
 
     pub fn sort_by(&mut self, order: Order) {
@@ -514,6 +542,21 @@ mod tests {
         assert_eq!(Some(String::from("REX")), catalog.current_entry().unwrap().label());
         catalog.paste_label();
         assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
+    }
 
+    #[test]
+    fn label_entries() {
+        let mut catalog = my_catalog();
+        catalog.move_to_index(0);
+        catalog.copy_label();
+        catalog.start_set();
+        catalog.move_to_index(3);
+        catalog.end_set_label();
+        catalog.move_to_index(1);
+        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
+        catalog.move_to_index(1);
+        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
+        catalog.move_to_index(2);
+        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
     }
 }
