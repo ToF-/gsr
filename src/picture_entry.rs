@@ -6,6 +6,8 @@ use std::time::SystemTime;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
 use crate::picture_io::set_image_data;
+use crate::path::THUMB_SUFFIX;
+use crate::path::IMAGE_DATA;
 
 #[derive(Clone, Debug)]
 pub struct PictureEntry {
@@ -19,9 +21,6 @@ pub struct PictureEntry {
     pub selected: bool,
     pub deleted: bool,
 }
-
-pub const THUMB_SUFFIX: &str = "THUMB";
-pub const IMAGE_DATA: &str = "IMAGE_DATA";
 
 pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {
     PictureEntry {

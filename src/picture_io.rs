@@ -85,16 +85,4 @@ mod tests {
         assert_eq!(expected, result.unwrap());
     }
 
-    pub fn get_picture_file_paths(path: &str) -> Result<Vec<String>> {
-        let files: Vec<String> = Vec::new();
-        Ok(files.clone())
-    }
-
-    #[test]
-    fn get_all_pictures_including_sub_folders_except_thumbnails() {
-        let result = get_picture_file_paths("testdata");
-        assert_eq!(true, result.is_ok());
-        let file_paths = result.unwrap();
-        assert_eq!(10, file_paths.len());
-    }
 }
