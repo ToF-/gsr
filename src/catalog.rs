@@ -250,6 +250,25 @@ impl Catalog {
         }
     }
 
+    pub fn unselect_page(&mut self) -> Result<()> {
+        match self.index() {
+            Some(index) => {
+                let start = self.page_index();
+                let end = start + self.page_length();
+                for i in start..end {
+                    let entry: &mut PictureEntry = &mut self.picture_entries[i];
+                    entry.selected = false;
+                    match entry.save_image_data() {
+                        Ok(()) => {},
+                        Err(err) => return Err(err),
+                    }
+                };
+                Ok(())
+            },
+            None => Err(Error::new(ErrorKind::Other, "empty catalog")),
+        }
+    }
+
     pub fn sort_by(&mut self, order: Order) {
         match order {
             Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
@@ -614,18 +633,43 @@ mod tests {
 
     #[test]
     fn select_entries() {
-        let mut catalog = my_catalog();
+        let mut catalog = my_larger_catalog();
+        catalog.set_page_size(2);
         catalog.move_to_index(0);
         assert_eq!(false, catalog.current_entry().unwrap().selected);
         catalog.copy_label();
         catalog.start_set();
-        catalog.move_to_index(3);
+        catalog.move_to_index(6);
         assert_eq!(true, catalog.end_set_select().is_ok());
-        catalog.move_to_index(1);
+        catalog.move_to_index(0);
         assert_eq!(true, catalog.current_entry().unwrap().selected);
         catalog.move_to_index(1);
         assert_eq!(true, catalog.current_entry().unwrap().selected);
         catalog.move_to_index(2);
         assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(3);
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(4);
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(5);
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(6);
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(2);
+        assert_eq!(true, catalog.unselect_page().is_ok());
+        catalog.move_to_index(4);
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(5);
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(6);
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(0);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(1);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(2);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        catalog.move_to_index(3);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
     }
 }
