@@ -258,8 +258,12 @@ impl Catalog {
         match self.index() {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
-                entry.selected = true;
-                entry.save_image_data()
+                if !entry.deleted {
+                    entry.selected = true;
+                    entry.save_image_data()
+                } else {
+                    Ok(())
+                }
             },
             None => Ok(())
         }
@@ -416,6 +420,16 @@ impl Catalog {
             Some(&self.picture_entries[self.index])
         } else {
             None
+        }
+    }
+
+    pub fn toggle_delete_entry(&mut self) -> Result<()> {
+        if let Some(index) = self.index() {
+            let entry = &mut self.picture_entries[index];
+            entry.deleted = !entry.deleted;
+            entry.save_image_data()
+        } else {
+            Ok(())
         }
     }
 
@@ -752,5 +766,16 @@ mod tests {
 
     #[test]
     fn deleting_en_entry_makes_it_non_selectable() {
+        let mut catalog = my_catalog();
+        catalog.move_to_index(0);
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        assert_eq!(true, catalog.toggle_delete_entry().is_ok());
+        assert_eq!(true, catalog.current_entry().unwrap().deleted);
+        let _ = catalog.select();
+        assert_eq!(false, catalog.current_entry().unwrap().selected);
+        assert_eq!(true, catalog.toggle_delete_entry().is_ok());
+        assert_eq!(false, catalog.current_entry().unwrap().deleted);
+        let _ = catalog.select();
+        assert_eq!(true, catalog.current_entry().unwrap().selected);
     }
 }

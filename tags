@@ -104,6 +104,7 @@ start_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn start_
 state_indicators	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn state_indicators() {$/;"	f
 thumbnail_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn thumbnail_file_path(&self) -> String {$/;"	f
 thumbnail_path_is_the_file_path_with_thumbnail_suffix	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn thumbnail_path_is_the_file_path_with_thumbnail_suffix() {$/;"	f
+toggle_delete_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn toggle_delete_entry(&mut self) -> Result<()> {$/;"	f
 toggle_full_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn toggle_full_size(&mut self) {$/;"	f
 toggle_page_limit	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn toggle_page_limit(&mut self) {$/;"	f
 toggle_palette	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn toggle_palette(&mut self) {$/;"	f
