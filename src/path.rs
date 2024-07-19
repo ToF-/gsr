@@ -51,6 +51,14 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
     }
 }
 
+pub fn image_data_file_path(original_file_path: &str) -> String {
+    let path = PathBuf::from(original_file_path);
+    let parent = path.parent().unwrap();
+    let file_stem = path.file_stem().unwrap().to_str().unwrap();
+    let new_file_name = format!("{}{}.json", file_stem, IMAGE_DATA);
+    let new_path = parent.join(new_file_name);
+    new_path.to_str().unwrap().to_string()
+}
 
 #[cfg(test)]
 mod tests {

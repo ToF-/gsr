@@ -5,9 +5,8 @@ use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
-use crate::picture_io::write_image_data;
-use crate::path::THUMB_SUFFIX;
-use crate::path::IMAGE_DATA;
+use crate::picture_io::{write_image_data, read_or_create_image_data, read_image_data, read_file_info};
+use crate::path::{THUMB_SUFFIX, IMAGE_DATA, image_data_file_path}; 
 
 #[derive(Clone, Debug)]
 pub struct PictureEntry {
@@ -22,7 +21,7 @@ pub struct PictureEntry {
     pub deleted: bool,
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool) -> PictureEntry {
     PictureEntry {
         file_path: file_path,
         file_size: file_size,
@@ -37,12 +36,31 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
             Some(label) => label.clone(),
             None => String::new(),
         },
-        selected: false,
+        selected: selected,
         deleted: false,
     }
 }
 
 impl PictureEntry {
+
+    pub fn from_file(file_path: String) -> Result<Self> {
+        match read_file_info(&file_path) {
+            Ok((file_size, modified_time)) => {
+                match read_or_create_image_data(&file_path) {
+                    Ok(image_data) => Ok(make_picture_entry(file_path,
+                            file_size,
+                            image_data.colors,
+                            modified_time,
+                            image_data.rank,
+                            Some(image_data.palette),
+                            Some(image_data.label),
+                            image_data.selected)),
+                    Err(err) => Err(err),
+                }
+            }
+            Err(err) => Err(err),
+        }
+    }
 
     pub fn original_file_name(&self) -> String {
         let original = &self.file_path;
@@ -83,13 +101,7 @@ impl PictureEntry {
     }
 
     pub fn image_data_file_path(&self) -> String {
-        let image_file_path = self.original_file_path();
-        let path = PathBuf::from(image_file_path);
-        let parent = path.parent().unwrap();
-        let file_stem = path.file_stem().unwrap().to_str().unwrap();
-        let new_file_name = format!("{}{}.json", file_stem, IMAGE_DATA);
-        let new_path = parent.join(new_file_name);
-        new_path.to_str().unwrap().to_string()
+        image_data_file_path(&self.original_file_path())
     }
 
     pub fn label(&self) -> Option<String> {
@@ -147,10 +159,11 @@ impl PictureEntry {
 mod tests {
     use super::*;
     use chrono::DateTime;
+    use std::fs::{copy, remove_file};
 
     fn my_entry(file_path: &str) -> PictureEntry {
         let day: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None)
+        make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None, false)
     }
 
     #[test]
@@ -182,6 +195,28 @@ mod tests {
         let mut entry = my_entry("photos/foo.jpeg");
         entry.set_label(String::from("foo"));
         assert_eq!(Some(String::from("foo")), entry.label());
+    }
+
+    #[test]
+    fn make_picture_entry_from_file_and_image_data_file() {
+        let result = PictureEntry::from_file(String::from("testdata/nature/flower.jpg"));
+        assert_eq!(true, result.is_ok());
+        let entry = result.unwrap();
+        assert_eq!(36287, entry.file_size);
+        assert_eq!(37181, entry.colors);
+        assert_eq!(10257524, entry.palette[0]);
+    }
+    #[test]
+    fn make_picture_entry_from_file_create_image_data_file_if_need_be() {
+        let _ = copy("testdata/nature/flowerIMAGE_DATA.json", "testdata/temp");
+        let _ = remove_file("testdata/nature/flowerIMAGE_DATA.json");
+        let result = PictureEntry::from_file(String::from("testdata/nature/flower.jpg"));
+        let _ = copy("testdata/temp", "testdata/nature/flowerIMAGE_DATA.json");
+        assert_eq!(true, result.is_ok());
+        let entry = result.unwrap();
+        assert_eq!(36287, entry.file_size);
+        assert_eq!(37181, entry.colors);
+        assert_eq!(10257524, entry.palette[0]);
     }
 }
 
