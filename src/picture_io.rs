@@ -1,12 +1,26 @@
 use std::io::{Result, Error, ErrorKind};
-use std::path::Path;
+use std::time::SystemTime;
+use std::path::{Path,PathBuf};
+use std::fs;
 use std::fs::{File, read_to_string};
 use crate::rank::Rank;
 use crate::image_data::ImageData;
 use crate::palette::{Colors, get_colors, Palette, get_palette};
 
+pub fn read_file_info(file_path: &str) -> Result<(u64, SystemTime)> {
+   let path = PathBuf::from(file_path);
+   match fs::metadata(path.clone()) {
+       Ok(metadata) => {
+           let file_size = metadata.len();
+           let modified_time = metadata.modified().unwrap();
+           Ok((file_size, modified_time))
+       },
+       Err(err) => Err(err),
+   }
+}
 
-pub fn get_image_data(file_path: &str) -> Result<ImageData> {
+
+pub fn read_image_data(file_path: &str) -> Result<ImageData> {
     let path = Path::new(&file_path);
     if path.exists() {
         match read_to_string(path) {
@@ -21,7 +35,7 @@ pub fn get_image_data(file_path: &str) -> Result<ImageData> {
     }
 }
 
-pub fn set_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {
+pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {
     let path = Path::new(&file_path);
     match File::create(path) {
         Ok(file) => {
@@ -45,6 +59,7 @@ pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::{DateTime,Utc};
 
     #[test]
     fn get_palette_from_a_picture_file() {
@@ -56,8 +71,8 @@ mod tests {
     }
     
     #[test]
-    fn get_image_data_deserializes_image_data() {
-        let result = get_image_data("testdata/nature/flowerIMAGE_DATA.json");
+    fn read_image_data_deserializes_image_data() {
+        let result = read_image_data("testdata/nature/flowerIMAGE_DATA.json");
         let expected = ImageData {
             colors: 37181,
             rank: Rank::NoStar,
@@ -78,11 +93,21 @@ mod tests {
             palette: [0, 1, 2, 3, 4, 5, 6, 7, 8],
             label: String::from("foo"),
         };
-        let saved = set_image_data(&expected, "testdata/dummyIMAGE_DATA.json");
+        let saved = write_image_data(&expected, "testdata/dummyIMAGE_DATA.json");
         assert_eq!(true, saved.is_ok());
-        let result = get_image_data("testdata/dummyIMAGE_DATA.json");
+        let result = read_image_data("testdata/dummyIMAGE_DATA.json");
         assert_eq!(true, result.is_ok());
         assert_eq!(expected, result.unwrap());
     }
 
+    #[test]
+    fn read_picture_file_info_read_file_size_and_modified_time() {
+        let result = read_file_info("testdata/nature/flower.jpg");
+        assert_eq!(true, result.is_ok());
+        let (file_size, modified_time) = result.unwrap();
+        assert_eq!(36287, file_size);
+        let date_time: DateTime<Utc> = DateTime::from(modified_time);
+        let formatted_date = date_time.to_rfc3339();
+        assert_eq!(String::from("2024-07-17T19:21:20.047001954+00:00"), formatted_date);
+    }
 }

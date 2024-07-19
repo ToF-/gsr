@@ -5,7 +5,7 @@ use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
-use crate::picture_io::set_image_data;
+use crate::picture_io::write_image_data;
 use crate::path::THUMB_SUFFIX;
 use crate::path::IMAGE_DATA;
 
@@ -139,7 +139,7 @@ impl PictureEntry {
             label: self.label.clone(),
         };
         let image_data_file_path = self.image_data_file_path();
-        set_image_data(&image_data, &image_data_file_path)
+        write_image_data(&image_data, &image_data_file_path)
     }
 }
 
