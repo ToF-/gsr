@@ -1,3 +1,4 @@
+use regex::Regex;
 use std::io::{Result, Error, ErrorKind};
 use crate::picture_entry::PictureEntry;
 use crate::path::get_picture_file_paths;
@@ -53,13 +54,27 @@ impl Catalog {
         self.picture_entries.append(picture_entries)
     }
 
-    pub fn add_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {
+    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>) -> Result<()> {
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
                 for file_path in file_paths {
-                    match PictureEntry::from_file(&file_path) {
-                        Ok(picture_entry) => self.picture_entries.push(picture_entry),
-                        Err(err) => return Err(err),
+                    let matches_pattern = match pattern_opt {
+                        None => true,
+                        Some(ref pattern) => {
+                            match Regex::new(&pattern) {
+                                Ok(reg_expr) => match reg_expr.captures(&file_path) {
+                                    Some(_) => true,
+                                    None => false,
+                                },
+                                Err(err) => return Err(Error::new(ErrorKind::Other, err)),
+                            }
+                        },
+                    };
+                    if matches_pattern {
+                        match PictureEntry::from_file(&file_path) {
+                            Ok(picture_entry) => self.picture_entries.push(picture_entry),
+                            Err(err) => return Err(err),
+                        }
                     }
                 }
                 Ok(())
@@ -799,9 +814,19 @@ mod tests {
     #[test] 
     fn adding_entries_from_a_directory() {
         let mut catalog = Catalog::new();
-        let result = catalog.add_picture_entries_from_dir("testdata");
+        let result = catalog.add_picture_entries_from_dir("testdata", None);
         assert_eq!(true, result.is_ok());
         assert_eq!(10, catalog.length())
+    }
+
+    #[test] 
+    fn adding_entries_from_a_directory_with_pattern_option() {
+        let mut catalog = Catalog::new();
+        let result = catalog.add_picture_entries_from_dir("testdata", Some(String::from("or")));
+        assert_eq!(true, result.is_ok());
+        assert_eq!(2, catalog.length());
+        assert_eq!(String::from("labrador.jpg"), catalog.picture_entries[0].original_file_name());
+        assert_eq!(String::from("color-wheel.png"), catalog.picture_entries[1].original_file_name());
 
     }
 }
