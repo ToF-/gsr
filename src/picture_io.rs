@@ -1,4 +1,8 @@
-use std::io::{Result, Error, ErrorKind};
+use thumbnailer::ThumbnailSize;
+use thumbnailer::create_thumbnails;
+use thumbnailer::error::ThumbResult;
+use std::io::{Result, BufReader, Error, ErrorKind};
+use std::ffi::OsStr;
 use std::time::SystemTime;
 use std::path::{Path,PathBuf};
 use crate::path::image_data_file_path;
@@ -87,6 +91,61 @@ pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {
     Ok((palette,colors))
 }
 
+fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, extension: &str, mut output_file: File) -> ThumbResult<()> {
+    let mime = match extension {
+        "jpg" | "jpeg" | "JPG" | "JPEG" => mime::IMAGE_JPEG,
+        "png" | "PNG" => mime::IMAGE_PNG,
+        _ => panic!("wrong extension"),
+    };
+    let mut thumbnails = match create_thumbnails(reader, mime, [ThumbnailSize::Small]) {
+        Ok(tns) => tns,
+        Err(err) => {
+            println!("error while creating thumbnails:{:?}", err);
+            return Err(err)
+        },
+    };
+    let thumbnail = thumbnails.pop().unwrap();
+    let write_result = match extension {
+        "jpg" | "jpeg" | "JPG" | "JPEG" => thumbnail.write_jpeg(&mut output_file,255),
+        "png" | "PNG" => thumbnail.write_png(&mut output_file),
+        _ => panic!("wrong extension"),
+    };
+    match write_result {
+        Err(err) => {
+            println!("error while writing thunbnail:{}", err);
+            Err(err)
+        },
+        ok => ok,
+    }
+}
+
+pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {
+    let path = PathBuf::from(thumbnail_file_path);
+    if path.exists() {
+        Ok(())
+    } else {
+        match File::open(original_file_path.clone()) {
+            Err(err) => Err(err),
+            Ok(input_file) => {
+                let source_path = Path::new(&original_file_path);
+                let extension = match source_path.extension()
+                    .and_then(OsStr::to_str) {
+                        None => return Err(Error::new(ErrorKind::Other, format!("source file has no extension"))),
+                        Some(ext) => ext,
+                    };
+                let reader = BufReader::new(input_file);
+                let output_file = match File::create(thumbnail_file_path) {
+                    Err(err) => return Err(err),
+                    Ok(file) => file,
+                };
+                match write_thumbnail(reader, extension, output_file) {
+                    Err(err) => Err(Error::new(ErrorKind::Other, err)),
+                    Ok(_) => Ok(()),
+                }
+            },
+        }
+    }
+}
 
 #[cfg(test)]
 mod tests {

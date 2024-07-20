@@ -5,7 +5,7 @@ use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
-use crate::picture_io::{write_image_data, read_or_create_image_data, read_image_data, read_file_info};
+use crate::picture_io::{write_image_data, check_or_create_thumbnail_file, read_or_create_image_data, read_file_info};
 use crate::path::{THUMB_SUFFIX, IMAGE_DATA, image_data_file_path}; 
 
 #[derive(Clone, Debug)]
@@ -153,6 +153,12 @@ impl PictureEntry {
         let image_data_file_path = self.image_data_file_path();
         write_image_data(&image_data, &image_data_file_path)
     }
+
+    pub fn check_or_create_thumbnail(&self) -> Result<()> {
+        let original_file_path = self.original_file_path();
+        let thumbnail_file_path = self.thumbnail_file_path();
+        check_or_create_thumbnail_file(&thumbnail_file_path, &original_file_path)
+    }
 }
 
 #[cfg(test)]
@@ -217,6 +223,17 @@ mod tests {
         assert_eq!(36287, entry.file_size);
         assert_eq!(37181, entry.colors);
         assert_eq!(10257524, entry.palette[0]);
+    }
+
+    #[test]
+    fn check_or_create_thumbnail_picture_if_it_does_not_exist() {
+        let _ = copy("testdata/nature/flowerTHUMB.jpg", "testdata/temp");
+        let _ = remove_file("testdata/nature/flowerTHUMB.jpg");
+        let entry = PictureEntry::from_file(String::from("testdata/nature/flower.jpg")).unwrap();
+        let result = entry.check_or_create_thumbnail();
+        assert_eq!(true, result.is_ok());
+        let path = PathBuf::from("testdata/nature/flowerTHUMB.jpg");
+        assert_eq!(true, path.exists());
     }
 }
 

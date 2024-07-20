@@ -29,6 +29,9 @@ can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn
 cancel_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_input(&mut self) {$/;"	f
 cancel_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_set(&mut self) {$/;"	f
 cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
+check_or_create_thumbnail	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn check_or_create_thumbnail(&self) -> Result<()> {$/;"	f
+check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
+check_or_create_thumbnail_picture_if_it_does_not_exist	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn check_or_create_thumbnail_picture_if_it_does_not_exist() {$/;"	f
 check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
 cmp_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
 cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
@@ -120,3 +123,4 @@ unlabel	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn un
 unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_all(&mut self) -> Result<()> {$/;"	f
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
 write_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f
+write_thumbnail	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, extension: &str, mut output_file: File) -> ThumbResult<()> {$/;"	f
