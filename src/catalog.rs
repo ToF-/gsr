@@ -1,5 +1,6 @@
 use std::io::{Result, Error, ErrorKind};
 use crate::picture_entry::PictureEntry;
+use crate::path::get_picture_file_paths;
 use crate::order::Order;
 use crate::direction::Direction;
 
@@ -50,6 +51,21 @@ impl Catalog {
 
     pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {
         self.picture_entries.append(picture_entries)
+    }
+
+    pub fn add_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {
+        match get_picture_file_paths(directory) {
+            Ok(file_paths) => {
+                for file_path in file_paths {
+                    match PictureEntry::from_file(&file_path) {
+                        Ok(picture_entry) => self.picture_entries.push(picture_entry),
+                        Err(err) => return Err(err),
+                    }
+                }
+                Ok(())
+            },
+            Err(err) => Err(err),
+        }
     }
 
     pub fn set_page_size(&mut self, page_size: usize) {
@@ -701,6 +717,7 @@ mod tests {
         catalog.move_to_index(2);
         assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
         catalog.move_to_index(0);
+        catalog.cancel_set();
         catalog.start_set();
         catalog.move_to_index(2);
         assert_eq!(true, catalog.end_unlabel().is_ok());
@@ -777,5 +794,14 @@ mod tests {
         assert_eq!(false, catalog.current_entry().unwrap().deleted);
         let _ = catalog.select();
         assert_eq!(true, catalog.current_entry().unwrap().selected);
+    }
+
+    #[test] 
+    fn adding_entries_from_a_directory() {
+        let mut catalog = Catalog::new();
+        let result = catalog.add_picture_entries_from_dir("testdata");
+        assert_eq!(true, result.is_ok());
+        assert_eq!(10, catalog.length())
+
     }
 }

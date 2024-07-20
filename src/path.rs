@@ -5,7 +5,6 @@ use std::path::PathBuf;
 use std::io::{Result, Error, ErrorKind};
 
 const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];
-const SELECTION_FILE_NAME: &str = "selections";
 
 pub const THUMB_SUFFIX: &str = "THUMB";
 pub const IMAGE_DATA: &str = "IMAGE_DATA";

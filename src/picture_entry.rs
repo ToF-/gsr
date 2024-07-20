@@ -6,7 +6,7 @@ use std::time::SystemTime;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
 use crate::picture_io::{write_image_data, check_or_create_thumbnail_file, read_or_create_image_data, read_file_info};
-use crate::path::{THUMB_SUFFIX, IMAGE_DATA, image_data_file_path}; 
+use crate::path::{THUMB_SUFFIX, image_data_file_path}; 
 
 #[derive(Clone, Debug)]
 pub struct PictureEntry {
@@ -43,11 +43,11 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
 
 impl PictureEntry {
 
-    pub fn from_file(file_path: String) -> Result<Self> {
-        match read_file_info(&file_path) {
+    pub fn from_file(file_path: &str) -> Result<Self> {
+        match read_file_info(file_path) {
             Ok((file_size, modified_time)) => {
-                match read_or_create_image_data(&file_path) {
-                    Ok(image_data) => Ok(make_picture_entry(file_path,
+                match read_or_create_image_data(file_path) {
+                    Ok(image_data) => Ok(make_picture_entry(file_path.to_string(),
                             file_size,
                             image_data.colors,
                             modified_time,
@@ -205,7 +205,7 @@ mod tests {
 
     #[test]
     fn make_picture_entry_from_file_and_image_data_file() {
-        let result = PictureEntry::from_file(String::from("testdata/nature/flower.jpg"));
+        let result = PictureEntry::from_file("testdata/nature/flower.jpg");
         assert_eq!(true, result.is_ok());
         let entry = result.unwrap();
         assert_eq!(36287, entry.file_size);
@@ -216,7 +216,7 @@ mod tests {
     fn make_picture_entry_from_file_create_image_data_file_if_need_be() {
         let _ = copy("testdata/nature/flowerIMAGE_DATA.json", "testdata/temp");
         let _ = remove_file("testdata/nature/flowerIMAGE_DATA.json");
-        let result = PictureEntry::from_file(String::from("testdata/nature/flower.jpg"));
+        let result = PictureEntry::from_file("testdata/nature/flower.jpg");
         let _ = copy("testdata/temp", "testdata/nature/flowerIMAGE_DATA.json");
         assert_eq!(true, result.is_ok());
         let entry = result.unwrap();
@@ -229,7 +229,7 @@ mod tests {
     fn check_or_create_thumbnail_picture_if_it_does_not_exist() {
         let _ = copy("testdata/nature/flowerTHUMB.jpg", "testdata/temp");
         let _ = remove_file("testdata/nature/flowerTHUMB.jpg");
-        let entry = PictureEntry::from_file(String::from("testdata/nature/flower.jpg")).unwrap();
+        let entry = PictureEntry::from_file("testdata/nature/flower.jpg").unwrap();
         let result = entry.check_or_create_thumbnail();
         assert_eq!(true, result.is_ok());
         let path = PathBuf::from("testdata/nature/flowerTHUMB.jpg");
