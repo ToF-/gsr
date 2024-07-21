@@ -4,6 +4,7 @@ use std::fs::read_to_string;
 use crate::picture_entry::PictureEntry;
 use crate::path::{get_picture_file_paths, check_file, is_thumbnail};
 use std::path::PathBuf;
+use std::cmp::min;
 use crate::order::Order;
 use crate::direction::Direction;
 
@@ -151,6 +152,12 @@ impl Catalog {
 
     pub fn page_index(&self) -> usize {
         self.page_index_of(self.index)
+    }
+
+    pub fn current_page_length(&self) -> usize {
+        let start = self.page_index();
+        let end = min(start + self.page_length(), self.last()+1);
+        end - start
     }
 
     pub fn input_on(&self) -> bool {
@@ -651,11 +658,13 @@ mod tests {
         assert_eq!(true, catalog.can_move_towards(Direction::Down));
         catalog.move_towards(Direction::Down);
         assert_eq!(0, catalog.index().unwrap());
+        assert_eq!(4, catalog.current_page_length());
         catalog.move_towards(Direction::Right);
         assert_eq!(1, catalog.index().unwrap());
         assert_eq!(true, catalog.can_move_towards(Direction::Up));
         catalog.move_towards(Direction::Up);
         assert_eq!(6, catalog.index().unwrap()); // because there's no picture entry in pos 7
+        assert_eq!(3, catalog.current_page_length());
         catalog.move_to_index(5);
         assert_eq!(true, catalog.can_move_towards(Direction::Down));
         catalog.move_towards(Direction::Down);
