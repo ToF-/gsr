@@ -178,43 +178,6 @@ impl Catalog {
             }
     }
 
-    pub fn set_page_size(&mut self, page_size: usize) {
-        assert!(page_size > 0 && page_size <= 10);
-        self.page_size = page_size;
-    }
-
-    pub fn toggle_page_limit(&mut self) {
-        self.page_limit_on = !self.page_limit_on
-    }
-
-    pub fn cancel_input(&mut self) {
-        self.input = None
-    }
-
-    pub fn input(&self) -> String {
-        self.input.clone().unwrap()
-    }
-
-    pub fn begin_input(&mut self) {
-        self.input = Some(String::from(""))
-    }
-
-    pub fn add_input_char(&mut self, ch: char) {
-        self.input = self.input.clone().map( |s| {
-            let mut t = s.clone();
-            t.push(ch);
-            t
-        })
-    }
-
-    pub fn del_input_char(&mut self) {
-        self.input = self.input.clone().map( |s| {
-            let mut t = s.clone();
-            t.pop();
-            t
-        })
-    }
-
     pub fn index_input_pattern(&mut self) -> Option<usize> {
         if let Some(pattern) = &self.input {
             self.picture_entries.iter().position(|entry| entry.original_file_name().contains(&*pattern))
@@ -235,6 +198,56 @@ impl Catalog {
             None
         }
     }
+    // update
+
+    pub fn set_page_size(&mut self, page_size: usize) {
+        assert!(page_size > 0 && page_size <= 10);
+        self.page_size = page_size;
+    }
+
+    pub fn toggle_page_limit(&mut self) {
+        self.page_limit_on = !self.page_limit_on
+    }
+
+    pub fn begin_input(&mut self) {
+        self.input = Some(String::from(""))
+    }
+
+    pub fn cancel_input(&mut self) {
+        self.input = None
+    }
+
+    pub fn start_set(&mut self) {
+        if self.current_entry().is_some() {
+            self.start_index = Some(self.index)
+        }
+    }
+
+    pub fn cancel_set(&mut self) {
+        if self.current_entry().is_some() {
+            self.start_index = None
+        }
+    }
+
+    pub fn input(&self) -> String {
+        self.input.clone().unwrap()
+    }
+
+    pub fn add_input_char(&mut self, ch: char) {
+        self.input = self.input.clone().map( |s| {
+            let mut t = s.clone();
+            t.push(ch);
+            t
+        })
+    }
+
+    pub fn del_input_char(&mut self) {
+        self.input = self.input.clone().map( |s| {
+            let mut t = s.clone();
+            t.pop();
+            t
+        })
+    }
 
     fn apply_label(&mut self, label: String) -> Result<()> {
         match self.index() {
@@ -247,7 +260,6 @@ impl Catalog {
         }
     }
     
-
     pub fn set_label(&mut self) -> Result<()> {
         self.label = self.input.clone();
         self.input = None;
@@ -278,17 +290,6 @@ impl Catalog {
         self.full_size_on = !self.full_size_on
     }
 
-    pub fn start_set(&mut self) {
-        if self.current_entry().is_some() {
-            self.start_index = Some(self.index)
-        }
-    }
-
-    pub fn cancel_set(&mut self) {
-        if self.current_entry().is_some() {
-            self.start_index = None
-        }
-    }
     pub fn unlabel(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
