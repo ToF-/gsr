@@ -9,6 +9,9 @@ const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG"
 pub const THUMB_SUFFIX: &str = "THUMB";
 pub const IMAGE_DATA: &str = "IMAGE_DATA";
 
+pub fn is_thumbnail(file_name: &str) -> bool {
+   file_name.contains(&THUMB_SUFFIX)
+}
 
 pub fn check_path(source: &str) -> Result<PathBuf> {
     let path = PathBuf::from(source);

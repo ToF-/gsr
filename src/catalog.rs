@@ -1,7 +1,9 @@
 use regex::Regex;
 use std::io::{Result, Error, ErrorKind};
+use std::fs::read_to_string;
 use crate::picture_entry::PictureEntry;
-use crate::path::{get_picture_file_paths, check_file};
+use crate::path::{get_picture_file_paths, check_file, is_thumbnail};
+use std::path::PathBuf;
 use crate::order::Order;
 use crate::direction::Direction;
 
@@ -80,6 +82,27 @@ impl Catalog {
                 Ok(())
             },
             Err(err) => Err(err),
+        }
+    }
+
+    pub fn add_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {
+        match read_to_string(file_list) {
+            Err(err) => Err(err),
+            Ok(content) => {
+                for path in content.lines()
+                    .map(String::from)
+                        .filter(|p| !is_thumbnail(p))
+                        .collect::<Vec<_>>()
+                        .into_iter()
+                        .map(|l| PathBuf::from(l)) {
+                            let file_path = path.to_str().unwrap().to_string();
+                            match PictureEntry::from_file(&file_path) {
+                                Ok(picture_entry) => self.picture_entries.push(picture_entry),
+                                Err(err) => return Err(err),
+                            }
+                        };
+                Ok(())
+            },
         }
     }
 
@@ -843,9 +866,19 @@ mod tests {
     fn adding_entry_from_a_single_file() {
         let mut catalog = Catalog::new();
         let result = catalog.add_picture_entry_from_file("testdata/color-wheel.png");
-        println!("{:?}", result);
         assert_eq!(true, result.is_ok());
         assert_eq!(1, catalog.length());
         assert_eq!(String::from("color-wheel.png"), catalog.picture_entries[0].original_file_name());
+    }
+
+    #[test]
+    fn adding_entries_from_a_file_list() {
+        let mut catalog = Catalog::new();
+        let result = catalog.add_picture_entries_from_file_list("testdata/selection");
+        assert_eq!(true, result.is_ok());
+        assert_eq!(3, catalog.length());
+        assert_eq!(String::from("3-cubes.jpeg"), catalog.picture_entries[0].original_file_name());
+        assert_eq!(String::from("ChessSet.jpg"), catalog.picture_entries[1].original_file_name());
+        assert_eq!(String::from("cumulus.jpeg"), catalog.picture_entries[2].original_file_name());
     }
 }
