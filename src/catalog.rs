@@ -1,7 +1,7 @@
 use regex::Regex;
 use std::io::{Result, Error, ErrorKind};
 use crate::picture_entry::PictureEntry;
-use crate::path::get_picture_file_paths;
+use crate::path::{get_picture_file_paths, check_file};
 use crate::order::Order;
 use crate::direction::Direction;
 
@@ -78,6 +78,16 @@ impl Catalog {
                     }
                 }
                 Ok(())
+            },
+            Err(err) => Err(err),
+        }
+    }
+
+    pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
+        match check_file(file_path) {
+            Ok(path) => match PictureEntry::from_file(file_path) {
+                Ok(picture_entry) => Ok(self.picture_entries.push(picture_entry)),
+                Err(err) => Err(err),
             },
             Err(err) => Err(err),
         }
@@ -827,6 +837,15 @@ mod tests {
         assert_eq!(2, catalog.length());
         assert_eq!(String::from("labrador.jpg"), catalog.picture_entries[0].original_file_name());
         assert_eq!(String::from("color-wheel.png"), catalog.picture_entries[1].original_file_name());
+    }
 
+    #[test]
+    fn adding_entry_from_a_single_file() {
+        let mut catalog = Catalog::new();
+        let result = catalog.add_picture_entry_from_file("testdata/color-wheel.png");
+        println!("{:?}", result);
+        assert_eq!(true, result.is_ok());
+        assert_eq!(1, catalog.length());
+        assert_eq!(String::from("color-wheel.png"), catalog.picture_entries[0].original_file_name());
     }
 }

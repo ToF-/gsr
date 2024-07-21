@@ -13,13 +13,39 @@ pub const IMAGE_DATA: &str = "IMAGE_DATA";
 pub fn check_path(source: &str) -> Result<PathBuf> {
     let path = PathBuf::from(source);
     if !path.exists() {
-        Err(Error::new(ErrorKind::Other, format!("path {} doesn't exist", source)))
+        Err(Error::new(ErrorKind::Other, format!("directory {} doesn't exist", source)))
     } else {
         match fs::metadata(path.clone()) {
             Ok(metadata) => if metadata.is_dir() {
                 Ok(path)
             } else {
-                Err(Error::new(ErrorKind::Other, format!("path {} is not a directory", source)))
+                Err(Error::new(ErrorKind::Other, format!("{} is not a directory", source)))
+            },
+            Err(err) => Err(err),
+        }
+    }
+}
+
+pub fn check_file(source: &str) -> Result<PathBuf> {
+    let path = PathBuf::from(source);
+    if !path.exists() {
+        Err(Error::new(ErrorKind::Other, format!("file {} doesn't exist", source)))
+    } else {
+        match fs::metadata(path.clone()) {
+            Ok(metadata) => {
+                let valid_extension = match path.extension() {
+                    Some(extension) => VALID_EXTENSIONS.contains(&extension.to_str().unwrap()),
+                    None => false,
+                };
+                let not_a_thumbnail = match path.to_str().map(|f| f.contains(THUMB_SUFFIX)) {
+                    Some(false) => true,
+                    _ => false,
+                };
+                if path.is_file() && valid_extension && not_a_thumbnail {
+                    Ok(path)
+                } else {
+                    Err(Error::new(ErrorKind::Other, format!("{} is not a valid file", source)))
+                }
             },
             Err(err) => Err(err),
         }
@@ -76,14 +102,14 @@ mod tests {
     fn get_an_error_on_absent_directory() {
         let result = get_picture_file_paths("foo");
         assert_eq!(false, result.is_ok());
-        assert_eq!("path foo doesn't exist", result.unwrap_err().to_string());
+        assert_eq!("directory foo doesn't exist", result.unwrap_err().to_string());
     }
 
     #[test]
     fn get_an_error_on_not_a_directory() {
         let result = get_picture_file_paths("testdata/nature/flower.jpg");
         assert_eq!(false, result.is_ok());
-        assert_eq!("path testdata/nature/flower.jpg is not a directory", result.unwrap_err().to_string());
+        assert_eq!("testdata/nature/flower.jpg is not a directory", result.unwrap_err().to_string());
     }
 
 }
