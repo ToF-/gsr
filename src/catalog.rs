@@ -22,6 +22,8 @@ pub struct Catalog {
 
 impl Catalog {
 
+    // creation
+
     pub fn new() -> Self {
         Catalog {
             picture_entries : Vec::new(),
@@ -33,22 +35,6 @@ impl Catalog {
             palette_on: false,
             full_size_on: false,
             start_index: None,
-        }
-    }
-
-    pub fn length(&self) -> usize {
-        self.picture_entries.len()
-    }
-
-    pub fn last(&self) -> usize {
-        self.length()-1
-    }
-
-    pub fn index(&self) -> Option<usize> {
-        if self.length() > 0 {
-            Some(self.index)
-        } else {
-            None
         }
     }
 
@@ -116,9 +102,14 @@ impl Catalog {
         }
     }
 
-    pub fn set_page_size(&mut self, page_size: usize) {
-        assert!(page_size > 0 && page_size <= 10);
-        self.page_size = page_size;
+    // queries
+
+    pub fn length(&self) -> usize {
+        self.picture_entries.len()
+    }
+
+    pub fn last(&self) -> usize {
+        self.length()-1
     }
 
     pub fn page_size(&self) -> usize {
@@ -133,19 +124,60 @@ impl Catalog {
         self.page_limit_on
     }
 
-    pub fn toggle_page_limit(&mut self) {
-        self.page_limit_on = !self.page_limit_on
+    pub fn palette_on(&self) -> bool {
+        self.palette_on
+    }
+
+    pub fn full_size_on(&self) -> bool {
+        self.full_size_on
+    }
+
+
+    pub fn index(&self) -> Option<usize> {
+        if self.index < self.picture_entries.len() {
+            Some(self.index)
+        } else {
+            None
+        }
+    }
+
+    pub fn current_entry(&self) -> Option<&PictureEntry> {
+        self.index().and_then(|index| Some(&self.picture_entries[index]))
     }
 
     pub fn page_index_of(&self, index: usize) -> usize {
         index - (index % self.page_length())
     }
+
     pub fn page_index(&self) -> usize {
         self.page_index_of(self.index)
     }
 
     pub fn input_on(&self) -> bool {
         self.input.is_some()
+    }
+
+    pub fn can_move_to_index(&self, index: usize) -> bool {
+        index < self.picture_entries.len()
+    }
+
+    pub fn can_move_towards(&self, direction: Direction) -> bool {
+        ! self.page_limit_on ||
+            match direction {
+                Direction::Left => self.page_size > 1 && self.index % self.page_size > 0,
+                Direction::Right => self.page_size > 1 && (self.index+1) % self.page_size > 0,
+                Direction::Up => self.page_size > 1 && self.index >= self.page_size,
+                Direction::Down => self.page_size > 1 && (self.index + self.page_size) < self.page_length(),
+            }
+    }
+
+    pub fn set_page_size(&mut self, page_size: usize) {
+        assert!(page_size > 0 && page_size <= 10);
+        self.page_size = page_size;
+    }
+
+    pub fn toggle_page_limit(&mut self) {
+        self.page_limit_on = !self.page_limit_on
     }
 
     pub fn cancel_input(&mut self) {
@@ -231,20 +263,12 @@ impl Catalog {
         }
     }
 
-    pub fn palette_on(&self) -> bool {
-        self.palette_on
-    }
-
     pub fn toggle_palette(&mut self) {
         self.palette_on = !self.palette_on
     }
 
     pub fn toggle_full_size(&mut self) {
         self.full_size_on = !self.full_size_on
-    }
-
-    pub fn full_size_on(&self) -> bool {
-        self.full_size_on
     }
 
     pub fn start_set(&mut self) {
@@ -406,10 +430,6 @@ impl Catalog {
         }
     }
 
-    pub fn can_move_to_index(&self, index: usize) -> bool {
-        index < self.picture_entries.len()
-    }
-
     pub fn move_to_index(&mut self, index: usize) {
         self.index = index
     }
@@ -421,16 +441,6 @@ impl Catalog {
         } else {
             0
         };
-    }
-
-    pub fn can_move_towards(&self, direction: Direction) -> bool {
-        ! self.page_limit_on ||
-            match direction {
-                Direction::Left => self.page_size > 1 && self.index % self.page_size > 0,
-                Direction::Right => self.page_size > 1 && (self.index+1) % self.page_size > 0,
-                Direction::Up => self.page_size > 1 && self.index >= self.page_size,
-                Direction::Down => self.page_size > 1 && (self.index + self.page_size) < self.page_length(),
-            }
     }
 
     pub fn move_towards(&mut self, direction: Direction) {
@@ -476,14 +486,6 @@ impl Catalog {
             self.page_index() - self.page_length()
         } else {
             self.page_index_of(self.length()-1)
-        }
-    }
-
-    pub fn current_entry(&self) -> Option<&PictureEntry> {
-        if self.index < self.picture_entries.len() {
-            Some(&self.picture_entries[self.index])
-        } else {
-            None
         }
     }
 
