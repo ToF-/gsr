@@ -35,7 +35,7 @@ pub fn check_file(source: &str) -> Result<PathBuf> {
         Err(Error::new(ErrorKind::Other, format!("file {} doesn't exist", source)))
     } else {
         match fs::metadata(path.clone()) {
-            Ok(metadata) => {
+            Ok(_) => {
                 let valid_extension = match path.extension() {
                     Some(extension) => VALID_EXTENSIONS.contains(&extension.to_str().unwrap()),
                     None => false,

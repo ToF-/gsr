@@ -108,7 +108,7 @@ impl Catalog {
 
     pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
         match check_file(file_path) {
-            Ok(path) => match PictureEntry::from_file(file_path) {
+            Ok(_) => match PictureEntry::from_file(file_path) {
                 Ok(picture_entry) => Ok(self.picture_entries.push(picture_entry)),
                 Err(err) => Err(err),
             },
