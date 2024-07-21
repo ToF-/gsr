@@ -4,6 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+Args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub struct Args {$/;"	s
 Catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
 Colors	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Colors = usize;$/;"	T
 Direction	/Users/christophethibaut/Coding/gsr/src/direction.rs	/^pub enum Direction {$/;"	g
@@ -52,6 +53,7 @@ end_set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn en
 end_set_select	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_set_select(&mut self) -> Result<()> {$/;"	f
 end_unlabel	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_unlabel(&mut self) -> Result<()> {$/;"	f
 finding_a_picture_entry_by_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn finding_a_picture_entry_by_input_pattern() {$/;"	f
+fmt	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {$/;"	f
 from_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn from_file(file_path: &str) -> Result<Self> {$/;"	f
 full_size_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn full_size_on(&self) -> bool {$/;"	f
 get_all_pictures_including_sub_folders_except_thumbnails	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn get_all_pictures_including_sub_folders_except_thumbnails() {$/;"	f
@@ -123,6 +125,7 @@ start_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn start_
 state_indicators	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn state_indicators() {$/;"	f
 thumbnail_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn thumbnail_file_path(&self) -> String {$/;"	f
 thumbnail_path_is_the_file_path_with_thumbnail_suffix	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn thumbnail_path_is_the_file_path_with_thumbnail_suffix() {$/;"	f
+to_possible_value	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn to_possible_value(&self) -> Option<PossibleValue> {$/;"	f
 toggle_delete_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn toggle_delete_entry(&mut self) -> Result<()> {$/;"	f
 toggle_full_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn toggle_full_size(&mut self) {$/;"	f
 toggle_page_limit	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn toggle_page_limit(&mut self) {$/;"	f
@@ -131,5 +134,6 @@ unlabel	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unlabel(
 unlabel	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn unlabel(&mut self) {$/;"	f
 unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_all(&mut self) -> Result<()> {$/;"	f
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
+value_variants	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn value_variants<'a>() -> &'a [Self] {$/;"	f
 write_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f
 write_thumbnail	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, extension: &str, mut output_file: File) -> ThumbResult<()> {$/;"	f

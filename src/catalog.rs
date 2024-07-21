@@ -7,6 +7,8 @@ use std::path::PathBuf;
 use std::cmp::min;
 use crate::order::Order;
 use crate::direction::Direction;
+use rand::prelude::SliceRandom;
+use rand::thread_rng;
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -435,6 +437,7 @@ impl Catalog {
             Order::Value => self.picture_entries.sort_by(|a, b|  { a.cmp_rank(&b) }),
             Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(&b) }),
             Order::Palette => self.picture_entries.sort_by(|a, b| { a.palette.cmp(&b.palette) }),
+            Order::Random => self.picture_entries.shuffle(&mut thread_rng()),
         }
     }
 

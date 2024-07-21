@@ -1,5 +1,5 @@
 [package]
-name = "gsr"
+name = "gsr2"
 version = "0.1.0"
 edition = "2021"
 
@@ -13,3 +13,6 @@ serde_json = "1.0.117"
 thumbnailer = "0.5.1"
 walkdir = "2.5.0"
 regex = "1.10.5"
+clap = { version = "4.3.19", features = ["derive"] }
+shuffle = "0.1.7"
+rand = "0.8.5"

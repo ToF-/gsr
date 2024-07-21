@@ -1,3 +1,4 @@
+mod args;
 mod catalog;
 mod direction;
 mod image_data;
@@ -8,6 +9,10 @@ mod picture_io;
 mod rank;
 mod picture_entry;
 
+use clap::Parser;
+use crate::args::Args;
+
 fn main() {
-    println!("Hello, world!");
+    let args = Args::parse();
+    println!("{:?}", args);
 }
