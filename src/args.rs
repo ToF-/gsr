@@ -17,6 +17,10 @@ pub struct Args {
     #[arg(short, long, value_name="N")]
     pub grid: Option<usize>,
 
+    /// window height (default = GALLSHHEIGHT)
+    #[arg(long, value_name="N")]
+    pub height: Option<i32>,
+
     /// show the Nth picture first
     #[arg(short, long, value_name="N")]
     pub index: Option<usize>,
@@ -52,4 +56,8 @@ pub struct Args {
     /// order pictures by Value
     #[arg(short, long, default_value_t = false)]
     pub value: bool,
+
+    /// window width (defaults = GALLSHWIDTH)
+    #[arg(short, long, value_name="N")]
+    pub width: Option<i32>,
 }
