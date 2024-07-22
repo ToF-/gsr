@@ -1,6 +1,12 @@
 use clap::Parser;
+use std::env;
 use crate::order::Order;
 use crate::path::{directory};
+
+const DEFAULT_WIDTH: i32   = 1000;
+const DEFAULT_HEIGHT: i32  = 1000;
+const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";
+const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 
 #[derive(Parser, Clone, Debug)]
 #[command(infer_long_args = true, infer_subcommands = true)]
@@ -94,6 +100,56 @@ impl Args {
         if self.date {
             self.order = Order::Date;
         }
+        self.width = Some(width(self.width));
+        self.height = Some(height(self.height));
+    }
+}
+
+fn width(initial_width: Option<i32>) -> i32 {
+    let candidate_width = match initial_width {
+        Some(n) => n,
+        None => match env::var(WIDTH_ENV_VAR) {
+            Ok(s) => match s.parse::<i32>() {
+                Ok(n) => n,
+                _ => {
+                    println!("illegal width value, setting to default");
+                    DEFAULT_WIDTH
+                }
+            },
+            _ => {
+                DEFAULT_WIDTH
+            }
+        }
+    };
+    if candidate_width < 3000 && candidate_width > 100 {
+        candidate_width
+    } else {
+        println!("illegal width value, setting to default");
+        DEFAULT_WIDTH
+    }
+}
+
+pub fn height(initial_height: Option<i32>) -> i32 {
+    let candidate_height = match initial_height {
+        Some(n) => n,
+        None => match env::var(HEIGHT_ENV_VAR) {
+            Ok(s) => match s.parse::<i32>() {
+                Ok(n) => n,
+                _ => {
+                    println!("illegal height value, setting to default");
+                    DEFAULT_HEIGHT
+                }
+            },
+            _ => {
+                DEFAULT_HEIGHT
+            }
+        }
+    };
+    if candidate_height < 3000 && candidate_height > 100 {
+        candidate_height
+    } else {
+        println!("illegal height value, setting to default");
+        DEFAULT_HEIGHT
     }
 }
 
@@ -101,44 +157,42 @@ impl Args {
 mod tests {
     use super::*;
 
-    const pgm: &str = "gsr2";
+    const PGM: &str = "gsr2";
+
+    fn canonized_args(command_line: Vec<&str>) -> Args {
+        let result = Args::try_parse_from(command_line.iter());
+        let mut args = result.unwrap();
+        args.canonize();
+        args
+    }
 
     #[test]
     fn canonize_args_set_up_the_default_dir_if_none_given() {
-        let command_line: Vec<&str> = vec![pgm];
-        let result = Args::try_parse_from(command_line.iter());
-        assert_eq!(true, result.is_ok());
-        let mut args = result.unwrap();
-        args.canonize();
+        let args = canonized_args(vec![PGM]);
         let default = directory(None);
         assert_eq!(default, args.directory.unwrap());
     }
 
     #[test]
+    fn canonize_args_set_up_the_default_width_and_heigth_if_none_given() {
+        let args = canonized_args(vec![PGM]);
+        assert_eq!(Some(2000), args.width);
+        assert_eq!(Some(2000), args.height);
+    }
+
+    #[test]
     fn canonize_args_fix_order_to_name_if_option_name_picked() {
-        let command_line: Vec<&str> = vec![pgm, "--order", "value","--name"];
-        let result = Args::try_parse_from(command_line.iter());
-        assert_eq!(true, result.is_ok());
-        let mut args = result.unwrap();
-        args.canonize();
+        let args = canonized_args(vec![PGM, "--order", "value","--name"]);
         assert_eq!(Order::Name, args.order);
     }
     #[test]
     fn canonize_args_fix_order_to_value_if_option_value_picked() {
-        let command_line: Vec<&str> = vec![pgm, "--order", "name","--value"];
-        let result = Args::try_parse_from(command_line.iter());
-        assert_eq!(true, result.is_ok());
-        let mut args = result.unwrap();
-        args.canonize();
+        let args = canonized_args(vec![PGM, "--order", "name","--value"]);
         assert_eq!(Order::Value, args.order);
     }
     #[test]
     fn canonize_args_fix_order_to_date_if_option_date_picked() {
-        let command_line: Vec<&str> = vec![pgm, "--order","Name","-d"];
-        let result = Args::try_parse_from(command_line.iter());
-        assert_eq!(true, result.is_ok());
-        let mut args = result.unwrap();
-        args.canonize();
+        let args = canonized_args(vec![PGM, "--order","Name","-d"]);
         assert_eq!(Order::Date, args.order);
     }
 }
