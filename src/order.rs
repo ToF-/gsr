@@ -1,6 +1,6 @@
 use clap::builder::PossibleValue;
 
-#[derive(Clone, Debug)]
+#[derive(PartialEq, Clone, Debug)]
 pub enum Order {
     Colors, Date, Label, Name, Palette, Size, Value, Random,
 }

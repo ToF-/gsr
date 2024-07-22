@@ -7,6 +7,8 @@
 Args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub struct Args {$/;"	s
 Catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
 Colors	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Colors = usize;$/;"	T
+DEFAULT_DIR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const DEFAULT_DIR :&str    = "images\/";$/;"	c
+DIR_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const DIR_ENV_VAR: &str = "GALLSHDIR";$/;"	c
 Direction	/Users/christophethibaut/Coding/gsr/src/direction.rs	/^pub enum Direction {$/;"	g
 FileSize	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub type FileSize = u64;$/;"	T
 IMAGE_DATA	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const IMAGE_DATA: &str = "IMAGE_DATA";$/;"	c
@@ -36,6 +38,11 @@ can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn
 cancel_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_input(&mut self) {$/;"	f
 cancel_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_set(&mut self) {$/;"	f
 cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
+canonize	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    pub fn canonize(&mut self) {$/;"	f
+canonize_args_fix_order_to_date_if_option_date_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn canonize_args_fix_order_to_date_if_option_date_picked() {$/;"	f
+canonize_args_fix_order_to_name_if_option_name_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn canonize_args_fix_order_to_name_if_option_name_picked() {$/;"	f
+canonize_args_fix_order_to_value_if_option_value_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn canonize_args_fix_order_to_value_if_option_value_picked() {$/;"	f
+canonize_args_set_up_the_default_dir_if_none_given	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn canonize_args_set_up_the_default_dir_if_none_given() {$/;"	f
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
 check_or_create_thumbnail	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn check_or_create_thumbnail(&self) -> Result<()> {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
@@ -48,6 +55,7 @@ current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cu
 current_page_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_page_length(&self) -> usize {$/;"	f
 del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 deleting_en_entry_makes_it_non_selectable	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
+directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn directory(directory: Option<String>) -> String {$/;"	f
 editing_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
 end_set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_set_label(&mut self) -> Result<()> {$/;"	f
 end_set_select	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_set_select(&mut self) -> Result<()> {$/;"	f
@@ -105,6 +113,7 @@ page_limit_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn pa
 page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 palette_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 paste_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn paste_label(&mut self) -> Result<()> {$/;"	f
+pgm	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    const pgm: &str = "gsr2";$/;"	c
 read_file_info	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_file_info(file_path: &str) -> Result<(FileSize, SystemTime)> {$/;"	f
 read_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_image_data(file_path: &str) -> Result<ImageData> {$/;"	f
 read_image_data_deserializes_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn read_image_data_deserializes_image_data() {$/;"	f

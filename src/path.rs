@@ -1,5 +1,6 @@
 use walkdir::WalkDir;
 use std::fs;
+use std::env;
 use std::path::PathBuf;
 
 use std::io::{Result, Error, ErrorKind};
@@ -8,6 +9,8 @@ const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG"
 
 pub const THUMB_SUFFIX: &str = "THUMB";
 pub const IMAGE_DATA: &str = "IMAGE_DATA";
+const DEFAULT_DIR :&str    = "images/";
+pub const DIR_ENV_VAR: &str = "GALLSHDIR";
 
 pub fn is_thumbnail(file_name: &str) -> bool {
    file_name.contains(&THUMB_SUFFIX)
@@ -86,6 +89,18 @@ pub fn image_data_file_path(original_file_path: &str) -> String {
     let new_file_name = format!("{}{}.json", file_stem, IMAGE_DATA);
     let new_path = parent.join(new_file_name);
     new_path.to_str().unwrap().to_string()
+}
+
+pub fn directory(directory: Option<String>) -> String {
+    let gallshdir = env::var(DIR_ENV_VAR);
+    if let Some(directory_arg) = directory {
+        String::from(directory_arg)
+    } else if let Ok(standard_dir) = &gallshdir {
+        String::from(standard_dir)
+    } else {
+        println!("GALLSHDIR variable not set. Using {} as default.", DEFAULT_DIR);
+        String::from(DEFAULT_DIR)
+    }
 }
 
 #[cfg(test)]

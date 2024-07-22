@@ -13,6 +13,7 @@ use clap::Parser;
 use crate::args::Args;
 
 fn main() {
-    let args = Args::parse();
+    let mut args = Args::parse();
+    args.canonize();
     println!("{:?}", args);
 }
