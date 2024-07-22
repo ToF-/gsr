@@ -5,6 +5,14 @@ use crate::order::Order;
 #[command(infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
 pub struct Args {
+    /// move all labelled pictures to their matching folder on TARGET_DIR
+    #[arg(short, long, value_name = "TARGET_DIR")]
+    pub all_move: Option<String>,
+
+    /// copy selected files to TARGET_DIR
+    #[arg(short, long, value_name = "TARGET_DIR")]
+    pub copy_selection: Option<String>,
+
     /// order pictures by Date
     #[arg(short, long, default_value_t = false)]
     pub date: bool,
@@ -29,6 +37,10 @@ pub struct Args {
     #[arg(short, long, default_value_t = false)]
     pub label: bool,
 
+    /// move selected files to TARGET_DIR
+    #[arg(short, long, value_name = "TARGET_DIR")]
+    pub move_selection: Option<String>,
+
     /// order pictures by Name
     #[arg(short, long, default_value_t = false)]
     pub name: bool,
@@ -52,6 +64,10 @@ pub struct Args {
     /// show thumbnails only
     #[arg(short, long, default_value_t = false)]
     pub thumbnails: bool,
+
+    /// update picture data and thumbnails files
+    #[arg(short, long, default_value_t = false)]
+    pub update: bool,
 
     /// order pictures by Value
     #[arg(short, long, default_value_t = false)]
