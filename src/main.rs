@@ -14,6 +14,5 @@ use crate::args::Args;
 
 fn main() {
     let mut args = Args::parse();
-    args.canonize();
-    println!("{:?}", args);
+    println!("{:?}", args.checked_args());
 }

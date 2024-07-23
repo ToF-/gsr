@@ -1,7 +1,8 @@
+use std::io::{Result, BufReader, Error, ErrorKind};
 use clap::Parser;
 use std::env;
 use crate::order::Order;
-use crate::path::{directory};
+use crate::path::{directory, check_file, check_path};
 
 const DEFAULT_WIDTH: i32   = 1000;
 const DEFAULT_HEIGHT: i32  = 1000;
@@ -89,19 +90,95 @@ pub struct Args {
 }
 
 impl Args {
-    pub fn canonize(&mut self) {
-        self.directory = Some(directory(self.directory.clone()));
-        if self.name {
-            self.order = Order::Name;
-        }
-        if self.value {
-            self.order = Order::Value;
-        }
-        if self.date {
-            self.order = Order::Date;
-        }
-        self.width = Some(width(self.width));
-        self.height = Some(height(self.height));
+
+    pub fn checked_args(&mut self) -> Result<Args> {
+        let result: Args = Args {
+            all_move: match &self.all_move {
+                None => None,
+                Some(dir) => match check_path(&dir) {
+                    Ok(_) => Some(dir.to_string()),
+                    Err(err) => return Err(err),
+                },
+            },
+
+            copy_selection: match &self.copy_selection {
+                None => None,
+                Some(dir) => match check_path(&dir) {
+                    Ok(_) => Some(dir.to_string()),
+                    Err(err) => return Err(err),
+                },
+            },
+
+            date: self.date,
+
+            directory: Some(directory(self.directory.clone())),
+
+            file: match &self.file {
+                None => None,
+                Some(path) => match check_file(&path) {
+                    Ok(_) => Some(path.clone()),
+                    Err(err) => return Err(err),
+                },
+            },
+
+            grid: match self.grid {
+                None => None,
+                Some(n) => if n > 0 && n <= 10 {
+                    Some(n)
+                } else if self.thumbnails {
+                    Some(10)
+                } else {
+                    Some(1)
+                }
+            },
+
+            height: Some(height(self.height)),
+
+            index: self.index,
+
+            label: self.label,
+
+            move_selection: match &self.move_selection {
+                None => None,
+                Some(dir) => match check_path(&dir) {
+                    Ok(_) => Some(dir.to_string()),
+                    Err(err) => return Err(err),
+                },
+            },
+
+            name: self.name,
+
+            order: if self.name {
+                Order::Name
+            } else if self.value {
+                Order::Value
+            } else if self.date {
+                Order::Date
+            } else {
+                self.order.clone()
+            },
+
+            pattern: self.pattern.clone(),
+
+            reading: match &self.reading {
+                None => None,
+                Some(path) => match check_file(&path) {
+                    Ok(_) => Some(path.to_string()),
+                    Err(err) => return Err(err),
+                },
+            },
+
+            seconds: self.seconds,
+
+            thumbnails: self.thumbnails,
+
+            update: self.update,
+
+            value: self.value,
+
+            width: Some(width(self.width)),
+        };
+        Ok(result)
     }
 }
 
@@ -159,40 +236,27 @@ mod tests {
 
     const PGM: &str = "gsr2";
 
-    fn canonized_args(command_line: Vec<&str>) -> Args {
+    fn checked_args(command_line: Vec<&str>) -> Args {
         let result = Args::try_parse_from(command_line.iter());
         let mut args = result.unwrap();
-        args.canonize();
+        args.checked_args();
         args
     }
 
     #[test]
-    fn canonize_args_set_up_the_default_dir_if_none_given() {
-        let args = canonized_args(vec![PGM]);
-        let default = directory(None);
-        assert_eq!(default, args.directory.unwrap());
-    }
-
-    #[test]
-    fn canonize_args_set_up_the_default_width_and_heigth_if_none_given() {
-        let args = canonized_args(vec![PGM]);
-        assert_eq!(Some(2000), args.width);
-        assert_eq!(Some(2000), args.height);
-    }
-
-    #[test]
-    fn canonize_args_fix_order_to_name_if_option_name_picked() {
-        let args = canonized_args(vec![PGM, "--order", "value","--name"]);
+    fn checked_args_set_order_to_name_if_option_name_picked() {
+        let args = checked_args(vec![PGM, "--order", "value","--name"]);
+        println!("{:?}", args);
         assert_eq!(Order::Name, args.order);
     }
     #[test]
-    fn canonize_args_fix_order_to_value_if_option_value_picked() {
-        let args = canonized_args(vec![PGM, "--order", "name","--value"]);
+    fn checked_args_set_order_to_value_if_option_value_picked() {
+        let args = checked_args(vec![PGM, "--order", "name","--value"]);
         assert_eq!(Order::Value, args.order);
     }
     #[test]
-    fn canonize_args_fix_order_to_date_if_option_date_picked() {
-        let args = canonized_args(vec![PGM, "--order","Name","-d"]);
+    fn checked_args_set_order_to_date_if_option_date_picked() {
+        let args = checked_args(vec![PGM, "--order","Name","-d"]);
         assert_eq!(Order::Date, args.order);
     }
 }

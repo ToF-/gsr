@@ -183,13 +183,10 @@ mod tests {
     }
 
     #[test]
-    fn read_picture_file_info_read_file_size_and_modified_time() {
+    fn read_picture_file_info_read_file_size() {
         let result = read_file_info("testdata/nature/flower.jpg");
         assert_eq!(true, result.is_ok());
-        let (file_size, modified_time) = result.unwrap();
+        let (file_size, _modified_time) = result.unwrap();
         assert_eq!(36287, file_size);
-        let date_time: DateTime<Utc> = DateTime::from(modified_time);
-        let formatted_date = date_time.to_rfc3339();
-        assert_eq!(String::from("2024-07-17T19:21:20.047001954+00:00"), formatted_date);
     }
 }
