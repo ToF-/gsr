@@ -111,12 +111,18 @@ impl Args {
 
             date: self.date,
 
-            directory: Some(directory(self.directory.clone())),
+            directory: {
+                let dir = directory(self.directory.clone());
+                match check_path(&dir) {
+                    Ok(_) => Some(dir),
+                    Err(err) => return Err(err),
+                }
+            },
 
             file: match &self.file {
                 None => None,
                 Some(path) => match check_file(&path) {
-                    Ok(_) => Some(path.clone()),
+                    Ok(_) => Some(path.to_string()),
                     Err(err) => return Err(err),
                 },
             },
@@ -236,28 +242,51 @@ mod tests {
 
     const PGM: &str = "gsr2";
 
-    fn checked_args(command_line: Vec<&str>) -> Args {
+    fn my_checked_args(command_line: Vec<&str>) -> Result<Args> {
         let result = Args::try_parse_from(command_line.iter());
         let mut args = result.unwrap();
-        args.checked_args();
-        args
+        args.checked_args()
     }
 
     #[test]
     fn checked_args_set_order_to_name_if_option_name_picked() {
-        let args = checked_args(vec![PGM, "--order", "value","--name"]);
+        let args = my_checked_args(vec![PGM, "--order", "value","--name"]);
         println!("{:?}", args);
-        assert_eq!(Order::Name, args.order);
+        assert_eq!(Order::Name, args.unwrap().order);
     }
     #[test]
     fn checked_args_set_order_to_value_if_option_value_picked() {
-        let args = checked_args(vec![PGM, "--order", "name","--value"]);
-        assert_eq!(Order::Value, args.order);
+        let args = my_checked_args(vec![PGM, "--order", "name","--value"]);
+        assert_eq!(Order::Value, args.unwrap().order);
     }
     #[test]
     fn checked_args_set_order_to_date_if_option_date_picked() {
-        let args = checked_args(vec![PGM, "--order","Name","-d"]);
-        assert_eq!(Order::Date, args.order);
+        let args = my_checked_args(vec![PGM, "--order","Name","-d"]);
+        assert_eq!(Order::Date, args.unwrap().order);
+    }
+    #[test]
+    fn checked_args_wont_accept_a_wrong_directory() {
+        let args = my_checked_args(vec![PGM,"/foo"]);
+        println!("{:?}", args);
+        assert_eq!(false, args.is_ok());
+    }
+    #[test]
+    fn checked_args_wont_accept_a_wrong_all_move_target() {
+        let args = my_checked_args(vec![PGM,"-a","/foo"]);
+        println!("{:?}", args);
+        assert_eq!(false, args.is_ok());
+    }
+    #[test]
+    fn checked_args_wont_accept_a_wrong_copy_selection_target() {
+        let args = my_checked_args(vec![PGM,"-c","/foo"]);
+        println!("{:?}", args);
+        assert_eq!(false, args.is_ok());
+    }
+    #[test]
+    fn checked_args_wont_accept_a_wrong_move_selection_target() {
+        let args = my_checked_args(vec![PGM,"-m","/foo"]);
+        println!("{:?}", args);
+        assert_eq!(false, args.is_ok());
     }
 }
 
