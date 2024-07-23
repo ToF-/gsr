@@ -63,6 +63,7 @@ current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cu
 current_page_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_page_length(&self) -> usize {$/;"	f
 del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 deleting_en_entry_makes_it_non_selectable	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
+dimension	/Users/christophethibaut/Coding/gsr/src/args.rs	/^fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {$/;"	f
 directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn directory(directory: Option<String>) -> String {$/;"	f
 editing_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
 end_set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_set_label(&mut self) -> Result<()> {$/;"	f
@@ -80,7 +81,6 @@ get_palette	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn get_pale
 get_palette_from_a_picture_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn get_palette_from_a_picture_file() {$/;"	f
 get_palette_from_picture	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {$/;"	f
 get_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {$/;"	f
-height	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub fn height(initial_height: Option<i32>) -> i32 {$/;"	f
 image_data_file_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn image_data_file_path(original_file_path: &str) -> String {$/;"	f
 image_data_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn image_data_file_path(&self) -> String {$/;"	f
 image_data_file_path_is_the_file_path_with_json_extension	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn image_data_file_path_is_the_file_path_with_json_extension() {$/;"	f
@@ -153,6 +153,5 @@ unlabel	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn un
 unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_all(&mut self) -> Result<()> {$/;"	f
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
 value_variants	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn value_variants<'a>() -> &'a [Self] {$/;"	f
-width	/Users/christophethibaut/Coding/gsr/src/args.rs	/^fn width(initial_width: Option<i32>) -> i32 {$/;"	f
 write_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f
 write_thumbnail	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, extension: &str, mut output_file: File) -> ThumbResult<()> {$/;"	f

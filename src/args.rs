@@ -138,7 +138,7 @@ impl Args {
                 }
             },
 
-            height: Some(height(self.height)),
+            height: Some(dimension(self.height, HEIGHT_ENV_VAR, "height", DEFAULT_HEIGHT)),
 
             index: self.index,
 
@@ -182,59 +182,36 @@ impl Args {
 
             value: self.value,
 
-            width: Some(width(self.width)),
+            width: Some(dimension(self.width, WIDTH_ENV_VAR, "width", DEFAULT_WIDTH)),
         };
         Ok(result)
     }
 }
 
-fn width(initial_width: Option<i32>) -> i32 {
-    let candidate_width = match initial_width {
+fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {
+    let candidate = match source {
         Some(n) => n,
-        None => match env::var(WIDTH_ENV_VAR) {
+        None => match env::var(var_name) {
             Ok(s) => match s.parse::<i32>() {
                 Ok(n) => n,
                 _ => {
-                    println!("illegal width value, setting to default");
-                    DEFAULT_WIDTH
+                    println!("illegal {} value: {}, setting to default", dimension_name, s);
+                    default
                 }
             },
             _ => {
-                DEFAULT_WIDTH
+                default
             }
         }
     };
-    if candidate_width < 3000 && candidate_width > 100 {
-        candidate_width
+    if candidate < 3000 && candidate > 100 {
+        candidate
     } else {
-        println!("illegal width value, setting to default");
-        DEFAULT_WIDTH
+        println!("illegal {} value: {}, setting to default", dimension_name, candidate);
+        default
     }
 }
 
-pub fn height(initial_height: Option<i32>) -> i32 {
-    let candidate_height = match initial_height {
-        Some(n) => n,
-        None => match env::var(HEIGHT_ENV_VAR) {
-            Ok(s) => match s.parse::<i32>() {
-                Ok(n) => n,
-                _ => {
-                    println!("illegal height value, setting to default");
-                    DEFAULT_HEIGHT
-                }
-            },
-            _ => {
-                DEFAULT_HEIGHT
-            }
-        }
-    };
-    if candidate_height < 3000 && candidate_height > 100 {
-        candidate_height
-    } else {
-        println!("illegal height value, setting to default");
-        DEFAULT_HEIGHT
-    }
-}
 
 #[cfg(test)]
 mod tests {
