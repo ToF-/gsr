@@ -38,6 +38,7 @@ after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Codin
 apply_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn apply_label(&mut self, label: String) -> Result<()> {$/;"	f
 at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
 begin_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self) {$/;"	f
+build_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn build_gui(args: &Args, application: &gtk::Application) {$/;"	f
 can_move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
 can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_towards(&self, direction: Direction) -> bool {$/;"	f
 cancel_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_input(&mut self) {$/;"	f
@@ -49,6 +50,7 @@ check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_i
 check_or_create_thumbnail_picture_if_it_does_not_exist	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn check_or_create_thumbnail_picture_if_it_does_not_exist() {$/;"	f
 check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
 checked_args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    pub fn checked_args(&mut self) -> Result<Args> {$/;"	f
+checked_args_default_grid_size_is_one	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_default_grid_size_is_one() {$/;"	f
 checked_args_set_order_to_date_if_option_date_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_set_order_to_date_if_option_date_picked() {$/;"	f
 checked_args_set_order_to_name_if_option_name_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_set_order_to_name_if_option_name_picked() {$/;"	f
 checked_args_set_order_to_value_if_option_value_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_set_order_to_value_if_option_value_picked() {$/;"	f

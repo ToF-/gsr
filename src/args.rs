@@ -128,7 +128,7 @@ impl Args {
             },
 
             grid: match self.grid {
-                None => None,
+                None => Some(1),
                 Some(n) => if n > 0 && n <= 10 {
                     Some(n)
                 } else if self.thumbnails {
@@ -264,6 +264,11 @@ mod tests {
         let args = my_checked_args(vec![PGM,"-m","/foo"]);
         println!("{:?}", args);
         assert_eq!(false, args.is_ok());
+    }
+    #[test]
+    fn checked_args_default_grid_size_is_one() {
+        let args = my_checked_args(vec![PGM]).unwrap();
+        assert_eq!(1, args.grid.unwrap());
     }
 }
 
