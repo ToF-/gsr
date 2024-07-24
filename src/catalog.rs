@@ -50,14 +50,23 @@ impl Catalog {
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
-        if let Some(file) = &args.file {
-            catalog.add_picture_entry_from_file(&file);
-        } else if let Some(list) = &args.reading {
-            catalog.add_picture_entries_from_file_list(&list);
-        } else if let Some(dir) = &args.directory {
-            catalog.add_picture_entries_from_dir(&dir, args.pattern.clone());
+        let add_result:Result<()> = catalog.add_picture_entries_from_source(args);
+        if let Err(err) = add_result {
+            return Err(err);
         }
         Ok(catalog)
+    }
+
+    fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {
+        if let Some(file) = &args.file {
+            self.add_picture_entry_from_file(&file)
+        } else if let Some(list) = &args.reading {
+            self.add_picture_entries_from_file_list(&list)
+        } else if let Some(dir) = &args.directory {
+            self.add_picture_entries_from_dir(&dir, args.pattern.clone())
+        } else {
+            Ok(())
+        }
     }
     pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {
         self.picture_entries.append(picture_entries)
@@ -244,29 +253,6 @@ impl Catalog {
         self.page_changed
     }
 
-    pub fn title_display(&self) -> String {
-        if self.length() == 0 {
-            return "".to_string()
-        };
-        let entry_title_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
-        let result = format!("S:[{}] {} ordered by {} {}/{}  {} {} {} {} {}",
-            self.max_selected,
-            if self.select_start.is_some() { "…" } else { "" },
-            if let Some(o) = self.order {
-                o.to_string()
-            } else {
-                "??".to_string()
-            },
-            self.index(),
-            self.last(),
-            entry_title_display,
-            if self.register.is_none() { String::from("") } else { format!("{}", self.register.unwrap()) },
-            if self.real_size_on { "*" } else { "" },
-            if self.label_edit_mode_on { format!("Label:{}", self.field) } else { String::from("") },
-            if self.search_edit_mode_on { format!("Search:{}", self.field) } else { String::from("") }
-            );
-        result
-    }
     // update
 
     pub fn set_page_size(&mut self, page_size: usize) {

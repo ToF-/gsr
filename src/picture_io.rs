@@ -192,28 +192,3 @@ mod tests {
     }
 }
 
-pub fn create_thumbnail(entry: &PictureEntry) -> Result<()> {
-    let original = entry.original_file_path();
-    let thumbnail = entry.thumbnail_file_path();
-    println!("creating thumbnail {}", thumbnail);
-    match File::open(original.clone()) {
-        Err(err) => Err(err),
-        Ok(input_file) => {
-            let source_path = Path::new(&original);
-            let extension = match source_path.extension()
-                .and_then(OsStr::to_str) { 
-                    None => return Err(Error::new(ErrorKind::Other, format!("source file has no extension"))),
-                    Some(ext) => ext,
-                };
-            let reader = BufReader::new(input_file);
-            let output_file = match File::create(thumbnail) {
-                Err(err) => return Err(err),
-                Ok(file) => file,
-            };
-            match write_thumbnail(reader, extension, output_file) {
-                Err(err) => Err(Error::new(ErrorKind::Other, err)),
-                Ok(_) => Ok (()),
-            }
-        },
-    }
-}

@@ -12,8 +12,8 @@ mod rank;
 
 use clap::Parser;
 use crate::args::Args;
+use glib::{clone};
 use crate::gui::build_gui;
-use glib::{clone, timeout_add_local};
 use gtk::prelude::*;
 use gtk::{self, Application, gdk, glib};
 use std::process::exit;
@@ -43,7 +43,7 @@ fn main() {
             // clone! passes a strong reference to a variable in the closure that activates the application
             // move converts any variables captured by reference or mutable reference to variables captured by value.
             application.connect_activate(clone!(@strong args => move |application: &gtk::Application| {
-                build_gui(&args, application);
+                build_gui(application)
             }));
 
             let empty: Vec<String> = vec![];

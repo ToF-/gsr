@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize};
 use std::fmt;
 
-#[derive(PartialEq, Clone, Debug, Deserialize, Serialize)]
+#[derive(PartialEq, Copy, Clone, Debug, Deserialize, Serialize)]
 pub enum Rank {
    ThreeStars, TwoStars, OneStar, NoStar,
 }
 
-iml Rank {
+impl Rank {
     pub fn show(&self) -> String {
         let limit = 3 - *self as usize;
         if limit > 0 {
