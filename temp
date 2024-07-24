@@ -1,0 +1,945 @@
+
+Fetching source and metadata ...
+Creating tags for: gsr2 ...
+[H[2J[3J   Compiling gsr2 v0.1.0 (/home/tof/Coding/gsr)
+error[E0433]: failed to resolve: use of undeclared crate or module `gtk4`
+ --> src/gui.rs:9:5
+  |
+9 | use gtk4::prelude::GridExt;
+  |     ^^^^ use of undeclared crate or module `gtk4`
+  |
+help: there is a crate or module with a similar name
+  |
+9 | use gtk::prelude::GridExt;
+  |     ~~~
+
+warning: unused imports: `BufReader`, `ErrorKind`, `Error`
+ --> src/args.rs:1:23
+  |
+1 | use std::io::{Result, BufReader, Error, ErrorKind};
+  |                       ^^^^^^^^^  ^^^^^  ^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
+
+warning: unused import: `timeout_add_local`
+  --> src/main.rs:16:19
+   |
+16 | use glib::{clone, timeout_add_local};
+   |                   ^^^^^^^^^^^^^^^^^
+
+error[E0599]: no method named `set_row_homogeneous` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:77:14
+    |
+77  |         view.set_row_homogeneous(true);
+    |              ^^^^^^^^^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:371:8
+    |
+371 |     fn set_row_homogeneous(&self, homogeneous: bool);
+    |        ------------------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `is_row_homogeneous` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:331:5
+    |
+331 |     fn is_row_homogeneous(&self) -> bool;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GridExt` which provides `set_row_homogeneous` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `set_column_homogeneous` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:78:14
+    |
+78  |         view.set_column_homogeneous(true);
+    |              ^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:362:8
+    |
+362 |     fn set_column_homogeneous(&self, homogeneous: bool);
+    |        ---------------------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `is_column_homogeneous` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:319:5
+    |
+319 |     fn is_column_homogeneous(&self) -> bool;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GridExt` which provides `set_column_homogeneous` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `set_hexpand` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:79:14
+    |
+79  |         view.set_hexpand(true);
+    |              ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:516:8
+    |
+516 |     fn set_hexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_hexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_vexpand` with a similar name
+    |
+79  |         view.set_vexpand(true);
+    |              ~~~~~~~~~~~
+
+error[E0599]: no method named `set_vexpand` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:80:14
+    |
+80  |         view.set_vexpand(true);
+    |              ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:571:8
+    |
+571 |     fn set_vexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_vexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_hexpand` with a similar name
+    |
+80  |         view.set_hexpand(true);
+    |              ~~~~~~~~~~~
+
+error[E0599]: no method named `set_hexpand` found for struct `Stack` in the current scope
+   --> src/gui.rs:84:15
+    |
+84  |         stack.set_hexpand(true);
+    |               ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:516:8
+    |
+516 |     fn set_hexpand(&self, expand: bool);
+    |        ----------- the method is available for `Stack` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_hexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_vexpand` with a similar name
+    |
+84  |         stack.set_vexpand(true);
+    |               ~~~~~~~~~~~
+
+error[E0599]: no method named `set_vexpand` found for struct `Stack` in the current scope
+   --> src/gui.rs:85:15
+    |
+85  |         stack.set_vexpand(true);
+    |               ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:571:8
+    |
+571 |     fn set_vexpand(&self, expand: bool);
+    |        ----------- the method is available for `Stack` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_vexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_hexpand` with a similar name
+    |
+85  |         stack.set_hexpand(true);
+    |               ~~~~~~~~~~~
+
+error[E0599]: no method named `set_child` found for struct `ApplicationWindow` in the current scope
+   --> src/gui.rs:91:28
+    |
+91  |         application_window.set_child(Some(&stack));
+    |                            ^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/window.rs:577:8
+    |
+577 |     fn set_child(&self, child: Option<&impl IsA<Widget>>);
+    |        --------- the method is available for `ApplicationWindow` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `child` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/window.rs:476:5
+    |
+476 |     fn child(&self) -> Option<Widget>;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GtkWindowExt` which provides `set_child` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GtkWindowExt;
+    |
+
+error[E0599]: no method named `set_button` found for struct `GestureClick` in the current scope
+  --> src/gui.rs:95:22
+   |
+95 |         view_gesture.set_button(0);
+   |                      ^^^^^^^^^^
+   |
+  ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:48:8
+   |
+48 |     fn set_button(&self, button: u32);
+   |        ---------- the method is available for `GestureClick` here
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: there is a method `button` with a similar name, but with different arguments
+  --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:29:5
+   |
+29 |     fn button(&self) -> u32;
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GestureSingleExt` which provides `set_button` is implemented but not in scope; perhaps you want to import it
+   |
+1  + use gtk4::prelude::GestureSingleExt;
+   |
+
+error[E0599]: no method named `add_controller` found for struct `Picture` in the current scope
+   --> src/gui.rs:100:20
+    |
+100 |         image_view.add_controller(view_gesture);
+    |                    ^^^^^^^^^^^^^^ method not found in `Picture`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:72:8
+    |
+72  |     fn add_controller(&self, controller: impl IsA<EventController>);
+    |        -------------- the method is available for `Picture` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `add_controller` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+
+error[E0599]: no method named `attach` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:102:14
+    |
+102 |         view.attach(&image_view, 0, 0, 1, 1);
+    |              ^^^^^^ method not found in `gtk4::Grid`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:297:8
+    |
+297 |     fn attach(&self, child: &impl IsA<Widget>, column: i32, row: i32, width: i32, height: i32);
+    |        ------ the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `GridExt` which provides `attach` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `set_hexpand` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:106:15
+    |
+106 |         panel.set_hexpand(true);
+    |               ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:516:8
+    |
+516 |     fn set_hexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_hexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_vexpand` with a similar name
+    |
+106 |         panel.set_vexpand(true);
+    |               ~~~~~~~~~~~
+
+error[E0599]: no method named `set_vexpand` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:107:15
+    |
+107 |         panel.set_vexpand(true);
+    |               ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:571:8
+    |
+571 |     fn set_vexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_vexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_hexpand` with a similar name
+    |
+107 |         panel.set_hexpand(true);
+    |               ~~~~~~~~~~~
+
+error[E0599]: no method named `set_row_homogeneous` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:108:15
+    |
+108 |         panel.set_row_homogeneous(true);
+    |               ^^^^^^^^^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:371:8
+    |
+371 |     fn set_row_homogeneous(&self, homogeneous: bool);
+    |        ------------------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `is_row_homogeneous` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:331:5
+    |
+331 |     fn is_row_homogeneous(&self) -> bool;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GridExt` which provides `set_row_homogeneous` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `set_column_homogeneous` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:109:15
+    |
+109 |         panel.set_column_homogeneous(false);
+    |               ^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:362:8
+    |
+362 |     fn set_column_homogeneous(&self, homogeneous: bool);
+    |        ---------------------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `is_column_homogeneous` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:319:5
+    |
+319 |     fn is_column_homogeneous(&self) -> bool;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GridExt` which provides `set_column_homogeneous` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `style_context` found for struct `gtk4::Label` in the current scope
+   --> src/gui.rs:114:21
+    |
+114 |         left_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    |                     ^^^^^^^^^^^^^ method not found in `Label`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:351:8
+    |
+351 |     fn style_context(&self) -> StyleContext;
+    |        ------------- the method is available for `gtk4::Label` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `style_context` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+
+error[E0599]: no method named `style_context` found for struct `gtk4::Label` in the current scope
+   --> src/gui.rs:115:22
+    |
+115 |         right_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    |                      ^^^^^^^^^^^^^ method not found in `Label`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:351:8
+    |
+351 |     fn style_context(&self) -> StyleContext;
+    |        ------------- the method is available for `gtk4::Label` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `style_context` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+
+error[E0599]: no method named `set_widget_name` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:119:22
+    |
+119 |         picture_grid.set_widget_name("picture_grid");
+    |                      ^^^^^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:538:8
+    |
+538 |     fn set_widget_name(&self, name: &str);
+    |        --------------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `widget_name` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:267:5
+    |
+267 |     fn widget_name(&self) -> glib::GString;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `WidgetExt` which provides `set_widget_name` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+
+error[E0599]: no method named `set_row_homogeneous` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:120:22
+    |
+120 |         picture_grid.set_row_homogeneous(true);
+    |                      ^^^^^^^^^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:371:8
+    |
+371 |     fn set_row_homogeneous(&self, homogeneous: bool);
+    |        ------------------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `is_row_homogeneous` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:331:5
+    |
+331 |     fn is_row_homogeneous(&self) -> bool;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GridExt` which provides `set_row_homogeneous` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `set_column_homogeneous` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:121:22
+    |
+121 |         picture_grid.set_column_homogeneous(true);
+    |                      ^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:362:8
+    |
+362 |     fn set_column_homogeneous(&self, homogeneous: bool);
+    |        ---------------------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `is_column_homogeneous` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:319:5
+    |
+319 |     fn is_column_homogeneous(&self) -> bool;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GridExt` which provides `set_column_homogeneous` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `set_hexpand` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:122:22
+    |
+122 |         picture_grid.set_hexpand(true);
+    |                      ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:516:8
+    |
+516 |     fn set_hexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_hexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_vexpand` with a similar name
+    |
+122 |         picture_grid.set_vexpand(true);
+    |                      ~~~~~~~~~~~
+
+error[E0599]: no method named `set_vexpand` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:123:22
+    |
+123 |         picture_grid.set_vexpand(true);
+    |                      ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:571:8
+    |
+571 |     fn set_vexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_vexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_hexpand` with a similar name
+    |
+123 |         picture_grid.set_hexpand(true);
+    |                      ~~~~~~~~~~~
+
+error[E0599]: no method named `attach` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:125:19
+    |
+125 |             panel.attach(&left_button, 0, 0, 1, 1);
+    |                   ^^^^^^ method not found in `gtk4::Grid`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:297:8
+    |
+297 |     fn attach(&self, child: &impl IsA<Widget>, column: i32, row: i32, width: i32, height: i32);
+    |        ------ the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `GridExt` which provides `attach` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `attach` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:126:19
+    |
+126 |             panel.attach(&picture_grid, 1, 0, 1, 1);
+    |                   ^^^^^^ method not found in `gtk4::Grid`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:297:8
+    |
+297 |     fn attach(&self, child: &impl IsA<Widget>, column: i32, row: i32, width: i32, height: i32);
+    |        ------ the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `GridExt` which provides `attach` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `attach` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:127:19
+    |
+127 |             panel.attach(&right_button, 2, 0, 1, 1);
+    |                   ^^^^^^ method not found in `gtk4::Grid`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:297:8
+    |
+297 |     fn attach(&self, child: &impl IsA<Widget>, column: i32, row: i32, width: i32, height: i32);
+    |        ------ the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `GridExt` which provides `attach` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `attach` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:129:19
+    |
+129 |             panel.attach(&picture_grid, 0, 0, 1, 1);
+    |                   ^^^^^^ method not found in `gtk4::Grid`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:297:8
+    |
+297 |     fn attach(&self, child: &impl IsA<Widget>, column: i32, row: i32, width: i32, height: i32);
+    |        ------ the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `GridExt` which provides `attach` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `set_button` found for struct `GestureClick` in the current scope
+   --> src/gui.rs:131:22
+    |
+131 |         left_gesture.set_button(1);
+    |                      ^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:48:8
+    |
+48  |     fn set_button(&self, button: u32);
+    |        ---------- the method is available for `GestureClick` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `button` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:29:5
+    |
+29  |     fn button(&self) -> u32;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GestureSingleExt` which provides `set_button` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GestureSingleExt;
+    |
+
+error[E0425]: cannot find function `setup_picture_grid` in this scope
+   --> src/gui.rs:137:13
+    |
+137 |             setup_picture_grid(&catalog_rc, &picture_grid, &application_window);
+    |             ^^^^^^^^^^^^^^^^^^ help: a function with a similar name exists: `setup_picture_cell`
+...
+175 | pub fn setup_picture_cell(window: &gtk::ApplicationWindow, grid: &gtk::Grid, vbox: &gtk::Box, coords: Coords, catalog_rc: &Rc<RefCell<Catalog>>...
+    | ------------------------------------------------------------------------------------------------------------------------------------------------ similarly named function `setup_picture_cell` defined here
+
+error[E0599]: no method named `add_controller` found for struct `gtk4::Label` in the current scope
+   --> src/gui.rs:139:21
+    |
+139 |         left_button.add_controller(left_gesture);
+    |                     ^^^^^^^^^^^^^^ method not found in `Label`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:72:8
+    |
+72  |     fn add_controller(&self, controller: impl IsA<EventController>);
+    |        -------------- the method is available for `gtk4::Label` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `add_controller` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+
+error[E0599]: no method named `set_button` found for struct `GestureClick` in the current scope
+   --> src/gui.rs:141:23
+    |
+141 |         right_gesture.set_button(1);
+    |                       ^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:48:8
+    |
+48  |     fn set_button(&self, button: u32);
+    |        ---------- the method is available for `GestureClick` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `button` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:29:5
+    |
+29  |     fn button(&self) -> u32;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GestureSingleExt` which provides `set_button` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GestureSingleExt;
+    |
+
+error[E0425]: cannot find function `setup_picture_grid` in this scope
+   --> src/gui.rs:147:13
+    |
+147 |             setup_picture_grid(&catalog_rc, &picture_grid, &application_window);
+    |             ^^^^^^^^^^^^^^^^^^ help: a function with a similar name exists: `setup_picture_cell`
+...
+175 | pub fn setup_picture_cell(window: &gtk::ApplicationWindow, grid: &gtk::Grid, vbox: &gtk::Box, coords: Coords, catalog_rc: &Rc<RefCell<Catalog>>...
+    | ------------------------------------------------------------------------------------------------------------------------------------------------ similarly named function `setup_picture_cell` defined here
+
+error[E0599]: no method named `add_controller` found for struct `gtk4::Label` in the current scope
+   --> src/gui.rs:149:22
+    |
+149 |         right_button.add_controller(right_gesture);
+    |                      ^^^^^^^^^^^^^^ method not found in `Label`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:72:8
+    |
+72  |     fn add_controller(&self, controller: impl IsA<EventController>);
+    |        -------------- the method is available for `gtk4::Label` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `add_controller` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+
+error[E0599]: no method named `set_valign` found for struct `gtk4::Box` in the current scope
+   --> src/gui.rs:154:22
+    |
+154 |                 vbox.set_valign(Align::Center);
+    |                      ^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:568:8
+    |
+568 |     fn set_valign(&self, align: Align);
+    |        ---------- the method is available for `gtk4::Box` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_valign` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_halign` with a similar name
+    |
+154 |                 vbox.set_halign(Align::Center);
+    |                      ~~~~~~~~~~
+
+error[E0599]: no method named `set_halign` found for struct `gtk4::Box` in the current scope
+   --> src/gui.rs:155:22
+    |
+155 |                 vbox.set_halign(Align::Center);
+    |                      ^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:510:8
+    |
+510 |     fn set_halign(&self, align: Align);
+    |        ---------- the method is available for `gtk4::Box` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_halign` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_valign` with a similar name
+    |
+155 |                 vbox.set_valign(Align::Center);
+    |                      ~~~~~~~~~~
+
+error[E0599]: no method named `set_hexpand` found for struct `gtk4::Box` in the current scope
+   --> src/gui.rs:156:22
+    |
+156 |                 vbox.set_hexpand(true);
+    |                      ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:516:8
+    |
+516 |     fn set_hexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Box` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_hexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_vexpand` with a similar name
+    |
+156 |                 vbox.set_vexpand(true);
+    |                      ~~~~~~~~~~~
+
+error[E0599]: no method named `set_vexpand` found for struct `gtk4::Box` in the current scope
+   --> src/gui.rs:157:22
+    |
+157 |                 vbox.set_vexpand(true);
+    |                      ^^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/widget.rs:571:8
+    |
+571 |     fn set_vexpand(&self, expand: bool);
+    |        ----------- the method is available for `gtk4::Box` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `set_vexpand` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `set_hexpand` with a similar name
+    |
+157 |                 vbox.set_hexpand(true);
+    |                      ~~~~~~~~~~~
+
+error[E0599]: no method named `attach` found for struct `gtk4::Grid` in the current scope
+   --> src/gui.rs:159:30
+    |
+159 |                 picture_grid.attach(&vbox, col as i32, row as i32, 1, 1);
+    |                              ^^^^^^ method not found in `gtk4::Grid`
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/grid.rs:297:8
+    |
+297 |     fn attach(&self, child: &impl IsA<Widget>, column: i32, row: i32, width: i32, height: i32);
+    |        ------ the method is available for `gtk4::Grid` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `GridExt` which provides `attach` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GridExt;
+    |
+
+error[E0599]: no method named `index_from_position` found for struct `Ref<'_, Catalog>` in the current scope
+   --> src/gui.rs:177:38
+    |
+177 |         if let Some(index) = catalog.index_from_position(coords) {
+    |                                      ^^^^^^^^^^^^^^^^^^^ method not found in `Ref<'_, Catalog>`
+
+error[E0599]: no method named `entry_at_index` found for struct `Ref<'_, Catalog>` in the current scope
+   --> src/gui.rs:178:42
+    |
+178 |             if let Some(entry) = catalog.entry_at_index(index) {
+    |                                          ^^^^^^^^^^^^^^ method not found in `Ref<'_, Catalog>`
+
+error[E0599]: no method named `page_changed` found for struct `Ref<'_, Catalog>` in the current scope
+   --> src/gui.rs:179:28
+    |
+179 |                 if catalog.page_changed() {
+    |                            ^^^^^^^^^^^^
+    |
+help: there is a method `page_index` with a similar name
+    |
+179 |                 if catalog.page_index() {
+    |                            ~~~~~~~~~~
+
+error[E0599]: no method named `first_child` found for reference `&gtk4::Box` in the current scope
+   --> src/gui.rs:180:50
+    |
+180 |                     while let Some(child) = vbox.first_child() {
+    |                                                  ^^^^^^^^^^^
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `first_child` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `last_child` with a similar name
+    |
+180 |                     while let Some(child) = vbox.last_child() {
+    |                                                  ~~~~~~~~~~
+
+error[E0425]: cannot find function `picture_for_entry` in this scope
+   --> src/gui.rs:183:35
+    |
+183 |                     let picture = picture_for_entry(entry, &catalog);
+    |                                   ^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `label_for_entry` in this scope
+   --> src/gui.rs:184:33
+    |
+184 |                     let label = label_for_entry(entry, index, &catalog);
+    |                                 ^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0599]: no method named `palette_extract_on` found for struct `Ref<'_, Catalog>` in the current scope
+   --> src/gui.rs:186:32
+    |
+186 |                     if catalog.palette_extract_on() { 
+    |                                ^^^^^^^^^^^^^^^^^^
+    |
+help: there is a method `palette_on` with a similar name
+    |
+186 |                     if catalog.palette_on() { 
+    |                                ~~~~~~~~~~
+
+error[E0425]: cannot find function `drawing_area_for_entry` in this scope
+   --> src/gui.rs:187:44
+    |
+187 |                         let drawing_area = drawing_area_for_entry(entry);
+    |                                            ^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0599]: no method named `set_button` found for struct `GestureClick` in the current scope
+   --> src/gui.rs:191:40
+    |
+191 |                     gesture_left_click.set_button(1);
+    |                                        ^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:48:8
+    |
+48  |     fn set_button(&self, button: u32);
+    |        ---------- the method is available for `GestureClick` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `button` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:29:5
+    |
+29  |     fn button(&self) -> u32;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GestureSingleExt` which provides `set_button` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GestureSingleExt;
+    |
+
+error[E0425]: cannot find function `focus_on_cell_at_coords` in this scope
+   --> src/gui.rs:194:29
+    |
+194 | ...                   focus_on_cell_at_coords(coords, &grid, &window, &mut catalog, false);
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0599]: no method named `set_button` found for struct `GestureClick` in the current scope
+   --> src/gui.rs:200:41
+    |
+200 |                     gesture_right_click.set_button(3);
+    |                                         ^^^^^^^^^^
+    |
+   ::: /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:48:8
+    |
+48  |     fn set_button(&self, button: u32);
+    |        ---------- the method is available for `GestureClick` here
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: there is a method `button` with a similar name, but with different arguments
+   --> /home/tof/.cargo/registry/src/index.crates.io-6f17d22bba15001f/gtk4-0.6.6/src/auto/gesture_single.rs:29:5
+    |
+29  |     fn button(&self) -> u32;
+    |     ^^^^^^^^^^^^^^^^^^^^^^^^
+help: trait `GestureSingleExt` which provides `set_button` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::GestureSingleExt;
+    |
+
+error[E0425]: cannot find function `focus_on_cell_at_coords` in this scope
+   --> src/gui.rs:203:29
+    |
+203 | ...                   focus_on_cell_at_coords(coords, &grid, &window, &mut catalog, true);
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0599]: no method named `first_child` found for reference `&gtk4::Box` in the current scope
+   --> src/gui.rs:211:42
+    |
+211 |             while let Some(child) = vbox.first_child() {
+    |                                          ^^^^^^^^^^^
+    |
+    = help: items from traits can only be used if the trait is in scope
+help: trait `WidgetExt` which provides `first_child` is implemented but not in scope; perhaps you want to import it
+    |
+1   + use gtk4::prelude::WidgetExt;
+    |
+help: there is a method `last_child` with a similar name
+    |
+211 |             while let Some(child) = vbox.last_child() {
+    |                                          ~~~~~~~~~~
+
+error[E0425]: cannot find function `empty_picture` in this scope
+   --> src/gui.rs:214:27
+    |
+214 |             let picture = empty_picture();
+    |                           ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `empty_label` in this scope
+   --> src/gui.rs:215:25
+    |
+215 |             let label = empty_label();
+    |                         ^^^^^^^^^^^ not found in this scope
+
+error[E0507]: cannot move out of `args.file` as enum variant `Some` which is behind a shared reference
+  --> src/catalog.rs:49:29
+   |
+49 |         if let Some(file) = args.file {
+   |                     ----    ^^^^^^^^^
+   |                     |
+   |                     data moved here
+   |                     move occurs because `file` has type `std::string::String`, which does not implement the `Copy` trait
+   |
+help: consider borrowing here
+   |
+49 |         if let Some(file) = &args.file {
+   |                             +
+
+error[E0507]: cannot move out of `args.reading` as enum variant `Some` which is behind a shared reference
+  --> src/catalog.rs:51:36
+   |
+51 |         } else if let Some(list) = args.reading {
+   |                            ----    ^^^^^^^^^^^^
+   |                            |
+   |                            data moved here
+   |                            move occurs because `list` has type `std::string::String`, which does not implement the `Copy` trait
+   |
+help: consider borrowing here
+   |
+51 |         } else if let Some(list) = &args.reading {
+   |                                    +
+
+error[E0507]: cannot move out of `args.directory` as enum variant `Some` which is behind a shared reference
+  --> src/catalog.rs:53:35
+   |
+53 |         } else if let Some(dir) = args.directory {
+   |                            ---    ^^^^^^^^^^^^^^
+   |                            |
+   |                            data moved here
+   |                            move occurs because `dir` has type `std::string::String`, which does not implement the `Copy` trait
+   |
+help: consider borrowing here
+   |
+53 |         } else if let Some(dir) = &args.directory {
+   |                                   +
+
+error[E0507]: cannot move out of `args.pattern` which is behind a shared reference
+  --> src/catalog.rs:54:56
+   |
+54 |             catalog.add_picture_entries_from_dir(&dir, args.pattern);
+   |                                                        ^^^^^^^^^^^^ move occurs because `args.pattern` has type `std::option::Option<std::string::String>`, which does not implement the `Copy` trait
+   |
+help: consider cloning the value if the performance cost is acceptable
+   |
+54 |             catalog.add_picture_entries_from_dir(&dir, args.pattern.clone());
+   |                                                                    ++++++++
+
+warning: unused variable: `gui_rc`
+  --> src/gui.rs:37:17
+   |
+37 |             let gui_rc = Rc::new(RefCell::new(gui));
+   |                 ^^^^^^ help: if this is intentional, prefix it with an underscore: `_gui_rc`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+Some errors have detailed explanations: E0425, E0433, E0507, E0599.
+For more information about an error, try `rustc --explain E0425`.
+warning: `gsr2` (bin "gsr2") generated 3 warnings
+error: could not compile `gsr2` (bin "gsr2") due to 56 previous errors; 3 warnings emitted

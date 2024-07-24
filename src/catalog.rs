@@ -3,12 +3,15 @@ use std::io::{Result, Error, ErrorKind};
 use std::fs::read_to_string;
 use crate::picture_entry::PictureEntry;
 use crate::path::{get_picture_file_paths, check_file, is_thumbnail};
+use crate::args::Args;
 use std::path::PathBuf;
 use std::cmp::min;
 use crate::order::Order;
 use crate::direction::Direction;
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
+
+pub type Coords = (i32, i32);
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -41,6 +44,17 @@ impl Catalog {
         }
     }
 
+    pub fn init_catalog(args: &Args) -> Result<Self> {
+        let mut catalog = Self::new();
+        if let Some(file) = &args.file {
+            catalog.add_picture_entry_from_file(&file);
+        } else if let Some(list) = &args.reading {
+            catalog.add_picture_entries_from_file_list(&list);
+        } else if let Some(dir) = &args.directory {
+            catalog.add_picture_entries_from_dir(&dir, args.pattern.clone());
+        }
+        Ok(catalog)
+    }
     pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {
         self.picture_entries.append(picture_entries)
     }
