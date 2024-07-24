@@ -159,6 +159,16 @@ impl PictureEntry {
         let thumbnail_file_path = self.thumbnail_file_path();
         check_or_create_thumbnail_file(&thumbnail_file_path, &original_file_path)
     }
+
+    pub fn title_display(self) -> String {
+        format!("{} {} [{} {} {}] {}",
+            self.original_file_name(),
+            if self.selected { "△" } else { "" },
+            self.file_size,
+            self.colors,
+            self.rank.show(),
+            if self.deleted { "🗑" } else { ""})
+    }
 }
 
 #[cfg(test)]

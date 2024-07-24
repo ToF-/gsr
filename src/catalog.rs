@@ -11,7 +11,7 @@ use crate::direction::Direction;
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
 
-pub type Coords = (i32, i32);
+pub type Coords = (usize, usize);
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -24,6 +24,8 @@ pub struct Catalog {
     palette_on: bool,
     full_size_on: bool,
     start_index: Option<usize>,
+    page_changed: bool,
+    cells_per_row: usize,
 }
 
 impl Catalog {
@@ -41,6 +43,8 @@ impl Catalog {
             palette_on: false,
             full_size_on: false,
             start_index: None,
+            page_changed: false,
+            cells_per_row: 1,
         }
     }
 
@@ -121,6 +125,10 @@ impl Catalog {
 
     // queries
 
+    pub fn cells_per_row(&self) -> usize {
+        self.cells_per_row
+    }
+
     pub fn length(&self) -> usize {
         self.picture_entries.len()
     }
@@ -158,8 +166,25 @@ impl Catalog {
         }
     }
 
+    pub fn index_from_position(&self, coords: Coords) -> Option<usize> {
+        let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.cells_per_row) as usize;
+        if index < self.length() {
+            Some(index)
+        } else {
+            None
+        }
+    }
+
+    pub fn entry_at_index(&self, index: usize) -> Option<&PictureEntry> {
+        if index < self.picture_entries.len() {
+            Some(&self.picture_entries[index])
+        } else {
+            None
+        }
+    }
+
     pub fn current_entry(&self) -> Option<&PictureEntry> {
-        self.index().and_then(|index| Some(&self.picture_entries[index]))
+        self.index().and_then(|index| self.entry_at_index(index))
     }
 
     pub fn page_index_of(&self, index: usize) -> usize {
@@ -213,6 +238,34 @@ impl Catalog {
         } else {
             None
         }
+    }
+
+    pub fn page_changed(&self) -> bool {
+        self.page_changed
+    }
+
+    pub fn title_display(&self) -> String {
+        if self.length() == 0 {
+            return "".to_string()
+        };
+        let entry_title_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
+        let result = format!("S:[{}] {} ordered by {} {}/{}  {} {} {} {} {}",
+            self.max_selected,
+            if self.select_start.is_some() { "…" } else { "" },
+            if let Some(o) = self.order {
+                o.to_string()
+            } else {
+                "??".to_string()
+            },
+            self.index(),
+            self.last(),
+            entry_title_display,
+            if self.register.is_none() { String::from("") } else { format!("{}", self.register.unwrap()) },
+            if self.real_size_on { "*" } else { "" },
+            if self.label_edit_mode_on { format!("Label:{}", self.field) } else { String::from("") },
+            if self.search_edit_mode_on { format!("Search:{}", self.field) } else { String::from("") }
+            );
+        result
     }
     // update
 
@@ -456,7 +509,9 @@ impl Catalog {
     }
 
     pub fn move_to_index(&mut self, index: usize) {
-        self.index = index
+        let page_index = self.page_index();
+        self.index = index;
+        self.page_changed = self.page_index() != page_index
     }
 
     pub fn move_next_page(&mut self) {
@@ -466,6 +521,7 @@ impl Catalog {
         } else {
             0
         };
+        self.page_changed = true;
     }
 
     pub fn move_towards(&mut self, direction: Direction) {

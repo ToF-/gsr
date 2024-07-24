@@ -1,9 +1,12 @@
+use crate::picture_io::create_thumbnail;
+use crate::picture_entry::PictureEntry;
 use thumbnailer::create_thumbnails;
+use std::io::{Result, Error, ErrorKind};
 use gtk::cairo::{Context, Format, ImageSurface};
 use crate::args::Args;
 use crate::catalog::Catalog;
-use gtk::glib::clone;
 use std::cell::{RefCell, RefMut};
+use std::path::Path;
 use std::rc::Rc;
 use gtk::{Align, CssProvider, Grid, Label, Orientation, Picture, ScrolledWindow};
 use crate::catalog::Coords;
@@ -235,24 +238,24 @@ pub fn empty_label() -> gtk::Label {
     label
 }
 
-pub fn focus_on_cell_at_coords(coords: Coords, grid: &gtk::Grid, window: &gtk::ApplicationWindow, repository: &mut Repository, with_select: bool) {
-    if repository.cells_per_row() > 1 {
-        if repository.can_move_abs(coords) {
-            set_label_text_at_current_position(&grid, &repository, false);
-            repository.move_abs(coords);
+pub fn focus_on_cell_at_coords(coords: Coords, grid: &gtk::Grid, window: &gtk::ApplicationWindow, catalog: &mut Catalog, with_select: bool) {
+    if catalog.cells_per_row() > 1 {
+        if catalog.can_move_abs(coords) {
+            set_label_text_at_current_position(&grid, &catalog, false);
+            catalog.move_abs(coords);
             if with_select {
-                repository.select_point();
+                catalog.select_point();
             }
-            set_label_text_at_current_position(&grid, &repository, true);
-            window.set_title(Some(&(repository.title_display())));
+            set_label_text_at_current_position(&grid, &catalog, true);
+            window.set_title(Some(&(catalog.title_display())));
         }
     }
 }
 
-pub fn set_label_text_at_current_position(grid: &gtk::Grid, repository: &Repository, has_focus: bool) {
-    let current_coords = repository.position();
-    if let Some(current_entry) = repository.current_entry() {
-        set_label_text_at_coords(grid, current_coords, current_entry.label_display(has_focus, repository.sample()))
+pub fn set_label_text_at_current_position(grid: &gtk::Grid, catalog: &Catalog, has_focus: bool) {
+    let current_coords = catalog.position();
+    if let Some(current_entry) = catalog.current_entry() {
+        set_label_text_at_coords(grid, current_coords, current_entry.label_display(has_focus, catalog.sample()))
     };
 }
 
@@ -279,7 +282,7 @@ pub fn label_at_coords(grid: &gtk::Grid, coords: Coords) -> Option<gtk::Label> {
     }
 }
 
-pub fn drawing_area_for_entry(entry: &Entry) -> gtk::DrawingArea {
+pub fn drawing_area_for_entry(entry: &PictureEntry) -> gtk::DrawingArea {
     let drawing_area = gtk::DrawingArea::new();
     drawing_area.set_valign(Align::Center);
     drawing_area.set_halign(Align::Center);
@@ -313,24 +316,24 @@ pub fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
     ctx.paint().expect("can't paint surface")
 }
 
-pub fn label_for_entry(entry: &Entry, index: usize, repository: &Repository) -> gtk::Label {
-    let is_current_entry = index == repository.current_index() && repository.cells_per_row() > 1;
-    let label = gtk::Label::new(Some(&entry.label_display(is_current_entry, repository.sample())));
+pub fn label_for_entry(entry: &PictureEntry, index: usize, catalog: &Catalog) -> gtk::Label {
+    let is_current_entry = index == catalog.current_index() && catalog.cells_per_row() > 1;
+    let label = gtk::Label::new(Some(&entry.label_display(is_current_entry, catalog.sample())));
     label.set_valign(Align::Center);
     label.set_halign(Align::Center);
     label.set_widget_name("picture_label");
     label
 }
 
-pub fn picture_for_entry(entry: &Entry, repository: &Repository) -> gtk::Picture {
+pub fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {
     let picture = gtk::Picture::new();
-    let opacity = if entry.delete { 0.25 }
-    else if entry.image_data.selected { 0.50 } else { 1.0 };
+    let opacity = if entry.deleted { 0.25 }
+    else if entry.selected { 0.50 } else { 1.0 };
     picture.set_valign(Align::Center);
     picture.set_halign(Align::Center);
     picture.set_opacity(opacity);
-    picture.set_can_shrink(!repository.real_size());
-    let result = if repository.cells_per_row() < 10 {
+    picture.set_can_shrink(!catalog.full_size_on());
+    let result = if catalog.cells_per_row() < 10 {
         set_original_picture_file(&picture, &entry)
     } else {
         set_thumbnail_picture_file(&picture, &entry)
@@ -345,7 +348,7 @@ pub fn picture_for_entry(entry: &Entry, repository: &Repository) -> gtk::Picture
     picture
 }
 
-pub fn set_thumbnail_picture_file(picture: &gtk::Picture, entry: &Entry) -> Result<()> {
+pub fn set_thumbnail_picture_file(picture: &gtk::Picture, entry: &PictureEntry) -> Result<()> {
     let thumbnail = entry.thumbnail_file_path();
     let path = Path::new(&thumbnail);
     if path.exists() {
@@ -361,3 +364,31 @@ pub fn set_thumbnail_picture_file(picture: &gtk::Picture, entry: &Entry) -> Resu
         }
     }
 }
+
+pub fn set_original_picture_file(picture: &gtk::Picture, entry: &PictureEntry) -> Result<()> {
+    let original = entry.original_file_path();
+    let path = Path::new(&original);
+    if path.exists() {
+        picture.set_filename(Some(original));
+        Ok(())
+    } else {
+        Err(Error::new(ErrorKind::Other, format!("file {} doesn't exist", original)))
+    }
+}
+
+pub fn setup_picture_grid(catalog_rc: &Rc<RefCell<Catalog>>, picture_grid: &gtk::Grid, window: &gtk::ApplicationWindow) {
+    if let Ok(catalog) = catalog_rc.try_borrow() {
+        let cells_per_row = catalog.cells_per_row();
+        for col in 0..cells_per_row as i32 {
+            for row in 0..cells_per_row as i32 {
+                let vbox = picture_grid.child_at(col,row).unwrap().downcast::<gtk::Box>().unwrap();
+                setup_picture_cell(window, &picture_grid, &vbox, (col as usize, row as usize), &catalog_rc);
+            }
+        }
+        window.set_title(Some(&catalog.title_display()));
+    }
+    else {
+        eprintln!("can't borrow catalog_rc");
+    }
+}
+
