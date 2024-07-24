@@ -43,7 +43,7 @@ fn main() {
             // clone! passes a strong reference to a variable in the closure that activates the application
             // move converts any variables captured by reference or mutable reference to variables captured by value.
             application.connect_activate(clone!(@strong args => move |application: &gtk::Application| {
-                build_gui(application)
+                build_gui(application, &args)
             }));
 
             let empty: Vec<String> = vec![];

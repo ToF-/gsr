@@ -40,7 +40,7 @@ after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Codin
 apply_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn apply_label(&mut self, label: String) -> Result<()> {$/;"	f
 at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
 begin_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self) {$/;"	f
-build_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn build_gui(application: &gtk::Application) {$/;"	f
+build_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn build_gui(application: &gtk::Application, args: &Args) {$/;"	f
 can_move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
 can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_towards(&self, direction: Direction) -> bool {$/;"	f
 cancel_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_input(&mut self) {$/;"	f
