@@ -66,6 +66,11 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                         let entry = catalog.current_entry().unwrap();
                         gui.picture.set_filename(Some(entry.original_file_path()))
                     },
+                    "p" => {
+                        catalog.move_prev_page();
+                        let entry = catalog.current_entry().unwrap();
+                        gui.picture.set_filename(Some(entry.original_file_path()))
+                    },
                     "q" => gui.application_window.close(),
                     _ => { } ,
                 }
