@@ -34,7 +34,8 @@ fn main() {
                     eprintln!("{}", err);
                     exit(1);
                 },
-                Ok(catalog) => {
+                Ok(mut catalog) => {
+                    catalog.sort_by(args.order.clone());
                     let catalog_rc = Rc::new(RefCell::new(catalog));
                     let application = Application::builder()
                         .application_id("org.example.gallsh")
