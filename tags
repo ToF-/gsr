@@ -151,6 +151,7 @@ show	/home/tof/Coding/gsr/src/rank.rs	/^    pub fn show(&self) -> String {$/;"	f
 sort_by	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(&mut self, order: Order) {$/;"	f
 sorting_catalog_by_different_criteria	/home/tof/Coding/gsr/src/catalog.rs	/^    fn sorting_catalog_by_different_criteria() {$/;"	f
 start_set	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn start_set(&mut self) {$/;"	f
+startup_gui	/home/tof/Coding/gsr/src/gui.rs	/^pub fn startup_gui(application: &gtk::Application) {$/;"	f
 state_indicators	/home/tof/Coding/gsr/src/catalog.rs	/^    fn state_indicators() {$/;"	f
 tests	/home/tof/Coding/gsr/src/args.rs	/^mod tests {$/;"	m
 tests	/home/tof/Coding/gsr/src/catalog.rs	/^mod tests {$/;"	m

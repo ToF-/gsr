@@ -13,7 +13,7 @@ mod rank;
 use clap::Parser;
 use crate::args::Args;
 use glib::{clone};
-use crate::gui::build_gui;
+use crate::gui::{build_gui, startup_gui};
 use gtk::prelude::*;
 use gtk::{self, Application, gdk, glib};
 use std::process::exit;
@@ -30,15 +30,9 @@ fn main() {
                 .application_id("org.example.gallsh")
                 .build();
 
-            application.connect_startup(|_| {
-                let css_provider = gtk::CssProvider::new();
-                css_provider.load_from_data("window { background-color:black;} image { margin:1em ; } label { color:white; }");
-                gtk::style_context_add_provider_for_display(
-                    &gdk::Display::default().unwrap(),
-                    &css_provider,
-                    1000,
-                );
-            });
+            application.connect_startup(|application| {
+                startup_gui(application);
+            }); 
 
             // clone! passes a strong reference to a variable in the closure that activates the application
             // move converts any variables captured by reference or mutable reference to variables captured by value.
@@ -51,3 +45,4 @@ fn main() {
         }
     }
 }
+
