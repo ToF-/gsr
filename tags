@@ -14,6 +14,7 @@ DEFAULT_WIDTH	/home/tof/Coding/gsr/src/args.rs	/^const DEFAULT_WIDTH: i32   = 10
 DIR_ENV_VAR	/home/tof/Coding/gsr/src/path.rs	/^pub const DIR_ENV_VAR: &str = "GALLSHDIR";$/;"	c
 Direction	/home/tof/Coding/gsr/src/direction.rs	/^pub enum Direction {$/;"	g
 FileSize	/home/tof/Coding/gsr/src/picture_io.rs	/^pub type FileSize = u64;$/;"	T
+Gui	/home/tof/Coding/gsr/src/gui.rs	/^struct Gui {$/;"	s
 HEIGHT_ENV_VAR	/home/tof/Coding/gsr/src/args.rs	/^const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";$/;"	c
 IMAGE_DATA	/home/tof/Coding/gsr/src/path.rs	/^pub const IMAGE_DATA: &str = "IMAGE_DATA";$/;"	c
 ImageData	/home/tof/Coding/gsr/src/image_data.rs	/^pub struct ImageData {$/;"	s
@@ -133,6 +134,7 @@ page_limit_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_limit_on(&se
 page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 palette_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 paste_label	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn paste_label(&mut self) -> Result<()> {$/;"	f
+process_key	/home/tof/Coding/gsr/src/gui.rs	/^pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {$/;"	f
 read_file_info	/home/tof/Coding/gsr/src/picture_io.rs	/^pub fn read_file_info(file_path: &str) -> Result<(FileSize, SystemTime)> {$/;"	f
 read_image_data	/home/tof/Coding/gsr/src/picture_io.rs	/^pub fn read_image_data(file_path: &str) -> Result<ImageData> {$/;"	f
 read_image_data_deserializes_image_data	/home/tof/Coding/gsr/src/picture_io.rs	/^    fn read_image_data_deserializes_image_data() {$/;"	f

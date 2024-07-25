@@ -1,11 +1,17 @@
 use gtk::{ApplicationWindow, gdk, Picture};
+use gtk::gdk::Key;
 use crate::gdk::Display;
 use crate::Args;
 use crate::Catalog;
 use gtk::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
+use gtk::glib::clone;
 
+struct Gui {
+    application_window: gtk::ApplicationWindow,
+    picture: gtk::Picture,
+}
 
 pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {
     let width = args.width.unwrap();
@@ -23,7 +29,21 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         picture.set_filename(Some(entry.original_file_path()));
     }
     application_window.set_child(Some(&picture));
-    application_window.present();
+
+    let gui = Gui {
+        application_window: application_window,
+        picture: picture,
+    };
+    let gui_rc = Rc::new(RefCell::new(gui));
+
+    let evk = gtk::EventControllerKey::new();
+    evk.connect_key_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_, key, _, _| {
+        process_key(&catalog_rc, &gui_rc, key) 
+    }));
+    if let Ok(gui) = gui_rc.try_borrow() {
+        gui.application_window.add_controller(evk);
+        gui.application_window.present()
+    };
 }
 
 pub fn startup_gui(application: &gtk::Application) {
@@ -34,4 +54,16 @@ pub fn startup_gui(application: &gtk::Application) {
         &css_provider,
         1000,
         );
+}
+
+pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {
+    if let Ok(gui) = gui_rc.try_borrow() {
+        if let Some(key_name) = key.name() {
+            match key_name.as_str() {
+                "q" => gui.application_window.close(),
+                _ => { } ,
+            }
+        }
+    };
+    gtk::Inhibit(false)
 }
