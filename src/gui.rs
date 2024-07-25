@@ -1,10 +1,13 @@
 use gtk::{ApplicationWindow, gdk, Picture};
 use crate::gdk::Display;
 use crate::Args;
+use crate::Catalog;
 use gtk::prelude::*;
+use std::rc::Rc;
+use std::cell::RefCell;
 
 
-pub fn build_gui(application: &gtk::Application, args: &Args) {
+pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {
     let width = args.width.unwrap();
     let height = args.height.unwrap();
     let application_window = ApplicationWindow::builder()
@@ -14,9 +17,12 @@ pub fn build_gui(application: &gtk::Application, args: &Args) {
         .default_height(height)
         .build();
     let picture = Picture::new();
-    picture.set_filename(Some("testdata/nature/flower.jpg"));
+
+    if let Ok(catalog) = catalog_rc.try_borrow() {
+        let entry = catalog.current_entry().unwrap();
+        picture.set_filename(Some(entry.original_file_path()));
+    }
     application_window.set_child(Some(&picture));
-    
     application_window.present();
 }
 

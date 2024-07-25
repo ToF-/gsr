@@ -52,8 +52,11 @@ impl Catalog {
         let mut catalog = Self::new();
         let add_result:Result<()> = catalog.add_picture_entries_from_source(args);
         if let Err(err) = add_result {
-            return Err(err);
-        }
+            return Err(err)
+        };
+        if catalog.length() == 0 {
+            return Err(Error::new(ErrorKind::Other,"no picture to show"))
+        };
         Ok(catalog)
     }
 
