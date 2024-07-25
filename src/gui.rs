@@ -63,19 +63,23 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                 match key_name.as_str() {
                     "n" => {
                         catalog.move_next_page();
-                        let entry = catalog.current_entry().unwrap();
-                        gui.picture.set_filename(Some(entry.original_file_path()))
                     },
                     "p" => {
                         catalog.move_prev_page();
-                        let entry = catalog.current_entry().unwrap();
-                        gui.picture.set_filename(Some(entry.original_file_path()))
                     },
                     "q" => gui.application_window.close(),
                     _ => { } ,
                 }
             }
+            refresh_picture(&gui, &catalog);
         }
     };
     gtk::Inhibit(false)
+}
+
+pub fn refresh_picture(gui: &Gui, catalog: &Catalog) {
+    if catalog.page_changed() {
+        let entry = catalog.current_entry().unwrap();
+        gui.picture.set_filename(Some(entry.original_file_path()))
+    }
 }

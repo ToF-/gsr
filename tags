@@ -140,6 +140,7 @@ read_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn r
 read_image_data_deserializes_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn read_image_data_deserializes_image_data() {$/;"	f
 read_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_or_create_image_data(file_path: &str) -> Result<ImageData> {$/;"	f
 read_picture_file_info_read_file_size	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn read_picture_file_info_read_file_size() {$/;"	f
+refresh_picture	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn refresh_picture(gui: &Gui, catalog: &Catalog) {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 save_image_data	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn save_image_data(&self) -> Result<()> {$/;"	f
 select	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn select(&mut self) -> Result<()> {$/;"	f
