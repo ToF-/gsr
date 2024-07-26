@@ -80,6 +80,9 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
 pub fn refresh_picture(gui: &Gui, catalog: &Catalog) {
     if catalog.page_changed() {
         let entry = catalog.current_entry().unwrap();
+        let opacity = if entry.deleted { 0.25 }
+        else if entry.selected { 0.50 } else { 1.0 };
+        gui.picture.set_opacity(opacity);
         gui.picture.set_filename(Some(entry.original_file_path()));
         set_title(gui, catalog);
     }
