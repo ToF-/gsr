@@ -102,10 +102,15 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                         },
                         "q" => gui.application_window.close(),
                         "s" => catalog.begin_input(InputKind::SearchInput),
+                        "u" => { let _ = catalog.unselect_page(); },
+                        "U" => { let _ = catalog.unselect_all(); },
                         "z" => catalog.move_to_first(),
                         "Z" => catalog.move_to_last(),
                         
-                        "comma" => { let _ = catalog.select(); },
+                        "comma" => {
+                                let _ = catalog.select();
+                                catalog.count_selected()
+                        },
                         "slash" => catalog.begin_input(InputKind::LabelInput),
                         "Right" => {
                             refresh = !catalog.full_size_on();
