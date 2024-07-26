@@ -10,7 +10,7 @@ use gtk::glib::clone;
 
 struct Gui {
     application_window: gtk::ApplicationWindow,
-    picture: gtk::Picture,
+    single_view_picture: gtk::Picture,
 }
 
 pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {
@@ -28,7 +28,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
 
     let gui = Gui {
         application_window: application_window,
-        picture: picture,
+        single_view_picture: picture,
     };
     let gui_rc = Rc::new(RefCell::new(gui));
 
@@ -40,7 +40,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         if let Ok(gui) = gui_rc.try_borrow() {
             gui.application_window.add_controller(evk);
             catalog.refresh();
-            refresh_picture(&gui, &catalog);
+            refresh_single_view_picture(&gui, &catalog);
             gui.application_window.present()
         }
     };
@@ -76,27 +76,28 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                     _ => { } ,
                 }
             }
-            refresh_picture(&gui, &catalog);
+            refresh_single_view_picture(&gui, &catalog);
         }
     };
     gtk::Inhibit(false)
 }
 
-pub fn refresh_picture(gui: &Gui, catalog: &Catalog) {
+pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
+    let picture = &gui.single_view_picture;
     if catalog.page_changed() {
         let entry = catalog.current_entry().unwrap();
         let opacity = if entry.deleted { 0.25 }
         else if entry.selected { 0.50 } else { 1.0 };
         if catalog.expand_on() {
-            gui.picture.set_valign(Align::Fill);
-            gui.picture.set_halign(Align::Fill);
+            picture.set_valign(Align::Fill);
+            picture.set_halign(Align::Fill);
         } else {
-            gui.picture.set_valign(Align::Center);
-            gui.picture.set_halign(Align::Center);
+            picture.set_valign(Align::Center);
+            picture.set_halign(Align::Center);
         };
-        gui.picture.set_opacity(opacity);
-        gui.picture.set_can_shrink(!catalog.full_size_on());
-        gui.picture.set_filename(Some(entry.original_file_path()));
+        picture.set_opacity(opacity);
+        picture.set_can_shrink(!catalog.full_size_on());
+        picture.set_filename(Some(entry.original_file_path()));
         set_title(gui, catalog);
     }
 }
