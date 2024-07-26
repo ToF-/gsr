@@ -111,6 +111,9 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                                 let _ = catalog.select();
                                 catalog.count_selected()
                         },
+                        "minus" => { 
+                            let _ = catalog.unlabel();
+                        },
                         "slash" => catalog.begin_input(InputKind::LabelInput),
                         "Right" => {
                             refresh = !catalog.full_size_on();
