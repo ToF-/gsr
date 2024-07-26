@@ -90,6 +90,7 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                     set_title(&gui, &catalog);
                 } else {
                     match key_name.as_str() {
+                        "c" => catalog.copy_label(),
                         "D" => catalog.delete(),
                         "e" => catalog.toggle_expand(),
                         "f" => catalog.toggle_full_size(),
@@ -110,6 +111,9 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                         "comma" => {
                                 let _ = catalog.select();
                                 catalog.count_selected()
+                        },
+                        "plus" => {
+                            catalog.paste_label();
                         },
                         "minus" => { 
                             let _ = catalog.unlabel();
