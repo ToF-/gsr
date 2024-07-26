@@ -1,6 +1,7 @@
-use gtk::{Align, ApplicationWindow, gdk, Picture};
+use gtk::{Align, ApplicationWindow, gdk, Picture, ScrolledWindow};
 use gtk::gdk::Key;
 use crate::gdk::Display;
+use crate::direction::Direction;
 use crate::Args;
 use crate::Catalog;
 use gtk::prelude::*;
@@ -10,6 +11,7 @@ use gtk::glib::clone;
 
 struct Gui {
     application_window: gtk::ApplicationWindow,
+    view_scrolled_window: gtk::ScrolledWindow,
     single_view_picture: gtk::Picture,
 }
 
@@ -22,12 +24,20 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         .default_width(width)
         .default_height(height)
         .build();
-    let picture = Picture::new();
 
-    application_window.set_child(Some(&picture));
+    let view_scrolled_window = ScrolledWindow::builder()
+        .hscrollbar_policy(gtk::PolicyType::Automatic)
+        .vscrollbar_policy(gtk::PolicyType::Automatic)
+        .name("view")
+        .build();
+
+    let picture = Picture::new();
+    view_scrolled_window.set_child(Some(&picture));
+    application_window.set_child(Some(&view_scrolled_window));
 
     let gui = Gui {
         application_window: application_window,
+        view_scrolled_window: view_scrolled_window,
         single_view_picture: picture,
     };
     let gui_rc = Rc::new(RefCell::new(gui));
@@ -60,6 +70,7 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
         if let Ok(gui) = gui_rc.try_borrow() {
             if let Some(key_name) = key.name() {
+                let mut refresh: bool = true;
                 match key_name.as_str() {
                     "D" => catalog.delete(),
                     "e" => catalog.toggle_expand(),
@@ -73,10 +84,26 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                     "q" => gui.application_window.close(),
                     "z" => catalog.move_to_first(),
                     "Z" => catalog.move_to_last(),
+                    "Right" => {
+                        refresh = !catalog.full_size_on();
+                        arrow_command(Direction::Right, &gui, &mut catalog)
+                    },
+                    "Left" => {
+                        refresh = !catalog.full_size_on();
+                        arrow_command(Direction::Left, &gui, &mut catalog)
+                    },
+                    "Down" => {
+                        refresh = !catalog.full_size_on();
+                        arrow_command(Direction::Down, &gui, &mut catalog)
+                    },
+                    "Up" => {
+                        refresh = !catalog.full_size_on();
+                        arrow_command(Direction::Up, &gui, &mut catalog)
+                    },
                     _ => { } ,
                 }
-            }
-            refresh_single_view_picture(&gui, &catalog);
+                if refresh { refresh_single_view_picture(&gui, &catalog) }
+            };
         }
     };
     gtk::Inhibit(false)
@@ -104,4 +131,25 @@ pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
 
 pub fn set_title(gui: &Gui, catalog: &Catalog) {
     gui.application_window.set_title(Some(&catalog.title_display()))
+}
+
+pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {
+    if catalog.full_size_on() {
+        let step: f64 = 100.0;
+        let (picture_adjustment, step) = match direction {
+            Direction::Right => (picture_hadjustment(&gui.view_scrolled_window), step),
+            Direction::Left  => (picture_hadjustment(&gui.view_scrolled_window), -step),
+            Direction::Down  => (picture_vadjustment(&gui.view_scrolled_window), step),
+            Direction::Up    => (picture_vadjustment(&gui.view_scrolled_window), -step),
+        };
+        picture_adjustment.set_value(picture_adjustment.value() + step)
+    }
+}
+
+pub fn picture_hadjustment(view_scrolled_window: &gtk::ScrolledWindow) -> gtk::Adjustment {
+    view_scrolled_window.hadjustment()
+}
+
+pub fn picture_vadjustment(view_scrolled_window: &gtk::ScrolledWindow) -> gtk::Adjustment {
+    view_scrolled_window.vadjustment()
 }

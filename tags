@@ -39,6 +39,7 @@ adding_entry_from_a_single_file	/home/tof/Coding/gsr/src/catalog.rs	/^    fn add
 after_adding_entries_length_is_updated	/home/tof/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
 after_moving_next_page_index_depends_on_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
 apply_label	/home/tof/Coding/gsr/src/catalog.rs	/^    fn apply_label(&mut self, label: String) -> Result<()> {$/;"	f
+arrow_command	/home/tof/Coding/gsr/src/gui.rs	/^pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {$/;"	f
 at_creation_length_is_0	/home/tof/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
 begin_input	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self) {$/;"	f
 build_gui	/home/tof/Coding/gsr/src/gui.rs	/^pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {$/;"	f
@@ -139,6 +140,8 @@ page_limit_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_limit_on(&se
 page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 palette_on	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 paste_label	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn paste_label(&mut self) -> Result<()> {$/;"	f
+picture_hadjustment	/home/tof/Coding/gsr/src/gui.rs	/^pub fn picture_hadjustment(view_scrolled_window: &gtk::ScrolledWindow) -> gtk::Adjustment {$/;"	f
+picture_vadjustment	/home/tof/Coding/gsr/src/gui.rs	/^pub fn picture_vadjustment(view_scrolled_window: &gtk::ScrolledWindow) -> gtk::Adjustment {$/;"	f
 process_key	/home/tof/Coding/gsr/src/gui.rs	/^pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {$/;"	f
 read_file_info	/home/tof/Coding/gsr/src/picture_io.rs	/^pub fn read_file_info(file_path: &str) -> Result<(FileSize, SystemTime)> {$/;"	f
 read_image_data	/home/tof/Coding/gsr/src/picture_io.rs	/^pub fn read_image_data(file_path: &str) -> Result<ImageData> {$/;"	f
