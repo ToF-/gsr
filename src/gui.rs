@@ -24,10 +24,6 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         .build();
     let picture = Picture::new();
 
-    if let Ok(catalog) = catalog_rc.try_borrow() {
-        let entry = catalog.current_entry().unwrap();
-        picture.set_filename(Some(entry.original_file_path()));
-    }
     application_window.set_child(Some(&picture));
 
     let gui = Gui {
@@ -40,9 +36,13 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     evk.connect_key_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_, key, _, _| {
         process_key(&catalog_rc, &gui_rc, key) 
     }));
-    if let Ok(gui) = gui_rc.try_borrow() {
-        gui.application_window.add_controller(evk);
-        gui.application_window.present()
+    if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
+        if let Ok(gui) = gui_rc.try_borrow() {
+            gui.application_window.add_controller(evk);
+            catalog.refresh();
+            refresh_picture(&gui, &catalog);
+            gui.application_window.present()
+        }
     };
 }
 
@@ -80,6 +80,11 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
 pub fn refresh_picture(gui: &Gui, catalog: &Catalog) {
     if catalog.page_changed() {
         let entry = catalog.current_entry().unwrap();
-        gui.picture.set_filename(Some(entry.original_file_path()))
+        gui.picture.set_filename(Some(entry.original_file_path()));
+        set_title(gui, catalog);
     }
+}
+
+pub fn set_title(gui: &Gui, catalog: &Catalog) {
+    gui.application_window.set_title(Some(&catalog.title_display()))
 }

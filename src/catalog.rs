@@ -26,6 +26,8 @@ pub struct Catalog {
     start_index: Option<usize>,
     page_changed: bool,
     cells_per_row: usize,
+    order: Option<Order>,
+    max_selected: usize,
 }
 
 impl Catalog {
@@ -45,6 +47,8 @@ impl Catalog {
             start_index: None,
             page_changed: false,
             cells_per_row: 1,
+            order: Some(Order::Random),
+            max_selected: 0,
         }
     }
 
@@ -54,6 +58,7 @@ impl Catalog {
         if let Err(err) = add_result {
             return Err(err)
         };
+        catalog.count_selected();
         if catalog.length() == 0 {
             return Err(Error::new(ErrorKind::Other,"no picture to show"))
         };
@@ -256,7 +261,30 @@ impl Catalog {
         self.page_changed
     }
 
+    pub fn title_display(&self) -> String {
+        let entry_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
+        let display= format!("S:[{}] {} ordered by {} {}/{}  {} {} {}",
+            self.max_selected,
+            if self.start_index.is_some() { "…" } else { "" },
+            if let Some(order) = self.order.clone() {
+                order.to_string()
+            } else {
+                "??".to_string()
+            },
+            self.index().unwrap(),
+            self.last(),
+            entry_display,
+            if self.full_size_on { "*" } else { "" },
+            if self.input.is_some() { format!("input:{}", self.input.as_ref().unwrap()) } else { String::from("") }
+            );
+        display
+    }
+
     // update
+
+    pub fn refresh(&mut self) {
+        self.page_changed = true
+    }
 
     pub fn set_page_size(&mut self, page_size: usize) {
         assert!(page_size > 0 && page_size <= 10);
@@ -413,7 +441,10 @@ impl Catalog {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 if !entry.deleted {
-                    entry.selected = true;
+                    if !entry.selected {
+                        entry.selected = true;
+                        self.max_selected += 1
+                    };
                     entry.save_image_data()
                 } else {
                     Ok(())
@@ -438,6 +469,7 @@ impl Catalog {
                                 Err(err) => return Err(err),
                             }
                         };
+                        self.count_selected();
                         Ok(())
                     },
                 }
@@ -459,6 +491,7 @@ impl Catalog {
                         Err(err) => return Err(err),
                     }
                 };
+                self.count_selected();
                 Ok(())
             },
             None => Err(Error::new(ErrorKind::Other, "empty catalog")),
@@ -478,10 +511,15 @@ impl Catalog {
                         Err(err) => return Err(err),
                     }
                 };
+                self.count_selected();
                 Ok(())
             },
             None => Err(Error::new(ErrorKind::Other, "empty catalog")),
         }
+    }
+
+    pub fn count_selected(&mut self) {
+        self.max_selected = self.picture_entries.clone().iter().filter(|entry| entry.selected).count()
     }
 
     pub fn sort_by(&mut self, order: Order) {
@@ -494,7 +532,8 @@ impl Catalog {
             Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(&b) }),
             Order::Palette => self.picture_entries.sort_by(|a, b| { a.palette.cmp(&b.palette) }),
             Order::Random => self.picture_entries.shuffle(&mut thread_rng()),
-        }
+        };
+        self.order = Some(order);
     }
 
     pub fn move_to_index(&mut self, index: usize) {
