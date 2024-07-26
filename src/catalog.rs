@@ -521,15 +521,8 @@ impl Catalog {
         match self.index() {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
-                if !entry.deleted {
-                    if !entry.selected {
-                        entry.selected = true;
-                        self.max_selected += 1
-                    };
-                    entry.save_image_data()
-                } else {
-                    Ok(())
-                }
+                entry.selected = !entry.selected;
+                entry.save_image_data()
             },
             None => Ok(())
         }
