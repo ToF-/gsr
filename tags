@@ -18,6 +18,7 @@ Gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^struct Gui {$/;"	s
 HEIGHT_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";$/;"	c
 IMAGE_DATA	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const IMAGE_DATA: &str = "IMAGE_DATA";$/;"	c
 ImageData	/Users/christophethibaut/Coding/gsr/src/image_data.rs	/^pub struct ImageData {$/;"	s
+InputKind	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub enum InputKind {$/;"	g
 Order	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
 PGM	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    const PGM: &str = "gsr2";$/;"	c
 Palette	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Palette = [u32;9];$/;"	T
@@ -41,7 +42,7 @@ after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Codin
 apply_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn apply_label(&mut self, label: String) -> Result<()> {$/;"	f
 arrow_command	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {$/;"	f
 at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
-begin_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self) {$/;"	f
+begin_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self, kind: InputKind) {$/;"	f
 build_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {$/;"	f
 can_move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
 can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_towards(&self, direction: Direction) -> bool {$/;"	f
@@ -65,6 +66,7 @@ checked_args_wont_accept_a_wrong_directory	/Users/christophethibaut/Coding/gsr/s
 checked_args_wont_accept_a_wrong_move_selection_target	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_move_selection_target() {$/;"	f
 cmp_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
 cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
+confirm_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn confirm_input(&mut self) {$/;"	f
 copy_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_label(&mut self) {$/;"	f
 count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn count_selected(&mut self) {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f

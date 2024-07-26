@@ -13,6 +13,10 @@ use rand::thread_rng;
 
 pub type Coords = (usize, usize);
 
+#[derive(Clone, Debug, PartialEq)]
+pub enum InputKind {
+    SearchInput, LabelInput, IndexInput, }
+
 #[derive(Debug)]
 pub struct Catalog {
     picture_entries: Vec<PictureEntry>,
@@ -29,6 +33,7 @@ pub struct Catalog {
     cells_per_row: usize,
     order: Option<Order>,
     max_selected: usize,
+    input_kind: Option<InputKind>,
 }
 
 impl Catalog {
@@ -51,6 +56,7 @@ impl Catalog {
             cells_per_row: 1,
             order: Some(Order::Random),
             max_selected: 0,
+            input_kind: None,
         }
     }
 
@@ -282,8 +288,16 @@ impl Catalog {
             entry_display,
             if self.expand_on { "□" } else { "" },
             if self.full_size_on { "░" } else { "" },
-            if self.input.is_some() { format!("input:{}", self.input.as_ref().unwrap()) } else { String::from("") }
-            );
+            if let Some(kind) = self.input_kind.clone() {
+                match kind {
+                    InputKind::SearchInput => format!("search:{}", self.input.as_ref().unwrap()),
+                    InputKind::LabelInput => format!("label:{}", self.input.as_ref().unwrap()),
+                    InputKind::IndexInput => format!("index:{}", self.input.as_ref().unwrap()),
+                }
+            } else {
+                String::from("")
+            }
+        );
         display
     }
 
@@ -313,12 +327,36 @@ impl Catalog {
         self.page_limit_on = !self.page_limit_on
     }
 
-    pub fn begin_input(&mut self) {
+    pub fn begin_input(&mut self, kind: InputKind) {
+        self.input_kind = Some(kind);
         self.input = Some(String::from(""))
     }
 
     pub fn cancel_input(&mut self) {
-        self.input = None
+        self.input = None;
+        self.input_kind = None
+    }
+
+    pub fn confirm_input(&mut self) {
+        if let Some(kind) = self.input_kind.clone() {
+            match kind {
+                InputKind::SearchInput => {
+                    if let Some(index) = self.index_input_pattern() {
+                        self.move_to_index(index)
+                    };
+                    self.input_kind = None;
+                    self.input = None
+                },
+                InputKind::IndexInput => {
+                    if let Some(index) = self.index_input_number() {
+                        self.move_to_index(index)
+                    };
+                    self.input_kind = None;
+                    self.input = None
+                }
+                _ => { },
+            }
+        }
     }
 
     pub fn start_set(&mut self) {
@@ -338,11 +376,32 @@ impl Catalog {
     }
 
     pub fn add_input_char(&mut self, ch: char) {
-        self.input = self.input.clone().map( |s| {
-            let mut t = s.clone();
-            t.push(ch);
-            t
-        })
+        if let Some(kind) = self.input_kind.clone() {
+            let ch_is_ok: bool = match kind {
+                InputKind::IndexInput => {
+                    match ch {
+                        '0'..='9' => true,
+                        _ => false,
+                    }
+                },
+                InputKind::LabelInput => {
+                    match ch {
+                        'a'..='z' => true,
+                        '0'..='9' => true,
+                        '-'|'_' => true,
+                        _ => false,
+                    }
+                },
+                InputKind::SearchInput => true,
+            };
+            if ch_is_ok {
+                self.input = self.input.clone().map( |s| {
+                    let mut t = s.clone();
+                    t.push(ch);
+                    t
+                });
+            }
+        }
     }
 
     pub fn del_input_char(&mut self) {
