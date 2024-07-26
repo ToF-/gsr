@@ -560,6 +560,14 @@ impl Catalog {
         self.page_changed = self.page_index() != page_index
     }
 
+    pub fn move_to_first(&mut self) {
+        self.move_to_index(0)
+    }
+
+    pub fn move_to_last(&mut self) {
+        self.move_to_index(self.last())
+    }
+
     pub fn move_next_page(&mut self) {
         let new_index = self.page_index() + self.page_length();
         self.index = if new_index < self.length() {

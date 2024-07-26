@@ -71,7 +71,8 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                         catalog.move_prev_page();
                     },
                     "q" => gui.application_window.close(),
-                    "z" => catalog.move_to_index(0),
+                    "z" => catalog.move_to_first(),
+                    "Z" => catalog.move_to_last(),
                     _ => { } ,
                 }
             }

@@ -115,7 +115,9 @@ make_picture_entry_from_file_and_image_data_file	/Users/christophethibaut/Coding
 make_picture_entry_from_file_create_image_data_file_if_need_be	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn make_picture_entry_from_file_create_image_data_file_if_need_be() {$/;"	f
 move_next_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_next_page(&mut self) {$/;"	f
 move_prev_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_prev_page(&mut self) {$/;"	f
+move_to_first	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_first(&mut self) {$/;"	f
 move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_index(&mut self, index: usize) {$/;"	f
+move_to_last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_last(&mut self) {$/;"	f
 move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_towards(&mut self, direction: Direction) {$/;"	f
 moving_next_picture_can_be_blocked_or_allowed	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn moving_next_picture_can_be_blocked_or_allowed() {$/;"	f
 my_catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn my_catalog() -> Catalog {$/;"	f
