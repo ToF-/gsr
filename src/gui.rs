@@ -137,19 +137,12 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {
     if catalog.full_size_on() {
         let step: f64 = 100.0;
         let (picture_adjustment, step) = match direction {
-            Direction::Right => (picture_hadjustment(&gui.view_scrolled_window), step),
-            Direction::Left  => (picture_hadjustment(&gui.view_scrolled_window), -step),
-            Direction::Down  => (picture_vadjustment(&gui.view_scrolled_window), step),
-            Direction::Up    => (picture_vadjustment(&gui.view_scrolled_window), -step),
+            Direction::Right => (gui.view_scrolled_window.hadjustment(), step),
+            Direction::Left  => (gui.view_scrolled_window.hadjustment(), -step),
+            Direction::Down  => (gui.view_scrolled_window.vadjustment(), step),
+            Direction::Up    => (gui.view_scrolled_window.vadjustment(), -step),
         };
         picture_adjustment.set_value(picture_adjustment.value() + step)
     }
 }
 
-pub fn picture_hadjustment(view_scrolled_window: &gtk::ScrolledWindow) -> gtk::Adjustment {
-    view_scrolled_window.hadjustment()
-}
-
-pub fn picture_vadjustment(view_scrolled_window: &gtk::ScrolledWindow) -> gtk::Adjustment {
-    view_scrolled_window.vadjustment()
-}
