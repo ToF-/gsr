@@ -23,6 +23,7 @@ pub struct Catalog {
     label: Option<String>,
     palette_on: bool,
     full_size_on: bool,
+    expand_on: bool,
     start_index: Option<usize>,
     page_changed: bool,
     cells_per_row: usize,
@@ -44,6 +45,7 @@ impl Catalog {
             label: None,
             palette_on: false,
             full_size_on: false,
+            expand_on: false,
             start_index: None,
             page_changed: false,
             cells_per_row: 1,
@@ -144,6 +146,10 @@ impl Catalog {
 
     pub fn cells_per_row(&self) -> usize {
         self.cells_per_row
+    }
+
+    pub fn expand_on(&self) -> bool {
+        self.expand_on
     }
 
     pub fn length(&self) -> usize {
@@ -263,7 +269,7 @@ impl Catalog {
 
     pub fn title_display(&self) -> String {
         let entry_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
-        let display= format!("S:[{}] {} ordered by {} {}/{}  {} {} {}",
+        let display= format!("S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
             self.max_selected,
             if self.start_index.is_some() { "…" } else { "" },
             if let Some(order) = self.order.clone() {
@@ -274,13 +280,19 @@ impl Catalog {
             self.index().unwrap(),
             self.last(),
             entry_display,
-            if self.full_size_on { "*" } else { "" },
+            if self.expand_on { "□" } else { "" },
+            if self.full_size_on { "░" } else { "" },
             if self.input.is_some() { format!("input:{}", self.input.as_ref().unwrap()) } else { String::from("") }
             );
         display
     }
 
     // update
+
+    pub fn toggle_expand(&mut self) {
+        self.expand_on = !self.expand_on;
+        self.page_changed = true
+    }
 
     pub fn delete(&mut self) {
         if let Some(index) = self.index() {

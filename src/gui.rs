@@ -1,4 +1,4 @@
-use gtk::{ApplicationWindow, gdk, Picture};
+use gtk::{Align, ApplicationWindow, gdk, Picture};
 use gtk::gdk::Key;
 use crate::gdk::Display;
 use crate::Args;
@@ -62,6 +62,8 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
             if let Some(key_name) = key.name() {
                 match key_name.as_str() {
                     "D" => catalog.delete(),
+                    "e" => catalog.toggle_expand(),
+                    "f" => catalog.toggle_full_size(),
                     "n" => {
                         catalog.move_next_page();
                     },
@@ -83,7 +85,15 @@ pub fn refresh_picture(gui: &Gui, catalog: &Catalog) {
         let entry = catalog.current_entry().unwrap();
         let opacity = if entry.deleted { 0.25 }
         else if entry.selected { 0.50 } else { 1.0 };
+        if catalog.expand_on() {
+            gui.picture.set_valign(Align::Fill);
+            gui.picture.set_halign(Align::Fill);
+        } else {
+            gui.picture.set_valign(Align::Center);
+            gui.picture.set_halign(Align::Center);
+        };
         gui.picture.set_opacity(opacity);
+        gui.picture.set_can_shrink(!catalog.full_size_on());
         gui.picture.set_filename(Some(entry.original_file_path()));
         set_title(gui, catalog);
     }
