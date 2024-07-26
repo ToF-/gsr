@@ -354,6 +354,11 @@ impl Catalog {
                     self.input_kind = None;
                     self.input = None
                 }
+                InputKind::LabelInput => {
+                    let _ = self.set_label();
+                    self.input_kind = None;
+                    self.input = None;
+                },
                 _ => { },
             }
         }
@@ -413,16 +418,15 @@ impl Catalog {
     }
 
     fn apply_label(&mut self, label: String) -> Result<()> {
-        match self.index() {
-            Some(index) => {
-                let entry = &mut self.picture_entries[index];
-                entry.set_label(label);
-                entry.save_image_data()
-            },
-            None => Err(Error::new(ErrorKind::Other, "empty catalog"))
+        if let Some(index) = self.index() {
+            let mut entry = &mut self.picture_entries[index];
+            entry.set_label(label);
+            entry.save_image_data()
+        } else {
+            Ok(())
         }
     }
-    
+
     pub fn set_label(&mut self) -> Result<()> {
         self.label = self.input.clone();
         self.input = None;

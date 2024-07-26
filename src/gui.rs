@@ -104,6 +104,7 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                         "s" => catalog.begin_input(InputKind::SearchInput),
                         "z" => catalog.move_to_first(),
                         "Z" => catalog.move_to_last(),
+                        "slash" => catalog.begin_input(InputKind::LabelInput),
                         "Right" => {
                             refresh = !catalog.full_size_on();
                             arrow_command(Direction::Right, &gui, &mut catalog)

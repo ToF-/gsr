@@ -161,12 +161,17 @@ impl PictureEntry {
     }
 
     pub fn title_display(self) -> String {
-        format!("{} {} [{} {} {}] {}",
+        format!("{} {} [{} {} {}] {} {}",
             self.original_file_name(),
             if self.selected { "△" } else { "" },
             self.file_size,
             self.colors,
             self.rank.show(),
+            if let Some(s) = self.label() {
+                s
+            } else {
+                String::from("")
+            },
             if self.deleted { "🗑" } else { ""})
     }
 }
