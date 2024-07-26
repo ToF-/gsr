@@ -61,6 +61,7 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
         if let Ok(gui) = gui_rc.try_borrow() {
             if let Some(key_name) = key.name() {
                 match key_name.as_str() {
+                    "D" => catalog.delete(),
                     "n" => {
                         catalog.move_next_page();
                     },

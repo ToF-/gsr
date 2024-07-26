@@ -282,6 +282,12 @@ impl Catalog {
 
     // update
 
+    pub fn delete(&mut self) {
+        if let Some(index) = self.index() {
+            self.picture_entries[index].deleted = !self.picture_entries[index].deleted;
+            self.page_changed = true
+        }
+    }
     pub fn refresh(&mut self) {
         self.page_changed = true
     }

@@ -69,6 +69,7 @@ count_selected	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn count_selected(&
 current_entry	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
 current_page_length	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn current_page_length(&self) -> usize {$/;"	f
 del_input_char	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
+delete	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn delete(&mut self) {$/;"	f
 deleting_en_entry_makes_it_non_selectable	/home/tof/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
 dimension	/home/tof/Coding/gsr/src/args.rs	/^fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {$/;"	f
 directory	/home/tof/Coding/gsr/src/path.rs	/^pub fn directory(directory: Option<String>) -> String {$/;"	f
