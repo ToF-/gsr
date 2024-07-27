@@ -1,4 +1,5 @@
-use gtk::{Align, ApplicationWindow, gdk, Picture, ScrolledWindow};
+use gtk::{Align, ApplicationWindow, gdk, Orientation, Picture, ScrolledWindow};
+use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
 use crate::gdk::Display;
 use crate::direction::Direction;
@@ -13,6 +14,7 @@ use gtk::glib::clone;
 struct Gui {
     application_window: gtk::ApplicationWindow,
     view_scrolled_window: gtk::ScrolledWindow,
+    single_view_box: gtk::Box,
     single_view_picture: gtk::Picture,
 }
 
@@ -32,13 +34,22 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         .name("view")
         .build();
 
+    let view_box = gtk::Box::new(Orientation::Vertical, 0);
+    view_box.set_valign(Align::Fill);
+    view_box.set_halign(Align::Fill);
+    view_box.set_hexpand(true);
+    view_box.set_vexpand(true);
+
     let picture = Picture::new();
-    view_scrolled_window.set_child(Some(&picture));
+    view_box.append(&picture);
+
+    view_scrolled_window.set_child(Some(&view_box));
     application_window.set_child(Some(&view_scrolled_window));
 
     let gui = Gui {
         application_window: application_window,
         view_scrolled_window: view_scrolled_window,
+        single_view_box: view_box,
         single_view_picture: picture,
     };
     let gui_rc = Rc::new(RefCell::new(gui));
@@ -163,6 +174,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
 }
 
 pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
+    let view_box = &gui.single_view_box;
     let picture = &gui.single_view_picture;
     if catalog.page_changed() {
         let entry = catalog.current_entry().unwrap();
@@ -179,9 +191,61 @@ pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
         picture.set_can_shrink(!catalog.full_size_on());
         picture.set_filename(Some(entry.original_file_path()));
         set_title(gui, catalog);
+        if let Some(widget) = view_box.last_child() {
+            if widget == *picture {
+                println!("init palette");
+                let colors = entry.palette;
+                let palette_area = gtk::DrawingArea::new();
+                palette_area.set_valign(Align::Center);
+                palette_area.set_halign(Align::Center);
+                palette_area.set_content_width(90);
+                palette_area.set_content_width(10);
+                palette_area.set_hexpand(true);
+                palette_area.set_vexpand(true);
+                palette_area.set_draw_func(move |_, ctx, _, _| {
+                    draw_palette(ctx, 90, 10, &colors)
+                });
+                view_box.append(&palette_area)
+            } else {
+                view_box.remove(&widget);
+                println!("remove and init palette");
+                let colors = entry.palette;
+                let palette_area = gtk::DrawingArea::new();
+                palette_area.set_valign(Align::Center);
+                palette_area.set_halign(Align::Center);
+                palette_area.set_content_width(90);
+                palette_area.set_content_width(10);
+                palette_area.set_hexpand(true);
+                palette_area.set_vexpand(true);
+                palette_area.set_draw_func(move |_, ctx, _, _| {
+                    draw_palette(ctx, 90, 10, &colors)
+
+                });
+                view_box.insert_child_after(&palette_area, Some(picture));
+            }
+        }
+
     }
 }
 
+pub fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
+    const COLOR_MAX: f64 = 9.0;
+    let square_size: f64 = height as f64;
+    let offset: f64 = (width as f64 - (COLOR_MAX as f64 * square_size)) / 2.0;
+    let surface = ImageSurface::create(Format::ARgb32, width, height).expect("can't create surface");
+    let context = Context::new(&surface).expect("can't create context");
+    for (i,w) in colors.iter().enumerate() {
+        let r = ((w >> 16) & 255) as u8;
+        let g = ((w >> 8) & 255) as u8;
+        let b = (w & 255) as u8;
+        context.set_source_rgb(r as f64 / 255.0, g as f64 / 255.0, b as f64 / 255.0);
+        let x = i as f64 * square_size;
+        context.rectangle(offset + x, 0.0, square_size, square_size);
+        context.fill().expect("can't fill rectangle");
+    };
+    ctx.set_source_surface(&surface, 0.0, 0.0).expect("can't set source surface");
+    ctx.paint().expect("can't paint surface")
+}
 pub fn set_title(gui: &Gui, catalog: &Catalog) {
     gui.application_window.set_title(Some(&catalog.title_display()))
 }

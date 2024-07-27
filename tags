@@ -5,6 +5,7 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
 Args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub struct Args {$/;"	s
+COLOR_MAX	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    const COLOR_MAX: f64 = 9.0;$/;"	c
 Catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
 Colors	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Colors = usize;$/;"	T
 Coords	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub type Coords = (usize, usize);$/;"	T
@@ -76,6 +77,7 @@ delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&m
 deleting_en_entry_makes_it_non_selectable	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
 dimension	/Users/christophethibaut/Coding/gsr/src/args.rs	/^fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {$/;"	f
 directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn directory(directory: Option<String>) -> String {$/;"	f
+draw_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {$/;"	f
 editing_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
 end_set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_set_label(&mut self) -> Result<()> {$/;"	f
 end_set_select	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_set_select(&mut self) -> Result<()> {$/;"	f
