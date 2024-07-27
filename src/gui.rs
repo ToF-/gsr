@@ -4,6 +4,7 @@ use gtk::gdk::Key;
 use crate::gdk::Display;
 use crate::direction::Direction;
 use crate::Args;
+use crate::order::Order;
 use crate::Catalog;
 use crate::catalog::InputKind;
 use gtk::prelude::*;
@@ -89,6 +90,8 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                 let mut refresh: bool = true;
                 refresh = if catalog.input_on() {
                     input_mode_process_key(key, &gui, &mut catalog)
+                } else if catalog.sort_selection_on() {
+                    sort_selection_process_key(key, &mut catalog)
                 } else {
                     view_mode_process_key(key, &gui, &mut catalog)
                 };
@@ -121,6 +124,26 @@ fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
     refresh
 }
 
+fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {
+    let mut refresh: bool = true;
+    match key.name() {
+        None => refresh = false,
+        Some(key_name) => match key_name.as_str() {
+            "c" => catalog.sort_by(Order::Colors),
+            "d" => catalog.sort_by(Order::Date),
+            "l" => catalog.sort_by(Order::Label),
+            "n" => catalog.sort_by(Order::Name),
+            "p" => catalog.sort_by(Order::Palette),
+            "r" => catalog.sort_by(Order::Random),
+            "s" => catalog.sort_by(Order::Size),
+            "v" => catalog.sort_by(Order::Value),
+            "Escape" => catalog.cancel_sort_selection(),
+            _ => {},
+        }
+    };
+    refresh
+}
+
 fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
     let mut refresh: bool = true;
     match key.name() {
@@ -147,7 +170,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             },
             "z" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
-
+            "equal" => catalog.begin_sort_selection(),
             "comma" => {
                 let _ = catalog.select();
                 catalog.count_selected()

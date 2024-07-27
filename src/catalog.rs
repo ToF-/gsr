@@ -34,6 +34,7 @@ pub struct Catalog {
     order: Option<Order>,
     max_selected: usize,
     input_kind: Option<InputKind>,
+    previous_order: Option<Order>,
 }
 
 impl Catalog {
@@ -57,6 +58,7 @@ impl Catalog {
             order: Some(Order::Random),
             max_selected: 0,
             input_kind: None,
+            previous_order: Some(Order::Random),
         }
     }
 
@@ -149,6 +151,10 @@ impl Catalog {
     }
 
     // queries
+
+    pub fn sort_selection_on(&self) -> bool {
+        self.order.is_none()
+    }
 
     pub fn cells_per_row(&self) -> usize {
         self.cells_per_row
@@ -302,6 +308,15 @@ impl Catalog {
     }
 
     // update
+
+    pub fn begin_sort_selection(&mut self) {
+        self.previous_order = self.order.clone();
+        self.order = None
+    }
+
+    pub fn cancel_sort_selection(&mut self) {
+        self.order = self.previous_order.clone()
+    }
 
     pub fn toggle_expand(&mut self) {
         self.expand_on = !self.expand_on;
@@ -597,17 +612,23 @@ impl Catalog {
     }
 
     pub fn sort_by(&mut self, order: Order) {
-        match order {
-            Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
-            Order::Date => self.picture_entries.sort_by(|a, b| { a.modified_time.cmp(&b.modified_time) }),
-            Order::Name => self.picture_entries.sort_by(|a, b| { a.original_file_path().cmp(&b.original_file_path()) }),
-            Order::Size => self.picture_entries.sort_by(|a, b| { a.file_size.cmp(&b.file_size)} ),
-            Order::Value => self.picture_entries.sort_by(|a, b|  { a.cmp_rank(&b) }),
-            Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(&b) }),
-            Order::Palette => self.picture_entries.sort_by(|a, b| { a.palette.cmp(&b.palette) }),
-            Order::Random => self.picture_entries.shuffle(&mut thread_rng()),
-        };
-        self.order = Some(order);
+        if let Some(entry) = self.current_entry() {
+            let original_file_name = entry.original_file_name();
+            match order {
+                Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
+                Order::Date => self.picture_entries.sort_by(|a, b| { a.modified_time.cmp(&b.modified_time) }),
+                Order::Name => self.picture_entries.sort_by(|a, b| { a.original_file_path().cmp(&b.original_file_path()) }),
+                Order::Size => self.picture_entries.sort_by(|a, b| { a.file_size.cmp(&b.file_size)} ),
+                Order::Value => self.picture_entries.sort_by(|a, b|  { a.cmp_rank(&b) }),
+                Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(&b) }),
+                Order::Palette => self.picture_entries.sort_by(|a, b| { a.palette.cmp(&b.palette) }),
+                Order::Random => self.picture_entries.shuffle(&mut thread_rng()),
+            };
+            self.order = Some(order);
+            if let Some(index) = self.picture_entries.iter().position(|entry| entry.original_file_name() == original_file_name) {
+                self.move_to_index(index)
+            }
+        }
     }
 
     pub fn move_to_index(&mut self, index: usize) {
