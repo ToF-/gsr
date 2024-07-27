@@ -39,6 +39,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     view_box.set_halign(Align::Fill);
     view_box.set_hexpand(true);
     view_box.set_vexpand(true);
+    view_box.set_homogeneous(false);
 
     let picture = Picture::new();
     view_box.append(&picture);
@@ -190,42 +191,33 @@ pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
         picture.set_opacity(opacity);
         picture.set_can_shrink(!catalog.full_size_on());
         picture.set_filename(Some(entry.original_file_path()));
+        let colors = entry.palette;
+        let palette_area = create_palette(colors.clone());
         set_title(gui, catalog);
         if let Some(widget) = view_box.last_child() {
             if widget == *picture {
-                println!("init palette");
-                let colors = entry.palette;
-                let palette_area = gtk::DrawingArea::new();
-                palette_area.set_valign(Align::Center);
-                palette_area.set_halign(Align::Center);
-                palette_area.set_content_width(90);
-                palette_area.set_content_width(10);
-                palette_area.set_hexpand(true);
-                palette_area.set_vexpand(true);
-                palette_area.set_draw_func(move |_, ctx, _, _| {
-                    draw_palette(ctx, 90, 10, &colors)
-                });
                 view_box.append(&palette_area)
             } else {
                 view_box.remove(&widget);
-                println!("remove and init palette");
-                let colors = entry.palette;
-                let palette_area = gtk::DrawingArea::new();
-                palette_area.set_valign(Align::Center);
-                palette_area.set_halign(Align::Center);
-                palette_area.set_content_width(90);
-                palette_area.set_content_width(10);
-                palette_area.set_hexpand(true);
-                palette_area.set_vexpand(true);
-                palette_area.set_draw_func(move |_, ctx, _, _| {
-                    draw_palette(ctx, 90, 10, &colors)
-
-                });
                 view_box.insert_child_after(&palette_area, Some(picture));
             }
         }
 
     }
+}
+
+fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {
+    let palette_area = gtk::DrawingArea::new();
+    palette_area.set_valign(Align::Center);
+    palette_area.set_halign(Align::Center);
+    palette_area.set_content_width(90);
+    palette_area.set_content_height(10);
+    palette_area.set_hexpand(true);
+    palette_area.set_vexpand(true);
+    palette_area.set_draw_func(move |_, ctx, _, _| {
+        draw_palette(ctx, 90, 10, &colors)
+    });
+    palette_area
 }
 
 pub fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
