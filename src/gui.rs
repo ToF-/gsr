@@ -1,4 +1,4 @@
-use gtk::{Align, ApplicationWindow, gdk, Orientation, Picture, ScrolledWindow, Stack};
+use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow, Stack};
 use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
 use crate::gdk::Display;
@@ -7,6 +7,7 @@ use crate::Args;
 use crate::order::Order;
 use crate::Catalog;
 use crate::catalog::InputKind;
+use crate::picture_entry::PictureEntry;
 use gtk::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -15,11 +16,16 @@ use gtk::glib::clone;
 struct Gui {
     application_window: gtk::ApplicationWindow,
     single_view_scrolled_window: gtk::ScrolledWindow,
+    multiple_view_scrolled_window: gtk::ScrolledWindow,
     single_view_box: gtk::Box,
     single_view_picture: gtk::Picture,
 }
 
 pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {
+    let cells_per_row: i32 = match catalog_rc.try_borrow() {
+        Ok(catalog) => catalog.cells_per_row() as i32,
+        Err(err) => panic!("{}", err),
+    };
     let width = args.width.unwrap();
     let height = args.height.unwrap();
     let application_window = ApplicationWindow::builder()
@@ -49,16 +55,69 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     view_box.append(&picture);
     single_view_scrolled_window.set_child(Some(&view_box));
 
+    let multiple_view_scrolled_window = ScrolledWindow::builder()
+        .hscrollbar_policy(gtk::PolicyType::Automatic)
+        .vscrollbar_policy(gtk::PolicyType::Automatic)
+        .name("grid")
+        .build();
+
+    let multiple_view_panel =Grid::new();
+    multiple_view_panel.set_hexpand(true);
+    multiple_view_panel.set_vexpand(true);
+    multiple_view_panel.set_row_homogeneous(true);
+    multiple_view_panel.set_column_homogeneous(false);
+    let buttons_css_provider = CssProvider::new();
+    buttons_css_provider.load_from_data(
+        "
+            label {
+                color: gray;
+                font-size: 12px;
+            }
+            text-button {
+                background-color: black;
+            }
+        ");
+    let left_button = Label::new(Some("←"));
+    let right_button= Label::new(Some("→"));
+    left_button.set_width_chars(10);
+    right_button.set_width_chars(10);
+    left_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    right_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+
+    let multiple_view_grid = Grid::new();
+    multiple_view_grid.set_widget_name("multiple_view_grid");
+    multiple_view_grid.set_row_homogeneous(true);
+    multiple_view_grid.set_column_homogeneous(true);
+    multiple_view_grid.set_hexpand(true);
+    multiple_view_grid.set_vexpand(true);
+    multiple_view_panel.attach(&left_button, 0, 0, 1, 1);
+    multiple_view_panel.attach(&multiple_view_grid, 1, 0, 1, 1);
+    multiple_view_panel.attach(&right_button, 2, 0, 1, 1);
+
+    for col in 0 .. cells_per_row {
+        for row in 0 .. cells_per_row {
+            let cell_box = gtk::Box::new(Orientation::Vertical, 0);
+            cell_box.set_valign(Align::Center);
+            cell_box.set_halign(Align::Center);
+            cell_box.set_hexpand(true);
+            cell_box.set_vexpand(true);
+            setup_picture_cell(&application_window, &multiple_view_grid, &cell_box, col, row, &catalog_rc)
+        }
+    }
+    multiple_view_scrolled_window.set_child(Some(&multiple_view_panel));
+
     let view_stack = gtk::Stack::new();
     view_stack.set_hexpand(true);
     view_stack.set_vexpand(true);
     let _ = view_stack.add_child(&single_view_scrolled_window);
+    let _ = view_stack.add_child(&multiple_view_scrolled_window);
     view_stack.set_visible_child(&single_view_scrolled_window);
     application_window.set_child(Some(&view_stack));
 
     let gui = Gui {
         application_window: application_window,
         single_view_scrolled_window: single_view_scrolled_window,
+        multiple_view_scrolled_window: multiple_view_scrolled_window,
         single_view_box: view_box,
         single_view_picture: picture,
     };
@@ -287,3 +346,45 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {
     }
 }
 
+fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {
+    if let Ok(catalog) = catalog_rc.try_borrow() {
+        let coords = (col as usize, row as usize);
+        if let Some(index) = catalog.index_from_position(coords) {
+            if catalog.page_changed() {
+                while let Some(child) = cell_box.first_child() {
+                    cell_box.remove(&child)
+                };
+                let entry = catalog.entry_at_index(index).unwrap();
+                let picture = picture_for_entry(&entry, &catalog);
+                let label = label_for_entry(&entry, index, &catalog);
+                cell_box.append(&picture);
+                cell_box.append(&label);
+            }
+        }
+    }
+}
+
+pub fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {
+    let picture = gtk::Picture::new();
+    let opacity = if entry.deleted { 0.25 }
+    else if entry.selected { 0.50 } else { 1.0 };
+    picture.set_valign(Align::Center);
+    picture.set_halign(Align::Center);
+    picture.set_opacity(opacity);
+    picture.set_can_shrink(!catalog.full_size_on());
+    let result = if catalog.cells_per_row() < 10 {
+        picture.set_filename(Some(entry.original_file_path()));
+    } else {
+        picture.set_filename(Some(entry.thumbnail_file_path()));
+    };
+    picture.set_visible(true);
+    picture
+}
+fn label_for_entry(entry: &PictureEntry, index: usize, catalog: &Catalog) -> gtk::Label {
+    let is_current_entry = index == catalog.index().unwrap() && catalog.cells_per_row() > 1;
+    let label = gtk::Label::new(Some(&entry.label_display(is_current_entry)));
+    label.set_valign(Align::Center);
+    label.set_halign(Align::Center);
+    label.set_widget_name("picture_label");
+    label
+}

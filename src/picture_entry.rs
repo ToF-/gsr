@@ -160,6 +160,18 @@ impl PictureEntry {
         check_or_create_thumbnail_file(&thumbnail_file_path, &original_file_path)
     }
 
+    pub fn label_display(&self, has_focus: bool) -> String {
+        format!("{}{}{}{}{}",
+            if has_focus { "▄" } else { "" },
+            self.rank.show(),
+            if self.selected { "△" } else { "" },
+            if self.label.len() > 0 {
+                format!("{}", self.label)
+            } else { String::from("") } ,
+            if self.deleted { "🗑" } else { "" },
+        )
+
+    }
     pub fn title_display(self) -> String {
         format!("{} {} [{} {} {}] {} {}",
             self.original_file_name(),
