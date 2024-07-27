@@ -42,6 +42,9 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     view_box.set_homogeneous(false);
 
     let picture = Picture::new();
+    picture.set_hexpand(true);
+    picture.set_vexpand(true);
+
     view_box.append(&picture);
 
     view_scrolled_window.set_child(Some(&view_box));
@@ -138,6 +141,10 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "s" => catalog.begin_input(InputKind::SearchInput),
             "u" => { let _ = catalog.unselect_page(); },
             "U" => { let _ = catalog.unselect_all(); },
+            "x" => {
+                catalog.toggle_palette();
+                refresh = true
+            },
             "z" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
 
@@ -191,18 +198,17 @@ pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
         picture.set_opacity(opacity);
         picture.set_can_shrink(!catalog.full_size_on());
         picture.set_filename(Some(entry.original_file_path()));
-        let colors = entry.palette;
-        let palette_area = create_palette(colors.clone());
         set_title(gui, catalog);
         if let Some(widget) = view_box.last_child() {
-            if widget == *picture {
-                view_box.append(&palette_area)
-            } else {
-                view_box.remove(&widget);
-                view_box.insert_child_after(&palette_area, Some(picture));
+            if widget != *picture {
+                view_box.remove(&widget)
             }
         }
-
+        if catalog.palette_on() {
+            let colors = entry.palette;
+            let palette_area = create_palette(colors.clone());
+            view_box.insert_child_after(&palette_area, Some(picture));
+        }
     }
 }
 
@@ -212,8 +218,6 @@ fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {
     palette_area.set_halign(Align::Center);
     palette_area.set_content_width(90);
     palette_area.set_content_height(10);
-    palette_area.set_hexpand(true);
-    palette_area.set_vexpand(true);
     palette_area.set_draw_func(move |_, ctx, _, _| {
         draw_palette(ctx, 90, 10, &colors)
     });
