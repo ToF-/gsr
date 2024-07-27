@@ -1,4 +1,4 @@
-use gtk::{Align, ApplicationWindow, gdk, Orientation, Picture, ScrolledWindow};
+use gtk::{Align, ApplicationWindow, gdk, Orientation, Picture, ScrolledWindow, Stack};
 use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
 use crate::gdk::Display;
@@ -14,7 +14,7 @@ use gtk::glib::clone;
 
 struct Gui {
     application_window: gtk::ApplicationWindow,
-    view_scrolled_window: gtk::ScrolledWindow,
+    single_view_scrolled_window: gtk::ScrolledWindow,
     single_view_box: gtk::Box,
     single_view_picture: gtk::Picture,
 }
@@ -29,7 +29,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         .default_height(height)
         .build();
 
-    let view_scrolled_window = ScrolledWindow::builder()
+    let single_view_scrolled_window = ScrolledWindow::builder()
         .hscrollbar_policy(gtk::PolicyType::Automatic)
         .vscrollbar_policy(gtk::PolicyType::Automatic)
         .name("view")
@@ -47,13 +47,18 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     picture.set_vexpand(true);
 
     view_box.append(&picture);
+    single_view_scrolled_window.set_child(Some(&view_box));
 
-    view_scrolled_window.set_child(Some(&view_box));
-    application_window.set_child(Some(&view_scrolled_window));
+    let view_stack = gtk::Stack::new();
+    view_stack.set_hexpand(true);
+    view_stack.set_vexpand(true);
+    let _ = view_stack.add_child(&single_view_scrolled_window);
+    view_stack.set_visible_child(&single_view_scrolled_window);
+    application_window.set_child(Some(&view_stack));
 
     let gui = Gui {
         application_window: application_window,
-        view_scrolled_window: view_scrolled_window,
+        single_view_scrolled_window: single_view_scrolled_window,
         single_view_box: view_box,
         single_view_picture: picture,
     };
@@ -273,10 +278,10 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {
     if catalog.full_size_on() {
         let step: f64 = 100.0;
         let (picture_adjustment, step) = match direction {
-            Direction::Right => (gui.view_scrolled_window.hadjustment(), step),
-            Direction::Left  => (gui.view_scrolled_window.hadjustment(), -step),
-            Direction::Down  => (gui.view_scrolled_window.vadjustment(), step),
-            Direction::Up    => (gui.view_scrolled_window.vadjustment(), -step),
+            Direction::Right => (gui.single_view_scrolled_window.hadjustment(), step),
+            Direction::Left  => (gui.single_view_scrolled_window.hadjustment(), -step),
+            Direction::Down  => (gui.single_view_scrolled_window.vadjustment(), step),
+            Direction::Up    => (gui.single_view_scrolled_window.vadjustment(), -step),
         };
         picture_adjustment.set_value(picture_adjustment.value() + step)
     }
