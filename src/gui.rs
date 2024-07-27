@@ -72,77 +72,94 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
         if let Ok(gui) = gui_rc.try_borrow() {
             if let Some(key_name) = key.name() {
                 let mut refresh: bool = true;
-                if catalog.input_on() {
-                    refresh = false;
-                    match key_name.as_str() {
-                        "Escape" => catalog.cancel_input(),
-                        "Return" => {
-                            catalog.confirm_input();
-                            refresh = true
-                        },
-                        "BackSpace" => catalog.del_input_char(),
-                        _ => {
-                            if let Some(ch) = key.to_unicode() {
-                                catalog.add_input_char(ch)
-                            }
-                        },
-                    };
-                    set_title(&gui, &catalog);
+                refresh = if catalog.input_on() {
+                    input_mode_process_key(key, &gui, &mut catalog)
                 } else {
-                    match key_name.as_str() {
-                        "c" => catalog.copy_label(),
-                        "D" => catalog.delete(),
-                        "e" => catalog.toggle_expand(),
-                        "f" => catalog.toggle_full_size(),
-                        "g" => catalog.begin_input(InputKind::IndexInput),
-                        "n" => {
-                            catalog.move_next_page();
-                        },
-                        "p" => {
-                            catalog.move_prev_page();
-                        },
-                        "q" => gui.application_window.close(),
-                        "s" => catalog.begin_input(InputKind::SearchInput),
-                        "u" => { let _ = catalog.unselect_page(); },
-                        "U" => { let _ = catalog.unselect_all(); },
-                        "z" => catalog.move_to_first(),
-                        "Z" => catalog.move_to_last(),
-                        
-                        "comma" => {
-                                let _ = catalog.select();
-                                catalog.count_selected()
-                        },
-                        "plus" => {
-                            catalog.paste_label();
-                        },
-                        "minus" => { 
-                            let _ = catalog.unlabel();
-                        },
-                        "slash" => catalog.begin_input(InputKind::LabelInput),
-                        "Right" => {
-                            refresh = !catalog.full_size_on();
-                            arrow_command(Direction::Right, &gui, &mut catalog)
-                        },
-                        "Left" => {
-                            refresh = !catalog.full_size_on();
-                            arrow_command(Direction::Left, &gui, &mut catalog)
-                        },
-                        "Down" => {
-                            refresh = !catalog.full_size_on();
-                            arrow_command(Direction::Down, &gui, &mut catalog)
-                        },
-                        "Up" => {
-                            refresh = !catalog.full_size_on();
-                            arrow_command(Direction::Up, &gui, &mut catalog)
-                        },
-                        _ => { } ,
-                    }
-                }
+                    view_mode_process_key(key, &gui, &mut catalog)
+                };
                 if refresh { refresh_single_view_picture(&gui, &catalog) }
             };
         }
     };
     gtk::Inhibit(false)
+}
+
+fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
+    let mut refresh: bool = false;
+    match key.name() {
+        None => refresh = false,
+        Some(key_name) => match key_name.as_str() {
+            "Escape" => catalog.cancel_input(),
+            "Return" => {
+                catalog.confirm_input();
+                refresh = true
+            },
+            "BackSpace" => catalog.del_input_char(),
+            _ => {
+                if let Some(ch) = key.to_unicode() {
+                    catalog.add_input_char(ch)
+                }
+            }
+        },
+    };
+    set_title(&gui, &catalog);
+    refresh
+}
+
+fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
+    let mut refresh: bool = true;
+    match key.name() {
+        None => refresh = false,
+        Some(key_name) => match key_name.as_str() {
+            "c" => catalog.copy_label(),
+            "D" => catalog.delete(),
+            "e" => catalog.toggle_expand(),
+            "f" => catalog.toggle_full_size(),
+            "g" => catalog.begin_input(InputKind::IndexInput),
+            "n" => {
+                catalog.move_next_page();
+            },
+            "p" => {
+                catalog.move_prev_page();
+            },
+            "q" => gui.application_window.close(),
+            "s" => catalog.begin_input(InputKind::SearchInput),
+            "u" => { let _ = catalog.unselect_page(); },
+            "U" => { let _ = catalog.unselect_all(); },
+            "z" => catalog.move_to_first(),
+            "Z" => catalog.move_to_last(),
+
+            "comma" => {
+                let _ = catalog.select();
+                catalog.count_selected()
+            },
+            "plus" => {
+                catalog.paste_label();
+            },
+            "minus" => { 
+                let _ = catalog.unlabel();
+            },
+            "slash" => catalog.begin_input(InputKind::LabelInput),
+            "Right" => {
+                refresh = !catalog.full_size_on();
+                arrow_command(Direction::Right, gui, catalog)
+            },
+            "Left" => {
+                refresh = !catalog.full_size_on();
+                arrow_command(Direction::Left, gui, catalog)
+            },
+            "Down" => {
+                refresh = !catalog.full_size_on();
+                arrow_command(Direction::Down, gui, catalog)
+            },
+            "Up" => {
+                refresh = !catalog.full_size_on();
+                arrow_command(Direction::Up, gui, catalog)
+            },
+            _ => { } ,
+        },
+    };
+    refresh
 }
 
 pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {

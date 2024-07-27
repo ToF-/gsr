@@ -105,6 +105,7 @@ index_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub
 index_of_entry_by_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn index_of_entry_by_input() {$/;"	f
 init_catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn init_catalog(args: &Args) -> Result<Self> {$/;"	f
 input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input(&self) -> String {$/;"	f
+input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
 is_thumbnail	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_thumbnail(file_name: &str) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
@@ -181,5 +182,6 @@ unlabel	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn un
 unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_all(&mut self) -> Result<()> {$/;"	f
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
 value_variants	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn value_variants<'a>() -> &'a [Self] {$/;"	f
+view_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 write_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f
 write_thumbnail	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, extension: &str, mut output_file: File) -> ThumbResult<()> {$/;"	f
