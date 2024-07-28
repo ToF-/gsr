@@ -273,19 +273,19 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "minus" => { let _ = catalog.unlabel(); },
             "slash" => catalog.begin_input(InputKind::LabelInput),
             "Right" => {
-                refresh = !catalog.full_size_on();
+                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
                 arrow_command(Direction::Right, gui, catalog)
             },
             "Left" => {
-                refresh = !catalog.full_size_on();
+                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
                 arrow_command(Direction::Left, gui, catalog)
             },
             "Down" => {
-                refresh = !catalog.full_size_on();
+                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
                 arrow_command(Direction::Down, gui, catalog)
             },
             "Up" => {
-                refresh = !catalog.full_size_on();
+                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
                 arrow_command(Direction::Up, gui, catalog)
             },
             _ => { } ,
@@ -339,7 +339,7 @@ fn refresh_multiple_view_picture(gui: &Gui, catalog: &Catalog) {
                         if let Some(index) = catalog.index_from_position(coords) {
                             let entry = catalog.entry_at_index(index).unwrap();
                             let picture = picture_for_entry(&entry, &catalog);
-                            let label = label_for_entry(&entry, index, &catalog);
+                            let label = label_for_entry(&entry, index, &catalog, index == catalog.index().unwrap());
                             cell_box.append(&picture);
                             cell_box.append(&label);
                         }
@@ -397,6 +397,11 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) {
             picture_adjustment.set_value(picture_adjustment.value() + step)
         } else {
             if catalog.can_move_towards(direction.clone()) {
+                let (col, row) = catalog.coords_for_index(catalog.index().unwrap());
+                let label = label_at_coords(gui, col as i32, row as i32).expect("can't find current label");
+
+
+                let Some(current_label) = 
                 catalog.move_towards(direction);
             }
         }
@@ -404,7 +409,8 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) {
         if catalog.can_move_towards(direction.clone()) {
             catalog.move_towards(direction);
         }
-    }
+    };
+    gui.application_window.set_title(Some(&catalog.title_display()))
 }
 
 fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {
@@ -417,7 +423,7 @@ fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view
                 };
                 let entry = catalog.entry_at_index(index).unwrap();
                 let picture = picture_for_entry(&entry, &catalog);
-                let label = label_for_entry(&entry, index, &catalog);
+                let label = label_for_entry(&entry, index, &catalog, index == catalog.index().unwrap());
                 cell_box.append(&picture);
                 cell_box.append(&label);
                 multiple_view_grid.attach(cell_box, col, row, 1, 1);
@@ -443,9 +449,8 @@ pub fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Pictur
     picture.set_visible(true);
     picture
 }
-fn label_for_entry(entry: &PictureEntry, index: usize, catalog: &Catalog) -> gtk::Label {
-    let is_current_entry = index == catalog.index().unwrap() && catalog.cells_per_row() > 1;
-    let label = gtk::Label::new(Some(&entry.label_display(is_current_entry)));
+fn label_for_entry(entry: &PictureEntry, index: usize, catalog: &Catalog, with_focus: bool) -> gtk::Label {
+    let label = gtk::Label::new(Some(&entry.label_display(with_focus)));
     label.set_valign(Align::Center);
     label.set_halign(Align::Center);
     label.set_widget_name("picture_label");

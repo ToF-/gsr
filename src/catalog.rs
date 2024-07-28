@@ -200,6 +200,14 @@ impl Catalog {
         }
     }
 
+    pub fn coords_for_index(&self, index: usize) -> Coords {
+        let start_index = self.page_index_of(index);
+        let offset = index - start_index;
+        let row = offset / self.cells_per_row();
+        let col = offset % self.cells_per_row();
+        (col, row)
+    }
+
     pub fn index_from_position(&self, coords: Coords) -> Option<usize> {
         let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size) as usize;
         if index < self.length() {
