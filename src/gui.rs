@@ -134,8 +134,9 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
         if let Ok(gui) = gui_rc.try_borrow() {
             gui.application_window.add_controller(evk);
+            catalog.move_to_index(0);
             catalog.refresh();
-            refresh_single_view_picture(&gui, &catalog);
+            refresh_view(&gui, &catalog);
             gui.application_window.present()
         }
     };
@@ -177,7 +178,8 @@ fn refresh_view(gui: &Gui, catalog: &Catalog) {
         } else {
             refresh_multiple_view_picture(gui, catalog)
         }
-    }
+    };
+    set_title(gui, catalog);
 }
 
 fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
@@ -299,7 +301,6 @@ pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
         picture.set_opacity(opacity);
         picture.set_can_shrink(!catalog.full_size_on());
         picture.set_filename(Some(entry.original_file_path()));
-        set_title(gui, catalog);
         if let Some(widget) = view_box.last_child() {
             if widget != *picture {
                 view_box.remove(&widget)

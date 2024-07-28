@@ -128,14 +128,10 @@ impl Args {
             },
 
             grid: match self.grid {
-                None => Some(1),
-                Some(n) => if n > 0 && n <= 10 {
-                    Some(n)
-                } else if self.thumbnails {
-                    Some(10)
-                } else {
-                    Some(1)
-                }
+                None if !self.thumbnails => Some(1),
+                None if self.thumbnails => Some(10),
+                Some(n) if !self.thumbnails && n <= 10 => Some(n),
+                _ => Some(1),
             },
 
             height: Some(dimension(self.height, HEIGHT_ENV_VAR, "height", DEFAULT_HEIGHT)),
@@ -269,6 +265,12 @@ mod tests {
     fn checked_args_default_grid_size_is_one() {
         let args = my_checked_args(vec![PGM]).unwrap();
         assert_eq!(1, args.grid.unwrap());
+    }
+    #[test]
+    fn checked_args_thumbnails_equals_grid_10() {
+        let args = my_checked_args(vec![PGM, "-t"]).unwrap();
+        println!("{:?}", args);
+        assert_eq!(10, args.grid.unwrap());
     }
 }
 

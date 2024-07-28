@@ -63,6 +63,7 @@ checked_args_default_grid_size_is_one	/Users/christophethibaut/Coding/gsr/src/ar
 checked_args_set_order_to_date_if_option_date_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_set_order_to_date_if_option_date_picked() {$/;"	f
 checked_args_set_order_to_name_if_option_name_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_set_order_to_name_if_option_name_picked() {$/;"	f
 checked_args_set_order_to_value_if_option_value_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_set_order_to_value_if_option_value_picked() {$/;"	f
+checked_args_thumbnails_equals_grid_10	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_thumbnails_equals_grid_10() {$/;"	f
 checked_args_wont_accept_a_wrong_all_move_target	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_all_move_target() {$/;"	f
 checked_args_wont_accept_a_wrong_copy_selection_target	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_copy_selection_target() {$/;"	f
 checked_args_wont_accept_a_wrong_directory	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_directory() {$/;"	f

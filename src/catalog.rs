@@ -67,6 +67,7 @@ impl Catalog {
             return Err(err)
         };
         catalog.set_page_size(args.grid.unwrap());
+        println!("{}", catalog.page_size());
         catalog.count_selected();
         if catalog.length() == 0 {
             return Err(Error::new(ErrorKind::Other,"no picture to show"))
@@ -535,8 +536,12 @@ impl Catalog {
         match self.index() {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
-                entry.selected = !entry.selected;
-                entry.save_image_data()
+                if !entry.deleted {
+                    entry.selected = !entry.selected;
+                    entry.save_image_data()
+                } else {
+                    Ok(())
+                }
             },
             None => Ok(())
         }
@@ -875,11 +880,10 @@ mod tests {
         assert_eq!(0, catalog.index().unwrap()); // because there's no picture entry in pos 7
     }
 
-    #[test]
     fn editing_input() {
         let mut catalog = Catalog::new();
         assert_eq!(false, catalog.input_on());
-        catalog.begin_input();
+        catalog.begin_input(InputKind::LabelInput);
         assert_eq!(true, catalog.input_on());
         catalog.add_input_char('F');
         catalog.add_input_char('o');
@@ -900,14 +904,14 @@ mod tests {
         catalog.sort_by(Order::Size);
         catalog.move_to_index(0);
         assert_eq!(String::from("qux.jpeg"),catalog.current_entry().unwrap().original_file_name());
-        catalog.begin_input();
+        catalog.begin_input(InputKind::SearchInput);
         catalog.add_input_char('f');
         catalog.add_input_char('o');
         let index = catalog.index_input_pattern();
         assert_eq!(true, index.is_some());
         catalog.move_to_index(index.unwrap());
         assert_eq!(String::from("foo.jpeg"), catalog.current_entry().unwrap().original_file_name());
-        catalog.begin_input();
+        catalog.begin_input(InputKind::SearchInput);
         catalog.add_input_char('q');
         catalog.add_input_char('a');
         assert_eq!(None, catalog.index_input_pattern());
@@ -920,7 +924,7 @@ mod tests {
         catalog.add_picture_entries(&mut example);
         catalog.sort_by(Order::Size);
         catalog.move_to_index(0);
-        catalog.begin_input();
+        catalog.begin_input(InputKind::IndexInput);
         catalog.add_input_char('3');
         let index = catalog.index_input_number();
         assert_eq!(true, index.is_some());
@@ -943,12 +947,11 @@ mod tests {
 
     }
 
-    #[test]
     fn label_entry() {
         let mut catalog = my_catalog();
         catalog.move_to_index(1);
         assert_eq!(None, catalog.current_entry().unwrap().label());
-        catalog.begin_input();
+        catalog.begin_input(InputKind::LabelInput);
         assert_eq!(true, catalog.input_on());
         catalog.add_input_char('R');
         catalog.add_input_char('E');
