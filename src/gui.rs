@@ -8,6 +8,7 @@ use crate::order::Order;
 use crate::Catalog;
 use crate::catalog::InputKind;
 use crate::picture_entry::PictureEntry;
+use crate::picture_io::check_or_create_thumbnail_file;
 use gtk::prelude::*;
 use std::rc::Rc;
 use std::cell::RefCell;
@@ -413,6 +414,7 @@ pub fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Pictur
     let result = if catalog.cells_per_row() < 10 {
         picture.set_filename(Some(entry.original_file_path()));
     } else {
+        check_or_create_thumbnail_file(&entry.thumbnail_file_path(), &entry.original_file_path());
         picture.set_filename(Some(entry.thumbnail_file_path()));
     };
     picture.set_visible(true);

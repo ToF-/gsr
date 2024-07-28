@@ -67,7 +67,6 @@ impl Catalog {
             return Err(err)
         };
         catalog.set_page_size(args.grid.unwrap());
-        println!("{}", catalog.page_size());
         catalog.count_selected();
         if catalog.length() == 0 {
             return Err(Error::new(ErrorKind::Other,"no picture to show"))

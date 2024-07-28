@@ -121,6 +121,7 @@ pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_p
     if path.exists() {
         Ok(())
     } else {
+        println!("creating thumbnail file {}", thumbnail_file_path);
         match File::open(original_file_path) {
             Err(err) => Err(err),
             Ok(input_file) => {
@@ -130,6 +131,7 @@ pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_p
                         None => return Err(Error::new(ErrorKind::Other, format!("source file has no extension"))),
                         Some(ext) => ext,
                     };
+
                 let reader = BufReader::new(input_file);
                 let output_file = match File::create(thumbnail_file_path) {
                     Err(err) => return Err(err),
