@@ -17,6 +17,7 @@ struct Gui {
     application_window: gtk::ApplicationWindow,
     single_view_scrolled_window: gtk::ScrolledWindow,
     multiple_view_scrolled_window: gtk::ScrolledWindow,
+    view_stack: gtk::Stack,
     single_view_box: gtk::Box,
     single_view_picture: gtk::Picture,
 }
@@ -111,13 +112,14 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     view_stack.set_vexpand(true);
     let _ = view_stack.add_child(&single_view_scrolled_window);
     let _ = view_stack.add_child(&multiple_view_scrolled_window);
-    view_stack.set_visible_child(&single_view_scrolled_window);
+    view_stack.set_visible_child(&multiple_view_scrolled_window);
     application_window.set_child(Some(&view_stack));
 
     let gui = Gui {
         application_window: application_window,
         single_view_scrolled_window: single_view_scrolled_window,
         multiple_view_scrolled_window: multiple_view_scrolled_window,
+        view_stack: view_stack,
         single_view_box: view_box,
         single_view_picture: picture,
     };
@@ -159,11 +161,21 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
                 } else {
                     view_mode_process_key(key, &gui, &mut catalog)
                 };
-                if refresh { refresh_single_view_picture(&gui, &catalog) }
+                if refresh { refresh_view(&gui, &catalog) }
             };
         }
     };
     gtk::Inhibit(false)
+}
+
+fn refresh_view(gui: &Gui, catalog: &Catalog) {
+    if let Some(child) = gui.view_stack.visible_child() {
+        if child == gui.single_view_scrolled_window {
+            refresh_single_view_picture(gui, catalog)
+        } else {
+            refresh_multiple_view_picture(gui, catalog)
+        }
+    }
 }
 
 fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
@@ -359,6 +371,7 @@ fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view
                 let label = label_for_entry(&entry, index, &catalog);
                 cell_box.append(&picture);
                 cell_box.append(&label);
+                multiple_view_grid.attach(cell_box, col, row, 1, 1);
             }
         }
     }

@@ -30,7 +30,6 @@ pub struct Catalog {
     expand_on: bool,
     start_index: Option<usize>,
     page_changed: bool,
-    cells_per_row: usize,
     order: Option<Order>,
     max_selected: usize,
     input_kind: Option<InputKind>,
@@ -54,7 +53,6 @@ impl Catalog {
             expand_on: false,
             start_index: None,
             page_changed: false,
-            cells_per_row: 1,
             order: Some(Order::Random),
             max_selected: 0,
             input_kind: None,
@@ -68,6 +66,7 @@ impl Catalog {
         if let Err(err) = add_result {
             return Err(err)
         };
+        catalog.set_page_size(args.grid.unwrap());
         catalog.count_selected();
         if catalog.length() == 0 {
             return Err(Error::new(ErrorKind::Other,"no picture to show"))
@@ -157,7 +156,7 @@ impl Catalog {
     }
 
     pub fn cells_per_row(&self) -> usize {
-        self.cells_per_row
+        self.page_size
     }
 
     pub fn expand_on(&self) -> bool {
@@ -202,7 +201,7 @@ impl Catalog {
     }
 
     pub fn index_from_position(&self, coords: Coords) -> Option<usize> {
-        let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.cells_per_row) as usize;
+        let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size) as usize;
         if index < self.length() {
             Some(index)
         } else {
