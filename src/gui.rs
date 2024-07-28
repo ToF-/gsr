@@ -252,15 +252,11 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "Z" => catalog.move_to_last(),
             "equal" => catalog.begin_sort_selection(),
             "comma" => {
-                let _ = catalog.select();
+                let _ = catalog.toggle_select();
                 catalog.count_selected()
             },
-            "plus" => {
-                catalog.paste_label();
-            },
-            "minus" => { 
-                let _ = catalog.unlabel();
-            },
+            "plus" => { let _ =  catalog.paste_label(); },
+            "minus" => { let _ = catalog.unlabel(); },
             "slash" => catalog.begin_input(InputKind::LabelInput),
             "Right" => {
                 refresh = !catalog.full_size_on();

@@ -532,7 +532,7 @@ impl Catalog {
             None => Err(Error::new(ErrorKind::Other, "empty catalog")),
         }
     }
-    pub fn select(&mut self) -> Result<()> {
+    pub fn toggle_select(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
@@ -551,7 +551,7 @@ impl Catalog {
         match self.index() {
             Some(index) => {
                 match self.start_index {
-                    None => self.select(),
+                    None => self.toggle_select(),
                     Some(other) => {
                         let (start,end) = if other <= index { (other,index) } else { (index,other) };
                         for i in start..end+1 {
