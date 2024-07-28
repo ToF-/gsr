@@ -1053,11 +1053,11 @@ mod tests {
         assert_eq!(false, catalog.current_entry().unwrap().selected);
         assert_eq!(true, catalog.toggle_delete_entry().is_ok());
         assert_eq!(true, catalog.current_entry().unwrap().deleted);
-        let _ = catalog.select();
+        let _ = catalog.toggle_select();
         assert_eq!(false, catalog.current_entry().unwrap().selected);
         assert_eq!(true, catalog.toggle_delete_entry().is_ok());
         assert_eq!(false, catalog.current_entry().unwrap().deleted);
-        let _ = catalog.select();
+        let _ = catalog.toggle_select();
         assert_eq!(true, catalog.current_entry().unwrap().selected);
     }
 

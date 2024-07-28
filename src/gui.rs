@@ -24,6 +24,13 @@ struct Gui {
     single_view_picture: gtk::Picture,
 }
 
+impl Gui {
+    pub fn single_view_mode(&self) -> bool {
+        let child = self.view_stack.visible_child().expect("view stack has no child");
+        child == self.single_view_scrolled_window
+    }
+}
+
 pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {
     let cells_per_row: i32 = match catalog_rc.try_borrow() {
         Ok(catalog) => catalog.cells_per_row() as i32,
@@ -238,6 +245,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "n" => {
                 catalog.move_next_page();
             },
+            "o" => catalog.toggle_page_limit(),
             "p" => {
                 catalog.move_prev_page();
             },
@@ -251,6 +259,11 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             },
             "z" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
+            "period" => if gui.single_view_mode() {
+                gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window)
+            } else {
+                gui.view_stack.set_visible_child(&gui.single_view_scrolled_window)
+            },
             "equal" => catalog.begin_sort_selection(),
             "comma" => {
                 let _ = catalog.toggle_select();
@@ -371,16 +384,26 @@ pub fn set_title(gui: &Gui, catalog: &Catalog) {
     gui.application_window.set_title(Some(&catalog.title_display()))
 }
 
-pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {
-    if catalog.full_size_on() {
-        let step: f64 = 100.0;
-        let (picture_adjustment, step) = match direction {
-            Direction::Right => (gui.single_view_scrolled_window.hadjustment(), step),
-            Direction::Left  => (gui.single_view_scrolled_window.hadjustment(), -step),
-            Direction::Down  => (gui.single_view_scrolled_window.vadjustment(), step),
-            Direction::Up    => (gui.single_view_scrolled_window.vadjustment(), -step),
-        };
-        picture_adjustment.set_value(picture_adjustment.value() + step)
+pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) {
+    if gui.single_view_mode() {
+        if catalog.full_size_on() {
+            let step: f64 = 100.0;
+            let (picture_adjustment, step) = match direction {
+                Direction::Right => (gui.single_view_scrolled_window.hadjustment(), step),
+                Direction::Left  => (gui.single_view_scrolled_window.hadjustment(), -step),
+                Direction::Down  => (gui.single_view_scrolled_window.vadjustment(), step),
+                Direction::Up    => (gui.single_view_scrolled_window.vadjustment(), -step),
+            };
+            picture_adjustment.set_value(picture_adjustment.value() + step)
+        } else {
+            if catalog.can_move_towards(direction.clone()) {
+                catalog.move_towards(direction);
+            }
+        }
+    } else {
+        if catalog.can_move_towards(direction.clone()) {
+            catalog.move_towards(direction);
+        }
     }
 }
 
