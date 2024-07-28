@@ -17,6 +17,7 @@ struct Gui {
     application_window: gtk::ApplicationWindow,
     single_view_scrolled_window: gtk::ScrolledWindow,
     multiple_view_scrolled_window: gtk::ScrolledWindow,
+    multiple_view_grid: gtk::Grid,
     view_stack: gtk::Stack,
     single_view_box: gtk::Box,
     single_view_picture: gtk::Picture,
@@ -119,6 +120,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         application_window: application_window,
         single_view_scrolled_window: single_view_scrolled_window,
         multiple_view_scrolled_window: multiple_view_scrolled_window,
+        multiple_view_grid: multiple_view_grid,
         view_stack: view_stack,
         single_view_box: view_box,
         single_view_picture: picture,
@@ -307,6 +309,32 @@ pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
             let colors = entry.palette;
             let palette_area = create_palette(colors.clone());
             view_box.insert_child_after(&palette_area, Some(picture));
+        }
+    }
+}
+
+fn refresh_multiple_view_picture(gui: &Gui, catalog: &Catalog) {
+    let multiple_view_grid = &gui.multiple_view_grid;
+    if catalog.page_changed() {
+        let cells_per_row = catalog.page_size() as i32;
+        for col in 0 .. cells_per_row {
+            for row in 0 .. cells_per_row {
+                let coords = (col as usize, row as usize);
+                if let Some(widget) = multiple_view_grid.child_at(col, row) {
+                    if let Ok(cell_box) = widget.downcast::<gtk::Box>() {
+                        while let Some(child) = cell_box.first_child() {
+                            cell_box.remove(&child)
+                        };
+                        if let Some(index) = catalog.index_from_position(coords) {
+                            let entry = catalog.entry_at_index(index).unwrap();
+                            let picture = picture_for_entry(&entry, &catalog);
+                            let label = label_for_entry(&entry, index, &catalog);
+                            cell_box.append(&picture);
+                            cell_box.append(&label);
+                        }
+                    }
+                }
+            }
         }
     }
 }
