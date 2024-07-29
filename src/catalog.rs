@@ -252,13 +252,20 @@ impl Catalog {
     }
 
     pub fn can_move_towards(&self, direction: Direction) -> bool {
-        ! self.page_limit_on ||
+        let index = self.index;
+        let cells_per_row = self.page_size;
+        let col = index % cells_per_row;
+        let row = (index - self.page_index()) / cells_per_row;
+        if self.page_limit_on {
             match direction {
-                Direction::Left => self.page_size > 1 && self.index % self.page_size > 0,
-                Direction::Right => self.page_size > 1 && (self.index+1) % self.page_size > 0,
-                Direction::Up => self.page_size > 1 && self.index >= self.page_size,
-                Direction::Down => self.page_size > 1 && (self.index + self.page_size) < self.page_length(),
+                Direction::Left => col > 0,
+                Direction::Right => col+1 < cells_per_row && index+1 < self.length(),
+                Direction::Up => row > 0,
+                Direction::Down => col+1 < cells_per_row && index + cells_per_row < self.length()
             }
+        } else {
+            true
+        }
     }
 
     pub fn index_input_pattern(&mut self) -> Option<usize> {

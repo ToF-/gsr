@@ -186,9 +186,9 @@ pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>,
 fn refresh_view(gui: &Gui, catalog: &Catalog) {
     if let Some(child) = gui.view_stack.visible_child() {
         if child == gui.single_view_scrolled_window {
-            refresh_single_view_picture(gui, catalog)
+            set_picture_for_single_view(gui, catalog)
         } else {
-            refresh_multiple_view_picture(gui, catalog)
+            set_all_pictures_for_multiple_view(gui, catalog)
         }
     };
     set_title(gui, catalog);
@@ -244,7 +244,9 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "c" => catalog.copy_label(),
             "D" => catalog.delete(),
             "e" => catalog.toggle_expand(),
-            "f" => catalog.toggle_full_size(),
+            "f" => if gui.single_view_mode() {
+                catalog.toggle_full_size()
+            },
             "g" => catalog.begin_input(InputKind::IndexInput),
             "n" => catalog.move_next_page(),
             "o" => catalog.toggle_page_limit(),
@@ -289,7 +291,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             _ => { } ,
         },
     };
-    refresh || catalog.page_changed()
+    refresh
 }
 
 pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
@@ -449,18 +451,15 @@ pub fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: us
     }
 }
 
-pub fn set_picture_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focus: bool) {
+pub fn set_label_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focus: bool) {
     let (col,row) = catalog.position_from_index(index);
     let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
     let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
-
-    while let Some(child) = cell_box.first_child() {
+    if let Some(child) = cell_box.last_child() {
         cell_box.remove(&child)
     };
     let entry = catalog.entry_at_index(index).unwrap();
-    let picture = picture_for_entry(&entry, &catalog);
     let label = label_for_entry(&entry, index, &catalog, has_focus);
-    cell_box.append(&picture);
     cell_box.append(&label);
 }
 
@@ -473,18 +472,19 @@ pub fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {
 }
 
 pub fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
-    let old_index = catalog.index().unwrap();
+    let old_index: usize = catalog.index().unwrap();
+    let old_page_index: usize = catalog.page_index();
     if catalog.can_move_towards(direction.clone()) {
         catalog.move_towards(direction);
         set_picture_for_single_view(gui, catalog);
         let new_index = catalog.index().unwrap();
-        if catalog.page_changed() {
+        if catalog.page_index() != old_page_index {
             set_all_pictures_for_multiple_view(gui, catalog)
         } else {
-            set_picture_for_cell_index(gui, catalog, old_index, false)
+            set_label_for_cell_index(gui, catalog, old_index, false)
         };
-        set_picture_for_cell_index(gui, catalog, new_index, true);
-        true
+        set_label_for_cell_index(gui, catalog, new_index, true);
+        false
     } else {
         false
     }
@@ -496,7 +496,7 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> 
     } else {
         let refresh = arrow_command_view_mode(direction, gui, catalog);
         gui.application_window.set_title(Some(&catalog.title_display()));
-        refresh
+        false
     }
 }
 
