@@ -260,9 +260,9 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "z" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
             "period" => if gui.single_view_mode() {
-                gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window)
+                gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
             } else {
-                gui.view_stack.set_visible_child(&gui.single_view_scrolled_window)
+                gui.view_stack.set_visible_child(&gui.single_view_scrolled_window);
             },
             "equal" => catalog.begin_sort_selection(),
             "comma" => {
@@ -395,8 +395,35 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> 
         } else {
             if catalog.can_move_towards(direction.clone()) {
                 catalog.move_towards(direction);
+                let view_box = &gui.single_view_box;
+                let picture = &gui.single_view_picture;
+                let entry = catalog.current_entry().unwrap();
+                let opacity = if entry.deleted { 0.25 }
+                else if entry.selected { 0.50 } else { 1.0 };
+                if catalog.expand_on() {
+                    picture.set_valign(Align::Fill);
+                    picture.set_halign(Align::Fill);
+                } else {
+                    picture.set_valign(Align::Center);
+                    picture.set_halign(Align::Center);
+                };
+                picture.set_opacity(opacity);
+                picture.set_can_shrink(!catalog.full_size_on());
+                picture.set_filename(Some(entry.original_file_path()));
+                if let Some(widget) = view_box.last_child() {
+                    if widget != *picture {
+                        view_box.remove(&widget)
+                    }
+                }
+                if catalog.palette_on() {
+                    let colors = entry.palette;
+                    let palette_area = create_palette(colors.clone());
+                    view_box.insert_child_after(&palette_area, Some(picture));
+                }
+                true
+            } else {
+                false
             }
-            true
         }
     } else {
         if catalog.can_move_towards(direction.clone()) {
