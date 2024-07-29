@@ -42,6 +42,8 @@ after_adding_entries_length_is_updated	/home/tof/Coding/gsr/src/catalog.rs	/^   
 after_moving_next_page_index_depends_on_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
 apply_label	/home/tof/Coding/gsr/src/catalog.rs	/^    fn apply_label(&mut self, label: String) -> Result<()> {$/;"	f
 arrow_command	/home/tof/Coding/gsr/src/gui.rs	/^pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
+arrow_command_full_size	/home/tof/Coding/gsr/src/gui.rs	/^pub fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {$/;"	f
+arrow_command_view_mode	/home/tof/Coding/gsr/src/gui.rs	/^pub fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 at_creation_length_is_0	/home/tof/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
 begin_input	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self, kind: InputKind) {$/;"	f
 begin_sort_selection	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn begin_sort_selection(&mut self) {$/;"	f
@@ -166,10 +168,14 @@ refresh_view	/home/tof/Coding/gsr/src/gui.rs	/^fn refresh_view(gui: &Gui, catalo
 rgba_key	/home/tof/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 save_image_data	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn save_image_data(&self) -> Result<()> {$/;"	f
 select_and_unselect_entries	/home/tof/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
+set_all_pictures_for_multiple_view	/home/tof/Coding/gsr/src/gui.rs	/^pub fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_label	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn set_label(&mut self) -> Result<()> {$/;"	f
 set_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
 set_new_image_data	/home/tof/Coding/gsr/src/picture_io.rs	/^    fn set_new_image_data() {$/;"	f
 set_page_size	/home/tof/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
+set_picture_for_cell_at	/home/tof/Coding/gsr/src/gui.rs	/^pub fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: usize) {$/;"	f
+set_picture_for_cell_index	/home/tof/Coding/gsr/src/gui.rs	/^pub fn set_picture_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focus: bool) {$/;"	f
+set_picture_for_single_view	/home/tof/Coding/gsr/src/gui.rs	/^pub fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_title	/home/tof/Coding/gsr/src/gui.rs	/^pub fn set_title(gui: &Gui, catalog: &Catalog) {$/;"	f
 setting_label	/home/tof/Coding/gsr/src/picture_entry.rs	/^    fn setting_label() {$/;"	f
 setup_picture_cell	/home/tof/Coding/gsr/src/gui.rs	/^fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {$/;"	f
