@@ -121,7 +121,11 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     view_stack.set_vexpand(true);
     let _ = view_stack.add_child(&single_view_scrolled_window);
     let _ = view_stack.add_child(&multiple_view_scrolled_window);
-    view_stack.set_visible_child(&multiple_view_scrolled_window);
+    if cells_per_row > 1 {
+        view_stack.set_visible_child(&multiple_view_scrolled_window);
+    } else {
+        view_stack.set_visible_child(&single_view_scrolled_window);
+    }
     application_window.set_child(Some(&view_stack));
 
     let gui = Gui {
@@ -242,13 +246,9 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "e" => catalog.toggle_expand(),
             "f" => catalog.toggle_full_size(),
             "g" => catalog.begin_input(InputKind::IndexInput),
-            "n" => {
-                catalog.move_next_page();
-            },
+            "n" => catalog.move_next_page(),
             "o" => catalog.toggle_page_limit(),
-            "p" => {
-                catalog.move_prev_page();
-            },
+            "p" => catalog.move_prev_page(),
             "q" => gui.application_window.close(),
             "s" => catalog.begin_input(InputKind::SearchInput),
             "u" => { let _ = catalog.unselect_page(); },
@@ -259,10 +259,12 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             },
             "z" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
-            "period" => if gui.single_view_mode() {
-                gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
-            } else {
-                gui.view_stack.set_visible_child(&gui.single_view_scrolled_window);
+            "period" => if catalog.page_size() > 1 {
+                if gui.single_view_mode() {
+                    gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
+                } else {
+                    gui.view_stack.set_visible_child(&gui.single_view_scrolled_window);
+                }
             },
             "equal" => catalog.begin_sort_selection(),
             "comma" => {
@@ -287,7 +289,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             _ => { } ,
         },
     };
-    refresh
+    refresh || catalog.page_changed()
 }
 
 pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
@@ -381,18 +383,18 @@ pub fn set_title(gui: &Gui, catalog: &Catalog) {
 }
 
 pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
-    let refresh:bool = if gui.single_view_mode() {
-        if catalog.full_size_on() {
-            let step: f64 = 100.0;
-            let (picture_adjustment, step) = match direction {
-                Direction::Right => (gui.single_view_scrolled_window.hadjustment(), step),
-                Direction::Left  => (gui.single_view_scrolled_window.hadjustment(), -step),
-                Direction::Down  => (gui.single_view_scrolled_window.vadjustment(), step),
-                Direction::Up    => (gui.single_view_scrolled_window.vadjustment(), -step),
-            };
-            picture_adjustment.set_value(picture_adjustment.value() + step);
-            false
-        } else {
+    if (catalog.page_size() == 1 || gui.single_view_mode()) && catalog.full_size_on() {
+        let step: f64 = 100.0;
+        let (picture_adjustment, step) = match direction {
+            Direction::Right => (gui.single_view_scrolled_window.hadjustment(), step),
+            Direction::Left  => (gui.single_view_scrolled_window.hadjustment(), -step),
+            Direction::Down  => (gui.single_view_scrolled_window.vadjustment(), step),
+            Direction::Up    => (gui.single_view_scrolled_window.vadjustment(), -step),
+        };
+        picture_adjustment.set_value(picture_adjustment.value() + step);
+        false
+    } else {
+        let refresh = if catalog.page_size() == 1 {
             if catalog.can_move_towards(direction.clone()) {
                 catalog.move_towards(direction);
                 let view_box = &gui.single_view_box;
@@ -424,42 +426,76 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> 
             } else {
                 false
             }
-        }
-    } else {
-        if catalog.can_move_towards(direction.clone()) {
-            {
-                let index = catalog.index().unwrap();
-                let (col, row) = catalog.position_from_index(catalog.index().unwrap());
-                let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
-                let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
-
-                while let Some(child) = cell_box.first_child() {
-                    cell_box.remove(&child)
-                };
-                let entry = catalog.current_entry().unwrap();
-                let picture = picture_for_entry(&entry, &catalog);
-                let label = label_for_entry(&entry, index, &catalog, false);
-                cell_box.append(&picture);
-                cell_box.append(&label);
-            }
-            catalog.move_towards(direction);
-            {
-                let index = catalog.index().unwrap();
-                let (col, row) = catalog.position_from_index(catalog.index().unwrap());
-                let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
-                let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
-                while let Some(child) = cell_box.first_child() {
-                    cell_box.remove(&child)
-                };
-                let entry = catalog.current_entry().unwrap();
-                let picture = picture_for_entry(&entry, &catalog);
-                let label = label_for_entry(&entry, index, &catalog, true);
-                cell_box.append(&picture);
-                cell_box.append(&label);
-            }
-            catalog.page_changed()
         } else {
-            false
+            if gui.single_view_mode() {
+                if catalog.can_move_towards(direction.clone()) {
+                    catalog.move_towards(direction);
+                    let view_box = &gui.single_view_box;
+                    let picture = &gui.single_view_picture;
+                    let entry = catalog.current_entry().unwrap();
+                    let opacity = if entry.deleted { 0.25 }
+                    else if entry.selected { 0.50 } else { 1.0 };
+                    if catalog.expand_on() {
+                        picture.set_valign(Align::Fill);
+                        picture.set_halign(Align::Fill);
+                    } else {
+                        picture.set_valign(Align::Center);
+                        picture.set_halign(Align::Center);
+                    };
+                    picture.set_opacity(opacity);
+                    picture.set_can_shrink(!catalog.full_size_on());
+                    picture.set_filename(Some(entry.original_file_path()));
+                    if let Some(widget) = view_box.last_child() {
+                        if widget != *picture {
+                            view_box.remove(&widget)
+                        }
+                    }
+                    if catalog.palette_on() {
+                        let colors = entry.palette;
+                        let palette_area = create_palette(colors.clone());
+                        view_box.insert_child_after(&palette_area, Some(picture));
+                    }
+                    true
+                } else {
+                    false
+                }
+            } else {
+                if catalog.can_move_towards(direction.clone()) {
+                    {
+                        let index = catalog.index().unwrap();
+                        let (col, row) = catalog.position_from_index(catalog.index().unwrap());
+                        let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
+                        let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
+
+                        while let Some(child) = cell_box.first_child() {
+                            cell_box.remove(&child)
+                        };
+                        let entry = catalog.current_entry().unwrap();
+                        let picture = picture_for_entry(&entry, &catalog);
+                        let label = label_for_entry(&entry, index, &catalog, false);
+                        cell_box.append(&picture);
+                        cell_box.append(&label);
+                    }
+                    catalog.move_towards(direction);
+                    {
+                        let index = catalog.index().unwrap();
+                        let (col, row) = catalog.position_from_index(catalog.index().unwrap());
+                        let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
+                        let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
+                        while let Some(child) = cell_box.first_child() {
+                            cell_box.remove(&child)
+                        };
+                        let entry = catalog.current_entry().unwrap();
+                        let picture = picture_for_entry(&entry, &catalog);
+                        let label = label_for_entry(&entry, index, &catalog, true);
+                        cell_box.append(&picture);
+                        cell_box.append(&label);
+                    }
+                    catalog.page_changed()
+                }
+            } else {
+                false
+            }
         }
     };
     gui.application_window.set_title(Some(&catalog.title_display()));
