@@ -273,20 +273,16 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "minus" => { let _ = catalog.unlabel(); },
             "slash" => catalog.begin_input(InputKind::LabelInput),
             "Right" => {
-                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
-                arrow_command(Direction::Right, gui, catalog)
+                refresh = arrow_command(Direction::Right, gui, catalog)
             },
             "Left" => {
-                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
-                arrow_command(Direction::Left, gui, catalog)
+                refresh = arrow_command(Direction::Left, gui, catalog)
             },
             "Down" => {
-                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
-                arrow_command(Direction::Down, gui, catalog)
+                refresh = arrow_command(Direction::Down, gui, catalog)
             },
             "Up" => {
-                refresh = !catalog.full_size_on() && catalog.page_size() == 1;
-                arrow_command(Direction::Up, gui, catalog)
+                refresh = arrow_command(Direction::Up, gui, catalog)
             },
             _ => { } ,
         },
@@ -384,8 +380,8 @@ pub fn set_title(gui: &Gui, catalog: &Catalog) {
     gui.application_window.set_title(Some(&catalog.title_display()))
 }
 
-pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) {
-    if gui.single_view_mode() {
+pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
+    let refresh:bool = if gui.single_view_mode() {
         if catalog.full_size_on() {
             let step: f64 = 100.0;
             let (picture_adjustment, step) = match direction {
@@ -394,23 +390,53 @@ pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) {
                 Direction::Down  => (gui.single_view_scrolled_window.vadjustment(), step),
                 Direction::Up    => (gui.single_view_scrolled_window.vadjustment(), -step),
             };
-            picture_adjustment.set_value(picture_adjustment.value() + step)
+            picture_adjustment.set_value(picture_adjustment.value() + step);
+            false
         } else {
             if catalog.can_move_towards(direction.clone()) {
-                let (col, row) = catalog.coords_for_index(catalog.index().unwrap());
-                let label = label_at_coords(gui, col as i32, row as i32).expect("can't find current label");
-
-
-                let Some(current_label) = 
                 catalog.move_towards(direction);
             }
+            true
         }
     } else {
         if catalog.can_move_towards(direction.clone()) {
+            {
+                let index = catalog.index().unwrap();
+                let (col, row) = catalog.position_from_index(catalog.index().unwrap());
+                let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
+                let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
+
+                while let Some(child) = cell_box.first_child() {
+                    cell_box.remove(&child)
+                };
+                let entry = catalog.current_entry().unwrap();
+                let picture = picture_for_entry(&entry, &catalog);
+                let label = label_for_entry(&entry, index, &catalog, false);
+                cell_box.append(&picture);
+                cell_box.append(&label);
+            }
             catalog.move_towards(direction);
+            {
+                let index = catalog.index().unwrap();
+                let (col, row) = catalog.position_from_index(catalog.index().unwrap());
+                let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
+                let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
+                while let Some(child) = cell_box.first_child() {
+                    cell_box.remove(&child)
+                };
+                let entry = catalog.current_entry().unwrap();
+                let picture = picture_for_entry(&entry, &catalog);
+                let label = label_for_entry(&entry, index, &catalog, true);
+                cell_box.append(&picture);
+                cell_box.append(&label);
+            }
+            catalog.page_changed()
+        } else {
+            false
         }
     };
-    gui.application_window.set_title(Some(&catalog.title_display()))
+    gui.application_window.set_title(Some(&catalog.title_display()));
+    refresh
 }
 
 fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {

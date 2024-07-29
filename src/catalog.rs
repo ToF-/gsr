@@ -200,7 +200,7 @@ impl Catalog {
         }
     }
 
-    pub fn coords_for_index(&self, index: usize) -> Coords {
+    pub fn position_from_index(&self, index: usize) -> Coords {
         let start_index = self.page_index_of(index);
         let offset = index - start_index;
         let row = offset / self.cells_per_row();
@@ -667,6 +667,7 @@ impl Catalog {
     }
 
     pub fn move_towards(&mut self, direction: Direction) {
+        let page_index = self.page_index();
         if self.can_move_towards(direction.clone()) {
             match direction {
                 Direction::Right => {
@@ -701,7 +702,8 @@ impl Catalog {
                     }
                 },
             }
-        }
+        };
+        self.page_changed = self.page_index() != page_index
     }
 
     pub fn move_prev_page(&mut self) {

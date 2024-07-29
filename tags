@@ -41,7 +41,7 @@ adding_entry_from_a_single_file	/Users/christophethibaut/Coding/gsr/src/catalog.
 after_adding_entries_length_is_updated	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
 after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
 apply_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn apply_label(&mut self, label: String) -> Result<()> {$/;"	f
-arrow_command	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &Catalog) {$/;"	f
+arrow_command	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
 begin_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self, kind: InputKind) {$/;"	f
 begin_sort_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_sort_selection(&mut self) {$/;"	f
@@ -118,7 +118,7 @@ label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn labe
 label_and_unlabel_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn label_and_unlabel_entries() {$/;"	f
 label_display	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label_display(&self, has_focus: bool) -> String {$/;"	f
 label_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn label_entry() {$/;"	f
-label_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn label_for_entry(entry: &PictureEntry, index: usize, catalog: &Catalog) -> gtk::Label {$/;"	f
+label_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn label_for_entry(entry: &PictureEntry, index: usize, catalog: &Catalog, with_focus: bool) -> gtk::Label {$/;"	f
 last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn last(&self) -> usize {$/;"	f
 length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
@@ -152,6 +152,7 @@ page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_s
 palette_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 paste_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn paste_label(&mut self) -> Result<()> {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
+position_from_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f
 process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {$/;"	f
 read_file_info	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_file_info(file_path: &str) -> Result<(FileSize, SystemTime)> {$/;"	f
 read_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_image_data(file_path: &str) -> Result<ImageData> {$/;"	f
