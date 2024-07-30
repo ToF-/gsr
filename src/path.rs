@@ -1,4 +1,5 @@
 use walkdir::WalkDir;
+use std::io;
 use std::fs;
 use std::env;
 use std::path::PathBuf;
@@ -12,6 +13,18 @@ pub const IMAGE_DATA: &str = "IMAGE_DATA";
 const DEFAULT_DIR :&str    = "images/";
 pub const DIR_ENV_VAR: &str = "GALLSHDIR";
 
+pub fn is_valid_directory(dir: &str) -> bool {
+    let path = PathBuf::from(dir);
+    if ! path.exists() {
+       return false
+    } else {
+        if let Ok(metadata) = fs::metadata(path) {
+            return metadata.is_dir()
+        } else {
+            return false
+        }
+    }
+}
 pub fn is_thumbnail(file_name: &str) -> bool {
    file_name.contains(&THUMB_SUFFIX)
 }
@@ -30,6 +43,36 @@ pub fn check_path(source: &str) -> Result<PathBuf> {
             Err(err) => Err(err),
         }
     }
+}
+
+pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {
+    let path = PathBuf::from(dir);
+    if !path.exists() {
+        println!("directory {} doesn't exist. Create ?", dir);
+        let mut response = String::new();
+        let stdin = io::stdin();
+        stdin.read_line(&mut response).expect("can't read from stdin");
+        match response.chars().next() {
+            Some(ch) if ch == 'y' || ch == 'Y' => {
+                match fs::create_dir(path.clone()) {
+                    Ok(()) => Ok(path),
+                    Err(err) => return Err(err),
+                }
+            },
+            _ => Err(Error::new(ErrorKind::Other, "directory creation cancelled")),
+        }
+    } else {
+        if is_valid_directory(dir) {
+            Ok(path)
+        } else {
+            Err(Error::new(ErrorKind::Other, format!("path {} doesn't exist", dir)))
+        }
+    }
+}
+
+pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {
+    let path = PathBuf::from(target_parent).join(label);
+    interactive_check_path(path.to_str().unwrap())
 }
 
 pub fn check_file(source: &str) -> Result<PathBuf> {

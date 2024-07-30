@@ -13,6 +13,7 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 #[command(infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
 pub struct Args {
+    
      /// Directory to search (default is set with variable GALLSHDIR)
     pub directory: Option<String>,
 

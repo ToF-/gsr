@@ -3,10 +3,9 @@ use crate::rank::Rank;
 use std::io::{Result, Error, ErrorKind};
 use std::fs::read_to_string;
 use crate::picture_entry::PictureEntry;
-use crate::path::{get_picture_file_paths, check_file, is_thumbnail};
+use crate::path::{get_picture_file_paths, interactive_check_label_path, check_file, is_thumbnail};
 use crate::args::Args;
 use std::path::PathBuf;
-use std::cmp::min;
 use crate::order::Order;
 use crate::direction::Direction;
 use rand::prelude::SliceRandom;
@@ -35,6 +34,7 @@ pub struct Catalog {
     max_selected: usize,
     input_kind: Option<InputKind>,
     previous_order: Option<Order>,
+    args: Option<Args>,
 }
 
 impl Catalog {
@@ -58,6 +58,7 @@ impl Catalog {
             max_selected: 0,
             input_kind: None,
             previous_order: Some(Order::Random),
+            args: None,
         }
     }
 
@@ -72,9 +73,47 @@ impl Catalog {
         if catalog.length() == 0 {
             return Err(Error::new(ErrorKind::Other,"no picture to show"))
         };
+        catalog.args = Some(args.clone());
         Ok(catalog)
     }
 
+    fn move_all_labelled_files(&self, target_dir: &str) -> Result<()> {
+        let mut result = Ok(());
+        self.picture_entries.clone().into_iter().filter(|entry| entry.label().is_some()).for_each(|entry| {
+            if result.is_ok() {
+                let label = entry.label().unwrap();
+                let check = match interactive_check_label_path(target_dir, &label) {
+                    Ok(path) => {
+                        entry.copy_files(path.to_str().unwrap());
+                        entry.delete_files();
+                        Ok(())
+                    },
+                    Err(err) => Err(err),
+                };
+                if check.is_err() {
+                    result = check;
+                }
+            }
+        });
+        result
+    }
+
+    pub fn file_operations(&self) {
+        self.delete_files();
+        let args = self.args.as_ref().unwrap();
+        if let Some(all_move_target_dir) = &args.all_move {
+            let _ = self.move_all_labelled_files(&all_move_target_dir);
+        };
+
+    }
+
+    fn delete_files(&self) {
+        let selection: Vec<&PictureEntry> = self.picture_entries.iter().filter(|e| e.deleted).collect();
+        for entry in selection {
+            entry.delete_files()
+        };
+
+    }
     fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {
         if let Some(file) = &args.file {
             self.add_picture_entry_from_file(&file)

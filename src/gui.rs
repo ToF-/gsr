@@ -32,7 +32,7 @@ impl Gui {
     }
 
     pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {
-        let widget = self.multiple_view_grid.child_at(col, row).expect("cannot find child");
+        let widget = self.multiple_view_grid.child_at(col, row).expect(&format!("cannot find child at {} {}", col, row));
         let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
         cell_box
     }
@@ -332,6 +332,10 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "o" => catalog.toggle_page_limit(),
             "p" => catalog.move_prev_page(),
             "q" => gui.application_window.close(),
+            "Q" => {
+                catalog.file_operations();
+                gui.application_window.close()
+            },
             "S" => catalog.begin_input(InputKind::SearchInput),
             "u" => { let _ = catalog.unselect_page(); },
             "U" => { let _ = catalog.unselect_all(); },
@@ -579,6 +583,8 @@ fn setup_picture_cell(multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: 
                 cell_box.append(&label);
                 multiple_view_grid.attach(cell_box, col, row, 1, 1);
             }
+        } else {
+            println!("no index for position {:?}", coords);
         }
     }
 }

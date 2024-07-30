@@ -35,6 +35,7 @@ fn main() {
                     exit(1);
                 },
                 Ok(mut catalog) => {
+                    println!("{:?}", catalog.length());
                     catalog.sort_by(args.order.clone());
                     let catalog_rc = Rc::new(RefCell::new(catalog));
                     let application = Application::builder()
