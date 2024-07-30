@@ -316,6 +316,10 @@ impl Catalog {
         display
     }
 
+    pub fn copy_to_current_dir(&self) -> Result<u64> {
+        let entry = self.current_entry().unwrap();
+        entry.copy_file_to_current_dir()
+    }
     // update
 
     pub fn begin_sort_selection(&mut self) {

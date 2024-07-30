@@ -5,7 +5,7 @@ use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
-use crate::picture_io::{write_image_data, read_or_create_image_data, read_file_info};
+use crate::picture_io::{copy_file_to_target_directory, write_image_data, read_or_create_image_data, read_file_info};
 use crate::path::{THUMB_SUFFIX, image_data_file_path}; 
 
 #[derive(Clone, Debug)]
@@ -144,6 +144,10 @@ impl PictureEntry {
         } else {
             cmp
         }
+    }
+
+    pub fn copy_file_to_current_dir(&self) -> Result<u64> {
+        copy_file_to_target_directory(&self.original_file_path(), ".")
     }
 
     pub fn save_image_data(&self) -> Result<()> {

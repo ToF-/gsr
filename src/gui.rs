@@ -318,6 +318,9 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "a" => refresh = left_click_command_view_mode(0,0, gui, catalog),
             "z" => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
             "c" => catalog.copy_label(),
+            "C" => {
+                let _ = catalog.copy_to_current_dir();
+            },
             "D" => catalog.delete(),
             "e" => catalog.toggle_expand(),
             "f" => if gui.single_view_mode() {
