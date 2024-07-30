@@ -512,6 +512,7 @@ impl Catalog {
                                     Err(err) => return Err(err),
                                 }
                             };
+                            self.start_index = None;
                             Ok(())
                         },
                     }
@@ -538,6 +539,7 @@ impl Catalog {
                                 Err(err) => return Err(err),
                             }
                         };
+                        self.start_index = None;
                         Ok(())
                     },
                 }
@@ -575,6 +577,7 @@ impl Catalog {
                                 Err(err) => return Err(err),
                             }
                         };
+                        self.start_index = None;
                         self.count_selected();
                         Ok(())
                     },

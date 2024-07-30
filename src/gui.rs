@@ -306,10 +306,18 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "U" => { let _ = catalog.unselect_all(); },
             "x" => {
                 catalog.toggle_palette();
-                refresh = true
+                set_title(gui, catalog);
             },
             "A" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
+            "Return" => catalog.start_set(),
+            "Escape" => catalog.cancel_set(),
+            "plus" => {
+                let _ = catalog.end_set_label();
+            },
+            "minus" => {
+                let _ = catalog.end_unlabel();
+            },
             "period" => if catalog.page_size() > 1 {
                 if gui.single_view_mode() {
                     gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
@@ -319,11 +327,9 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             },
             "equal" => catalog.begin_sort_selection(),
             "comma" => {
-                let _ = catalog.toggle_select();
+                let _ = catalog.end_set_select();
                 catalog.count_selected()
             },
-            "plus" => { let _ =  catalog.paste_label(); },
-            "minus" => { let _ = catalog.unlabel(); },
             "slash" => catalog.begin_input(InputKind::LabelInput),
             "Right" => {
                 refresh = arrow_command(Direction::Right, gui, catalog)
