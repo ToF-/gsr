@@ -110,7 +110,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
             cell_box.set_halign(Align::Center);
             cell_box.set_hexpand(true);
             cell_box.set_vexpand(true);
-            setup_picture_cell(&multiple_view_grid, &cell_box, col, row, &catalog_rc)
+            setup_picture_cell(&multiple_view_grid, &cell_box, col, row, &catalog_rc);
         }
     }
     multiple_view_scrolled_window.set_child(Some(&multiple_view_panel));
@@ -138,6 +138,27 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     };
     let gui_rc = Rc::new(RefCell::new(gui));
 
+    if let Ok(gui) = gui_rc.try_borrow() {
+        for col in 0 .. cells_per_row {
+            for row in 0 .. cells_per_row {
+                if let Some(widget) = gui.multiple_view_grid.child_at(col, row) {
+                    let cell_box = &widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
+                    
+                    let gesture_left_click = gtk::GestureClick::new();
+                    gesture_left_click.set_button(1);
+                    gesture_left_click.connect_pressed(clone!(@strong col, @strong row, @strong gui_rc, @strong catalog_rc => move |_,_,_,_| {
+                        if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
+                            if let Ok(gui) = gui_rc.try_borrow() {
+                                let _ = click_command_view_mode(col as usize, row as usize, &gui, &mut catalog);
+                            }
+                        }
+                    }));
+                    cell_box.add_controller(gesture_left_click);
+
+                }
+            }
+        }
+    }
     let left_gesture = gtk::GestureClick::new();
     left_gesture.set_button(1);
     left_gesture.connect_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_,_,_,_| {
