@@ -69,6 +69,7 @@ checked_args_wont_accept_a_wrong_all_move_target	/Users/christophethibaut/Coding
 checked_args_wont_accept_a_wrong_copy_selection_target	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_copy_selection_target() {$/;"	f
 checked_args_wont_accept_a_wrong_directory	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_directory() {$/;"	f
 checked_args_wont_accept_a_wrong_move_selection_target	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_move_selection_target() {$/;"	f
+click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 cmp_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
 cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
 confirm_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn confirm_input(&mut self) {$/;"	f

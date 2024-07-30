@@ -267,6 +267,8 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
     match key.name() {
         None => refresh = false,
         Some(key_name) => match key_name.as_str() {
+            "a" => refresh = click_command_view_mode(0,0, gui, catalog),
+            "z" => refresh = click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
             "c" => catalog.copy_label(),
             "D" => catalog.delete(),
             "e" => catalog.toggle_expand(),
@@ -285,7 +287,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                 catalog.toggle_palette();
                 refresh = true
             },
-            "z" => catalog.move_to_first(),
+            "A" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
             "period" => if catalog.page_size() > 1 {
                 if gui.single_view_mode() {
@@ -455,6 +457,28 @@ fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalo
         };
         set_label_for_cell_index(gui, catalog, new_index, true);
         false
+    } else {
+        false
+    }
+}
+
+fn click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {
+    let old_index: usize = catalog.index().unwrap();
+    let old_page_index: usize = catalog.page_index();
+    if let Some(new_index) = catalog.index_from_position((col, row)) {
+        if catalog.can_move_to_index(new_index) {
+            catalog.move_to_index(new_index);
+            set_picture_for_single_view(gui, catalog);
+            if catalog.page_index() != old_page_index {
+                set_all_pictures_for_multiple_view(gui, catalog)
+            } else {
+                set_label_for_cell_index(gui, catalog, old_index, false)
+            };
+            set_label_for_cell_index(gui, catalog, new_index, true);
+            false
+        } else {
+            false
+        }
     } else {
         false
     }
