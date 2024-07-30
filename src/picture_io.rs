@@ -52,12 +52,15 @@ pub fn read_or_create_image_data(file_path: &str) -> Result<ImageData> {
     }
 }
 
-pub fn copy_file_to_target_directory(source_file_name: &tr, target_directory_name: &str) -> Result<u64> {
-    let source_file_path = Path::new(&source_file_name);
+pub fn copy_file_to_target_directory(source_file_path_str: &str, target_directory_name: &str) -> Result<u64> {
+    let source_file_path = Path::new(&source_file_path_str);
+    let source_file_name = source_file_path.file_name().expect("can't extract file name");
     let target_directory_path = Path::new(&target_directory_name);
     let target_file_path = target_directory_path.join(source_file_name);
     println!("copy {} to {}", source_file_path.display(), target_file_path.display());
-    std::fs::copy(source_file_path, target_file_path)
+    let result = std::fs::copy(source_file_path, target_file_path);
+    println!("{:?}", result);
+    result
 }
 
 pub fn read_image_data(file_path: &str) -> Result<ImageData> {
