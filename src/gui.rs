@@ -22,12 +22,19 @@ struct Gui {
     view_stack: gtk::Stack,
     single_view_box: gtk::Box,
     single_view_picture: gtk::Picture,
+    cells_per_row: i32,
 }
 
 impl Gui {
     pub fn single_view_mode(&self) -> bool {
         let child = self.view_stack.visible_child().expect("view stack has no child");
         child == self.single_view_scrolled_window
+    }
+
+    pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {
+        let widget = self.multiple_view_grid.child_at(col, row).expect("cannot find child");
+        let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
+        cell_box
     }
 }
 
@@ -136,27 +143,34 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         view_stack: view_stack,
         single_view_box: view_box,
         single_view_picture: picture,
+        cells_per_row: cells_per_row,
     };
     let gui_rc = Rc::new(RefCell::new(gui));
 
     if let Ok(gui) = gui_rc.try_borrow() {
-        for col in 0 .. cells_per_row {
-            for row in 0 .. cells_per_row {
-                if let Some(widget) = gui.multiple_view_grid.child_at(col, row) {
-                    let cell_box = &widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
-                    
-                    let gesture_left_click = gtk::GestureClick::new();
-                    gesture_left_click.set_button(1);
-                    gesture_left_click.connect_pressed(clone!(@strong col, @strong row, @strong gui_rc, @strong catalog_rc => move |_,_,_,_| {
-                        if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
-                            if let Ok(gui) = gui_rc.try_borrow() {
-                                let _ = click_command_view_mode(col as usize, row as usize, &gui, &mut catalog);
-                            }
+        for col in 0 .. gui.cells_per_row {
+            for row in 0 .. gui.cells_per_row {
+                let cell_box = gui.cell_box_at(col, row);
+                let gesture_left_click = gtk::GestureClick::new();
+                gesture_left_click.set_button(1);
+                gesture_left_click.connect_pressed(clone!(@strong col, @strong row, @strong gui_rc, @strong catalog_rc => move |_,_,_,_| {
+                    if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
+                        if let Ok(gui) = gui_rc.try_borrow() {
+                            let _ = left_click_command_view_mode(col as usize, row as usize, &gui, &mut catalog);
                         }
-                    }));
-                    cell_box.add_controller(gesture_left_click);
-
-                }
+                    }
+                }));
+                cell_box.add_controller(gesture_left_click);
+                let gesture_right_click = gtk::GestureClick::new();
+                gesture_right_click.set_button(3);
+                gesture_right_click.connect_pressed(clone!(@strong col, @strong row, @strong gui_rc, @strong catalog_rc => move |_,_,_,_| {
+                    if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
+                        if let Ok(gui) = gui_rc.try_borrow() {
+                            let _ = right_click_command_view_mode(col as usize, row as usize, &gui, &mut catalog);
+                        }
+                    }
+                }));
+                cell_box.add_controller(gesture_right_click);
             }
         }
     }
@@ -301,8 +315,8 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "3"|"guillemotright" => {
                 let _ = catalog.end_set_rank(Rank::ThreeStars);
             },
-            "a" => refresh = click_command_view_mode(0,0, gui, catalog),
-            "z" => refresh = click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
+            "a" => refresh = left_click_command_view_mode(0,0, gui, catalog),
+            "z" => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
             "c" => catalog.copy_label(),
             "D" => catalog.delete(),
             "e" => catalog.toggle_expand(),
@@ -395,17 +409,6 @@ fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
 fn set_title(gui: &Gui, catalog: &Catalog) {
     gui.application_window.set_title(Some(&catalog.title_display()))
 }
-
-// if in single view mode and in full size:
-//  arrows are just for image adjustment, do not refresh
-// if in single view mode with a page size = 1:
-//  arrows left and right are for prev and next page, refresh
-// if in single view mode with a page size > 1:
-//  arrows are for moving through the catalog: refresh
-//  and also change the cell boxes that are not currently visible
-// if in a multiple view mode with a page size > 1:
-//  change the cell boxes from and to
-//  also change the single view mode picture
 
 fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {
     let step: f64 = 100.0;
@@ -502,10 +505,33 @@ fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalo
     }
 }
 
-fn click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {
+fn left_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {
     let old_index: usize = catalog.index().unwrap();
     let old_page_index: usize = catalog.page_index();
     if let Some(new_index) = catalog.index_from_position((col, row)) {
+        if catalog.can_move_to_index(new_index) {
+            catalog.move_to_index(new_index);
+            set_picture_for_single_view(gui, catalog);
+            if catalog.page_index() != old_page_index {
+                set_all_pictures_for_multiple_view(gui, catalog)
+            } else {
+                set_label_for_cell_index(gui, catalog, old_index, false)
+            };
+            set_label_for_cell_index(gui, catalog, new_index, true);
+            false
+        } else {
+            false
+        }
+    } else {
+        false
+    }
+}
+
+fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {
+    let old_index: usize = catalog.index().unwrap();
+    let old_page_index: usize = catalog.page_index();
+    if let Some(new_index) = catalog.index_from_position((col, row)) {
+        catalog.start_set();
         if catalog.can_move_to_index(new_index) {
             catalog.move_to_index(new_index);
             set_picture_for_single_view(gui, catalog);

@@ -54,6 +54,7 @@ cancel_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can
 cancel_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_set(&mut self) {$/;"	f
 cancel_sort_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_sort_selection(&mut self) {$/;"	f
 cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
+cell_box_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {$/;"	f
 cells_per_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cells_per_row(&self) -> usize {$/;"	f
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
@@ -68,7 +69,6 @@ checked_args_wont_accept_a_wrong_all_move_target	/Users/christophethibaut/Coding
 checked_args_wont_accept_a_wrong_copy_selection_target	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_copy_selection_target() {$/;"	f
 checked_args_wont_accept_a_wrong_directory	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_directory() {$/;"	f
 checked_args_wont_accept_a_wrong_move_selection_target	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_wont_accept_a_wrong_move_selection_target() {$/;"	f
-click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 cmp_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
 cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
 confirm_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn confirm_input(&mut self) {$/;"	f
@@ -120,6 +120,7 @@ label_display	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub
 label_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn label_entry() {$/;"	f
 label_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn label_for_entry(entry: &PictureEntry, with_focus: bool) -> gtk::Label {$/;"	f
 last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn last(&self) -> usize {$/;"	f
+left_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn left_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
 make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool) -> PictureEntry {$/;"	f
@@ -161,6 +162,7 @@ read_picture_file_info_read_file_size	/Users/christophethibaut/Coding/gsr/src/pi
 refresh	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn refresh(&mut self) {$/;"	f
 refresh_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
+right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 save_image_data	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn save_image_data(&self) -> Result<()> {$/;"	f
 select_and_unselect_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
 set_all_pictures_for_multiple_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f
