@@ -56,7 +56,6 @@ cancel_sort_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    p
 cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
 cells_per_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cells_per_row(&self) -> usize {$/;"	f
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
-check_or_create_thumbnail	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn check_or_create_thumbnail(&self) -> Result<()> {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
 check_or_create_thumbnail_picture_if_it_does_not_exist	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn check_or_create_thumbnail_picture_if_it_does_not_exist() {$/;"	f
 check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
@@ -162,8 +161,6 @@ read_image_data_deserializes_image_data	/Users/christophethibaut/Coding/gsr/src/
 read_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_or_create_image_data(file_path: &str) -> Result<ImageData> {$/;"	f
 read_picture_file_info_read_file_size	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn read_picture_file_info_read_file_size() {$/;"	f
 refresh	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn refresh(&mut self) {$/;"	f
-refresh_multiple_view_picture	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_multiple_view_picture(gui: &Gui, catalog: &Catalog) {$/;"	f
-refresh_single_view_picture	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {$/;"	f
 refresh_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 save_image_data	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn save_image_data(&self) -> Result<()> {$/;"	f

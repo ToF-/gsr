@@ -138,6 +138,36 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     };
     let gui_rc = Rc::new(RefCell::new(gui));
 
+    let left_gesture = gtk::GestureClick::new();
+    left_gesture.set_button(1);
+    left_gesture.connect_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_,_,_,_| {
+        {
+            let mut catalog = catalog_rc.borrow_mut();
+            catalog.move_prev_page();
+        }
+        if let Ok(catalog) =  catalog_rc.try_borrow() {
+            if let Ok(gui) = gui_rc.try_borrow() {
+                refresh_view(&gui, &catalog);
+            }
+        }
+    }));
+    left_button.add_controller(left_gesture);
+
+    let right_gesture = gtk::GestureClick::new();
+    right_gesture.set_button(1);
+    right_gesture.connect_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_,_,_,_| {
+        {
+            let mut catalog = catalog_rc.borrow_mut();
+            catalog.move_next_page();
+        }
+        if let Ok(catalog) =  catalog_rc.try_borrow() {
+            if let Ok(gui) = gui_rc.try_borrow() {
+                refresh_view(&gui, &catalog);
+            }
+        }
+    }));
+    right_button.add_controller(right_gesture);
+
     let evk = gtk::EventControllerKey::new();
     evk.connect_key_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_, key, _, _| {
         process_key(&catalog_rc, &gui_rc, key) 
