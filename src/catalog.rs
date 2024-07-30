@@ -388,7 +388,6 @@ impl Catalog {
                     self.input_kind = None;
                     self.input = None;
                 },
-                _ => { },
             }
         }
     }
@@ -448,7 +447,7 @@ impl Catalog {
 
     fn apply_label(&mut self, label: String) -> Result<()> {
         if let Some(index) = self.index() {
-            let mut entry = &mut self.picture_entries[index];
+            let entry = &mut self.picture_entries[index];
             entry.set_label(label);
             entry.save_image_data()
         } else {

@@ -16,7 +16,7 @@ use crate::catalog::Catalog;
 use glib::{clone};
 use crate::gui::{build_gui, startup_gui};
 use gtk::prelude::*;
-use gtk::{self, Application, gdk, glib};
+use gtk::{self, Application, glib};
 use std::process::exit;
 use std::cell::RefCell;
 use std::rc::Rc;

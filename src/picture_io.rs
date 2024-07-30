@@ -1,4 +1,3 @@
-use crate::picture_entry::PictureEntry;
 use thumbnailer::ThumbnailSize;
 use thumbnailer::create_thumbnails;
 use thumbnailer::error::ThumbResult;

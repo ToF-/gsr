@@ -1,7 +1,6 @@
-use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow, Stack};
+use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow};
 use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
-use crate::gdk::Display;
 use crate::direction::Direction;
 use crate::Args;
 use crate::order::Order;
@@ -111,7 +110,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
             cell_box.set_halign(Align::Center);
             cell_box.set_hexpand(true);
             cell_box.set_vexpand(true);
-            setup_picture_cell(&application_window, &multiple_view_grid, &cell_box, col, row, &catalog_rc)
+            setup_picture_cell(&multiple_view_grid, &cell_box, col, row, &catalog_rc)
         }
     }
     multiple_view_scrolled_window.set_child(Some(&multiple_view_panel));
@@ -154,32 +153,29 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     };
 }
 
-pub fn startup_gui(application: &gtk::Application) {
+pub fn startup_gui(_application: &gtk::Application) {
     let css_provider = gtk::CssProvider::new();
     css_provider.load_from_data("window { background-color:black;} image { margin:1em ; } label { color:white; }");
     gtk::style_context_add_provider_for_display(
         &gdk::Display::default().unwrap(),
         &css_provider,
         1000,
-        );
+    );
 }
 
-pub fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {
+fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
         if let Ok(gui) = gui_rc.try_borrow() {
-            if let Some(key_name) = key.name() {
-                let mut refresh: bool = true;
-                refresh = if catalog.input_on() {
-                    input_mode_process_key(key, &gui, &mut catalog)
-                } else if catalog.sort_selection_on() {
-                    sort_selection_process_key(key, &mut catalog)
-                } else {
-                    view_mode_process_key(key, &gui, &mut catalog)
-                };
-                if refresh { refresh_view(&gui, &catalog) }
+            let refresh: bool = if catalog.input_on() {
+                input_mode_process_key(key, &gui, &mut catalog)
+            } else if catalog.sort_selection_on() {
+                sort_selection_process_key(key, &mut catalog)
+            } else {
+                view_mode_process_key(key, &gui, &mut catalog)
             };
+            if refresh { refresh_view(&gui, &catalog) }
         }
-    };
+    }
     gtk::Inhibit(false)
 }
 
@@ -294,62 +290,6 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
     refresh
 }
 
-pub fn refresh_single_view_picture(gui: &Gui, catalog: &Catalog) {
-    let view_box = &gui.single_view_box;
-    let picture = &gui.single_view_picture;
-    if catalog.page_changed() {
-        let entry = catalog.current_entry().unwrap();
-        let opacity = if entry.deleted { 0.25 }
-        else if entry.selected { 0.50 } else { 1.0 };
-        if catalog.expand_on() {
-            picture.set_valign(Align::Fill);
-            picture.set_halign(Align::Fill);
-        } else {
-            picture.set_valign(Align::Center);
-            picture.set_halign(Align::Center);
-        };
-        picture.set_opacity(opacity);
-        picture.set_can_shrink(!catalog.full_size_on());
-        picture.set_filename(Some(entry.original_file_path()));
-        if let Some(widget) = view_box.last_child() {
-            if widget != *picture {
-                view_box.remove(&widget)
-            }
-        }
-        if catalog.palette_on() {
-            let colors = entry.palette;
-            let palette_area = create_palette(colors.clone());
-            view_box.insert_child_after(&palette_area, Some(picture));
-        }
-    }
-}
-
-fn refresh_multiple_view_picture(gui: &Gui, catalog: &Catalog) {
-    let multiple_view_grid = &gui.multiple_view_grid;
-    if catalog.page_changed() {
-        let cells_per_row = catalog.page_size() as i32;
-        for col in 0 .. cells_per_row {
-            for row in 0 .. cells_per_row {
-                let coords = (col as usize, row as usize);
-                if let Some(widget) = multiple_view_grid.child_at(col, row) {
-                    if let Ok(cell_box) = widget.downcast::<gtk::Box>() {
-                        while let Some(child) = cell_box.first_child() {
-                            cell_box.remove(&child)
-                        };
-                        if let Some(index) = catalog.index_from_position(coords) {
-                            let entry = catalog.entry_at_index(index).unwrap();
-                            let picture = picture_for_entry(&entry, &catalog);
-                            let label = label_for_entry(&entry, index, &catalog, index == catalog.index().unwrap());
-                            cell_box.append(&picture);
-                            cell_box.append(&label);
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
 fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {
     let palette_area = gtk::DrawingArea::new();
     palette_area.set_valign(Align::Center);
@@ -362,7 +302,7 @@ fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {
     palette_area
 }
 
-pub fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
+fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
     const COLOR_MAX: f64 = 9.0;
     let square_size: f64 = height as f64;
     let offset: f64 = (width as f64 - (COLOR_MAX as f64 * square_size)) / 2.0;
@@ -380,7 +320,7 @@ pub fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
     ctx.set_source_surface(&surface, 0.0, 0.0).expect("can't set source surface");
     ctx.paint().expect("can't paint surface")
 }
-pub fn set_title(gui: &Gui, catalog: &Catalog) {
+fn set_title(gui: &Gui, catalog: &Catalog) {
     gui.application_window.set_title(Some(&catalog.title_display()))
 }
 
@@ -395,7 +335,7 @@ pub fn set_title(gui: &Gui, catalog: &Catalog) {
 //  change the cell boxes from and to
 //  also change the single view mode picture
 
-pub fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {
+fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {
     let step: f64 = 100.0;
     let (picture_adjustment, step) = match direction {
         Direction::Right => (gui.single_view_scrolled_window.hadjustment(), step),
@@ -407,7 +347,7 @@ pub fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {
     false
 }
 
-pub fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {
+fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {
     let view_box = &gui.single_view_box;
     let picture = &gui.single_view_picture;
     let entry = catalog.current_entry().unwrap();
@@ -435,7 +375,7 @@ pub fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {
     }
 }
 
-pub fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: usize) {
+fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: usize) {
     let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
     let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
 
@@ -445,13 +385,13 @@ pub fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: us
     if let Some(index) = catalog.index_from_position((col,row)) {
         let entry = catalog.entry_at_index(index).unwrap();
         let picture = picture_for_entry(&entry, &catalog);
-        let label = label_for_entry(&entry, index, &catalog, index == catalog.index().unwrap());
+        let label = label_for_entry(&entry, index == catalog.index().unwrap());
         cell_box.append(&picture);
         cell_box.append(&label);
     }
 }
 
-pub fn set_label_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focus: bool) {
+fn set_label_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focus: bool) {
     let (col,row) = catalog.position_from_index(index);
     let widget = gui.multiple_view_grid.child_at(col as i32, row as i32).expect("cannot find cell box in multiple view grid");
     let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
@@ -459,11 +399,11 @@ pub fn set_label_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_
         cell_box.remove(&child)
     };
     let entry = catalog.entry_at_index(index).unwrap();
-    let label = label_for_entry(&entry, index, &catalog, has_focus);
+    let label = label_for_entry(&entry, has_focus);
     cell_box.append(&label);
 }
 
-pub fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {
+fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {
     for col in 0..catalog.page_size() {
         for row in 0..catalog.page_size() {
             set_picture_for_cell_at(gui, catalog, col, row)
@@ -471,7 +411,7 @@ pub fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {
     }
 }
 
-pub fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
+fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
     let old_index: usize = catalog.index().unwrap();
     let old_page_index: usize = catalog.page_index();
     if catalog.can_move_towards(direction.clone()) {
@@ -490,17 +430,17 @@ pub fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Ca
     }
 }
 
-pub fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
+fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
     if gui.single_view_mode() && catalog.full_size_on() {
         arrow_command_full_size(direction, gui)
     } else {
-        let refresh = arrow_command_view_mode(direction, gui, catalog);
+        let _ = arrow_command_view_mode(direction, gui, catalog);
         gui.application_window.set_title(Some(&catalog.title_display()));
         false
     }
 }
 
-fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {
+fn setup_picture_cell(multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {
     if let Ok(catalog) = catalog_rc.try_borrow() {
         let coords = (col as usize, row as usize);
         if let Some(index) = catalog.index_from_position(coords) {
@@ -510,7 +450,7 @@ fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view
                 };
                 let entry = catalog.entry_at_index(index).unwrap();
                 let picture = picture_for_entry(&entry, &catalog);
-                let label = label_for_entry(&entry, index, &catalog, index == catalog.index().unwrap());
+                let label = label_for_entry(&entry, index == catalog.index().unwrap());
                 cell_box.append(&picture);
                 cell_box.append(&label);
                 multiple_view_grid.attach(cell_box, col, row, 1, 1);
@@ -519,7 +459,7 @@ fn setup_picture_cell(application_window: &gtk::ApplicationWindow, multiple_view
     }
 }
 
-pub fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {
+fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {
     let picture = gtk::Picture::new();
     let opacity = if entry.deleted { 0.25 }
     else if entry.selected { 0.50 } else { 1.0 };
@@ -527,16 +467,16 @@ pub fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Pictur
     picture.set_halign(Align::Center);
     picture.set_opacity(opacity);
     picture.set_can_shrink(!catalog.full_size_on());
-    let result = if catalog.cells_per_row() < 10 {
+    if catalog.cells_per_row() < 10 {
         picture.set_filename(Some(entry.original_file_path()));
     } else {
-        check_or_create_thumbnail_file(&entry.thumbnail_file_path(), &entry.original_file_path());
+        let _ = check_or_create_thumbnail_file(&entry.thumbnail_file_path(), &entry.original_file_path());
         picture.set_filename(Some(entry.thumbnail_file_path()));
     };
     picture.set_visible(true);
     picture
 }
-fn label_for_entry(entry: &PictureEntry, index: usize, catalog: &Catalog, with_focus: bool) -> gtk::Label {
+fn label_for_entry(entry: &PictureEntry, with_focus: bool) -> gtk::Label {
     let label = gtk::Label::new(Some(&entry.label_display(with_focus)));
     label.set_valign(Align::Center);
     label.set_halign(Align::Center);

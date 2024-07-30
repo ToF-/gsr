@@ -5,7 +5,7 @@ use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
 use crate::image_data::ImageData;
-use crate::picture_io::{write_image_data, check_or_create_thumbnail_file, read_or_create_image_data, read_file_info};
+use crate::picture_io::{write_image_data, read_or_create_image_data, read_file_info};
 use crate::path::{THUMB_SUFFIX, image_data_file_path}; 
 
 #[derive(Clone, Debug)]
@@ -152,12 +152,6 @@ impl PictureEntry {
         };
         let image_data_file_path = self.image_data_file_path();
         write_image_data(&image_data, &image_data_file_path)
-    }
-
-    pub fn check_or_create_thumbnail(&self) -> Result<()> {
-        let original_file_path = self.original_file_path();
-        let thumbnail_file_path = self.thumbnail_file_path();
-        check_or_create_thumbnail_file(&thumbnail_file_path, &original_file_path)
     }
 
     pub fn label_display(&self, has_focus: bool) -> String {
