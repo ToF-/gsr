@@ -1,4 +1,5 @@
 use regex::Regex;
+use crate::rank::Rank;
 use std::io::{Result, Error, ErrorKind};
 use std::fs::read_to_string;
 use crate::picture_entry::PictureEntry;
@@ -455,6 +456,16 @@ impl Catalog {
         }
     }
 
+    pub fn set_rank(&mut self, rank: Rank) -> Result<()> {
+        if let Some(index) = self.index() {
+            let entry = &mut self.picture_entries[index];
+            entry.set_rank(rank);
+            entry.save_image_data()
+        } else {
+            Ok(())
+        }
+    }
+
     pub fn set_label(&mut self) -> Result<()> {
         self.label = self.input.clone();
         self.input = None;
@@ -518,6 +529,30 @@ impl Catalog {
                     }
                 } else {
                     Ok(())
+                }
+            },
+            None => Err(Error::new(ErrorKind::Other, "empty catalog")),
+        }
+    }
+
+    pub fn end_set_rank(&mut self, rank: Rank) -> Result<()> {
+        match self.index() {
+            Some(index) => {
+                match self.start_index {
+                    None => self.set_rank(rank),
+                    Some(other) => {
+                        let (start,end) = if other <= index { (other,index) } else { (index,other) };
+                        for i in start..end+1 {
+                            let entry: &mut PictureEntry = &mut self.picture_entries[i];
+                            entry.set_rank(rank);
+                            match entry.save_image_data() {
+                                Ok(()) => {},
+                                Err(err) => return Err(err),
+                            }
+                        };
+                        self.start_index = None;
+                        Ok(())
+                    },
                 }
             },
             None => Err(Error::new(ErrorKind::Other, "empty catalog")),

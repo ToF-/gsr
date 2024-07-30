@@ -133,6 +133,10 @@ impl PictureEntry {
         self.label = String::from("");
     }
 
+    pub fn set_rank(&mut self, rank: Rank) {
+        self.rank = rank
+    }
+
     pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {
         let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
         if cmp == Equal {

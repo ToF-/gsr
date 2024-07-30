@@ -1,4 +1,5 @@
 use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow};
+use crate::rank::Rank;
 use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
 use crate::direction::Direction;
@@ -288,6 +289,18 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
     match key.name() {
         None => refresh = false,
         Some(key_name) => match key_name.as_str() {
+            "0"|"dollar" => {
+                let _ = catalog.end_set_rank(Rank::NoStar);
+            },
+            "1"|"quotedbl" => {
+                let _ = catalog.end_set_rank(Rank::OneStar);
+            },
+            "2"|"guillemotleft" => {
+                let _ = catalog.end_set_rank(Rank::TwoStars);
+            },
+            "3"|"guillemotright" => {
+                let _ = catalog.end_set_rank(Rank::ThreeStars);
+            },
             "a" => refresh = click_command_view_mode(0,0, gui, catalog),
             "z" => refresh = click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
             "c" => catalog.copy_label(),
