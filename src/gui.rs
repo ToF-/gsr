@@ -309,12 +309,12 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             "f" => if gui.single_view_mode() {
                 catalog.toggle_full_size()
             },
-            "g" => catalog.begin_input(InputKind::IndexInput),
+            "G" => catalog.begin_input(InputKind::IndexInput),
             "n" => catalog.move_next_page(),
             "o" => catalog.toggle_page_limit(),
             "p" => catalog.move_prev_page(),
             "q" => gui.application_window.close(),
-            "s" => catalog.begin_input(InputKind::SearchInput),
+            "S" => catalog.begin_input(InputKind::SearchInput),
             "u" => { let _ = catalog.unselect_page(); },
             "U" => { let _ = catalog.unselect_all(); },
             "x" => {
@@ -344,16 +344,16 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                 catalog.count_selected()
             },
             "slash" => catalog.begin_input(InputKind::LabelInput),
-            "Right" => {
+            "Right"|"r" => {
                 refresh = arrow_command(Direction::Right, gui, catalog)
             },
-            "Left" => {
+            "Left"|"t" => {
                 refresh = arrow_command(Direction::Left, gui, catalog)
             },
-            "Down" => {
+            "Down"|"s" => {
                 refresh = arrow_command(Direction::Down, gui, catalog)
             },
-            "Up" => {
+            "Up"|"d" => {
                 refresh = arrow_command(Direction::Up, gui, catalog)
             },
             _ => { } ,

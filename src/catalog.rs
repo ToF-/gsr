@@ -238,12 +238,6 @@ impl Catalog {
         self.page_index_of(self.index)
     }
 
-    pub fn current_page_length(&self) -> usize {
-        let start = self.page_index();
-        let end = min(start + self.page_length(), self.last()+1);
-        end - start
-    }
-
     pub fn input_on(&self) -> bool {
         self.input.is_some()
     }
@@ -262,7 +256,7 @@ impl Catalog {
                 Direction::Left => col > 0,
                 Direction::Right => col+1 < cells_per_row && index+1 < self.length(),
                 Direction::Up => row > 0,
-                Direction::Down => col+1 < cells_per_row && index + cells_per_row < self.length()
+                Direction::Down => row+1 < cells_per_row && index + cells_per_row < self.length()
             }
         } else {
             true
@@ -385,7 +379,7 @@ impl Catalog {
                     self.input = None
                 }
                 InputKind::LabelInput => {
-                    let _ = self.set_label();
+                    let _ = self.set_label_with_input();
                     self.input_kind = None;
                     self.input = None;
                 },
@@ -403,10 +397,6 @@ impl Catalog {
         if self.current_entry().is_some() {
             self.start_index = None
         }
-    }
-
-    pub fn input(&self) -> String {
-        self.input.clone().unwrap()
     }
 
     pub fn add_input_char(&mut self, ch: char) {
@@ -448,6 +438,7 @@ impl Catalog {
 
     fn apply_label(&mut self, label: String) -> Result<()> {
         if let Some(index) = self.index() {
+            self.label = Some(label.clone());
             let entry = &mut self.picture_entries[index];
             entry.set_label(label);
             entry.save_image_data()
@@ -466,9 +457,14 @@ impl Catalog {
         }
     }
 
+    pub fn set_label_with_input(&mut self) -> Result<()> {
+        match &self.input {
+            Some(s) => self.apply_label(s.clone()),
+            None => Ok(()),
+        }
+    }
+
     pub fn set_label(&mut self) -> Result<()> {
-        self.label = self.input.clone();
-        self.input = None;
         match &self.label {
             Some(s) => self.apply_label(s.clone()),
             None => Ok(()),
@@ -478,13 +474,6 @@ impl Catalog {
     pub fn copy_label(&mut self) {
         if let Some(entry) = self.current_entry() {
             self.label = entry.label()
-        }
-    }
-
-    pub fn paste_label(&mut self) -> Result<()> {
-        match &self.label {
-            Some(s) => self.apply_label(s.clone()),
-            None => Ok(()),
         }
     }
 
@@ -757,17 +746,6 @@ impl Catalog {
             self.page_index_of(self.length()-1)
         }
     }
-
-    pub fn toggle_delete_entry(&mut self) -> Result<()> {
-        if let Some(index) = self.index() {
-            let entry = &mut self.picture_entries[index];
-            entry.deleted = !entry.deleted;
-            entry.save_image_data()
-        } else {
-            Ok(())
-        }
-    }
-
 }
 
 #[cfg(test)]
@@ -897,6 +875,8 @@ mod tests {
         catalog.move_to_index(0);
         catalog.move_towards(Direction::Right);
         assert_eq!(1, catalog.index().unwrap());
+        assert_eq!(4, catalog.page_length());
+        assert_eq!(true, catalog.can_move_towards(Direction::Down));
         catalog.move_towards(Direction::Down);
         assert_eq!(3, catalog.index().unwrap());
         catalog.move_towards(Direction::Left);
@@ -920,13 +900,11 @@ mod tests {
         assert_eq!(true, catalog.can_move_towards(Direction::Down));
         catalog.move_towards(Direction::Down);
         assert_eq!(0, catalog.index().unwrap());
-        assert_eq!(4, catalog.current_page_length());
         catalog.move_towards(Direction::Right);
         assert_eq!(1, catalog.index().unwrap());
         assert_eq!(true, catalog.can_move_towards(Direction::Up));
         catalog.move_towards(Direction::Up);
         assert_eq!(6, catalog.index().unwrap()); // because there's no picture entry in pos 7
-        assert_eq!(3, catalog.current_page_length());
         catalog.move_to_index(5);
         assert_eq!(true, catalog.can_move_towards(Direction::Down));
         catalog.move_towards(Direction::Down);

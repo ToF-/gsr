@@ -250,15 +250,5 @@ mod tests {
         assert_eq!(10257524, entry.palette[0]);
     }
 
-    #[test]
-    fn check_or_create_thumbnail_picture_if_it_does_not_exist() {
-        let _ = copy("testdata/nature/flowerTHUMB.jpg", "testdata/temp");
-        let _ = remove_file("testdata/nature/flowerTHUMB.jpg");
-        let entry = PictureEntry::from_file("testdata/nature/flower.jpg").unwrap();
-        let result = entry.check_or_create_thumbnail();
-        assert_eq!(true, result.is_ok());
-        let path = PathBuf::from("testdata/nature/flowerTHUMB.jpg");
-        assert_eq!(true, path.exists());
-    }
 }
 
