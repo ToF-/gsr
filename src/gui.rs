@@ -327,6 +327,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                 catalog.toggle_full_size()
             },
             "G" => catalog.begin_input(InputKind::IndexInput),
+            "I" => catalog.print_info(),
             "n" => catalog.move_next_page(),
             "o" => catalog.toggle_page_limit(),
             "p" => catalog.move_prev_page(),

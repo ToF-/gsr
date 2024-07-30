@@ -320,6 +320,12 @@ impl Catalog {
         let entry = self.current_entry().unwrap();
         entry.copy_file_to_current_dir()
     }
+
+    pub fn print_info(&self) {
+        println!("{}", self.title_display());
+        println!("{}", self.current_entry().expect("can't access current entry").original_file_path());
+        println!("{:?}", self.current_entry().expect("can't access current entry"));
+    }
     // update
 
     pub fn begin_sort_selection(&mut self) {
