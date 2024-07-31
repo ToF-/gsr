@@ -32,7 +32,6 @@ impl Gui {
     }
 
     pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {
-        println!("{:?}", self.multiple_view_grid);
         let widget = self.multiple_view_grid.child_at(col, row).expect(&format!("cannot find child at {} {}", col, row));
         let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
         cell_box
@@ -123,6 +122,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
             cell_box.set_hexpand(true);
             cell_box.set_vexpand(true);
             setup_picture_cell(&multiple_view_grid, &cell_box, col, row, &catalog_rc);
+            multiple_view_grid.attach(&cell_box, col, row, 1, 1);
             assert!(multiple_view_grid.child_at(col, row).unwrap() == cell_box);
         }
     }
@@ -586,10 +586,7 @@ fn setup_picture_cell(multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: 
                 let label = label_for_entry(&entry, index == catalog.index().unwrap());
                 cell_box.append(&picture);
                 cell_box.append(&label);
-                multiple_view_grid.attach(cell_box, col, row, 1, 1);
             }
-        } else {
-            println!("no index for position {:?}", coords);
         }
     }
 }
