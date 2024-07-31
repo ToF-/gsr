@@ -753,7 +753,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "gsr2"
+name = "gsr"
 version = "0.1.0"
 dependencies = [
  "chrono",

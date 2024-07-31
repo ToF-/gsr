@@ -12,6 +12,8 @@ pub const THUMB_SUFFIX: &str = "THUMB";
 pub const IMAGE_DATA: &str = "IMAGE_DATA";
 const DEFAULT_DIR :&str    = "images/";
 pub const DIR_ENV_VAR: &str = "GALLSHDIR";
+pub const DEFAULT_TMP_DIR :&str    = ".";
+pub const TMP_ENV_VAR: &str = "GALLSHTMP";
 
 pub fn is_valid_directory(dir: &str) -> bool {
     let path = PathBuf::from(dir);
@@ -143,6 +145,15 @@ pub fn directory(directory: Option<String>) -> String {
     } else {
         println!("GALLSHDIR variable not set. Using {} as default.", DEFAULT_DIR);
         String::from(DEFAULT_DIR)
+    }
+}
+
+pub fn temp_directory() -> String {
+    let tmp_dir = env::var(TMP_ENV_VAR);
+    if let Ok(dir) = &tmp_dir {
+        String::from(dir)
+    } else {
+        String::from(DEFAULT_TMP_DIR)
     }
 }
 
