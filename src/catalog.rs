@@ -84,8 +84,9 @@ impl Catalog {
                 let label = entry.label().unwrap();
                 let check = match interactive_check_label_path(target_dir, &label) {
                     Ok(path) => {
-                        entry.copy_files(path.to_str().unwrap());
-                        entry.delete_files();
+                        if entry.copy_files(path.to_str().unwrap()).is_ok() {
+                            entry.delete_files();
+                        }
                         Ok(())
                     },
                     Err(err) => Err(err),

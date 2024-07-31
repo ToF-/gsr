@@ -65,10 +65,12 @@ pub fn copy_file_to_target_directory(source_file_path_str: &str, target_director
     let source_file_name = source_file_path.file_name().expect("can't extract file name");
     let target_directory_path = Path::new(&target_directory_name);
     let target_file_path = target_directory_path.join(source_file_name);
-    println!("copy {} to {}", source_file_path.display(), target_file_path.display());
-    let result = std::fs::copy(source_file_path, target_file_path);
-    println!("{:?}", result);
-    result
+    if source_file_path.to_str() != target_file_path.to_str() {
+        println!("copy {} to {}", source_file_path.display(), target_file_path.display());
+        std::fs::copy(source_file_path, target_file_path)
+    } else {
+        Err(Error::new(ErrorKind::Other, "source and target files are identical"))
+    }
 }
 
 pub fn read_image_data(file_path: &str) -> Result<ImageData> {

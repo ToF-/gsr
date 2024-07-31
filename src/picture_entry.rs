@@ -152,10 +152,17 @@ impl PictureEntry {
         delete_file(&self.image_data_file_path());
     }
 
-    pub fn copy_files(&self, target_dir: &str) {
-        copy_file_to_target_directory(&self.original_file_path(), target_dir);
-        copy_file_to_target_directory(&self.thumbnail_file_path(), target_dir);
-        copy_file_to_target_directory(&self.image_data_file_path(), target_dir);
+    pub fn copy_files(&self, target_dir: &str) -> Result<u64> {
+        copy_file_to_target_directory(&self.original_file_path(), target_dir)
+            .and_then(|r1| {
+                copy_file_to_target_directory(&self.thumbnail_file_path(), target_dir)
+                    .and_then(|r2| {
+                        copy_file_to_target_directory(&self.image_data_file_path(), target_dir)
+                            .and_then(|r3| {
+                                Ok(r1+r2+r3)
+                            })
+                    })
+            })
     }
 
     pub fn copy_file_to_current_dir(&self) -> Result<u64> {
