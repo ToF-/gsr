@@ -706,7 +706,7 @@ impl Catalog {
 
     pub fn sort_by(&mut self, order: Order) {
         if let Some(entry) = self.current_entry() {
-            let original_file_name = entry.original_file_name();
+            let original_file_path = entry.original_file_path();
             match order {
                 Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
                 Order::Date => self.picture_entries.sort_by(|a, b| { a.modified_time.cmp(&b.modified_time) }),
@@ -718,16 +718,18 @@ impl Catalog {
                 Order::Random => self.picture_entries.shuffle(&mut thread_rng()),
             };
             self.order = Some(order);
-            if let Some(index) = self.picture_entries.iter().position(|entry| entry.original_file_name() == original_file_name) {
+            if let Some(index) = self.picture_entries.iter().position(|entry| entry.original_file_path() == original_file_path) {
                 self.move_to_index(index)
+            } else {
+                panic!("couldn't find entry with original file name= {}", original_file_path)
             }
         }
     }
 
     pub fn move_to_index(&mut self, index: usize) {
-        let page_index = self.page_index();
+        let old_page_index = self.page_index();
         self.index = index;
-        self.page_changed = self.page_index() != page_index
+        self.page_changed = self.page_index() != old_page_index
     }
 
     pub fn move_to_first(&mut self) {

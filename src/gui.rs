@@ -32,6 +32,7 @@ impl Gui {
     }
 
     pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {
+        println!("{:?}", self.multiple_view_grid);
         let widget = self.multiple_view_grid.child_at(col, row).expect(&format!("cannot find child at {} {}", col, row));
         let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
         cell_box
@@ -111,6 +112,9 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     multiple_view_panel.attach(&multiple_view_grid, 1, 0, 1, 1);
     multiple_view_panel.attach(&right_button, 2, 0, 1, 1);
 
+    if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
+        catalog.refresh()
+    };
     for col in 0 .. cells_per_row {
         for row in 0 .. cells_per_row {
             let cell_box = gtk::Box::new(Orientation::Vertical, 0);
@@ -119,6 +123,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
             cell_box.set_hexpand(true);
             cell_box.set_vexpand(true);
             setup_picture_cell(&multiple_view_grid, &cell_box, col, row, &catalog_rc);
+            assert!(multiple_view_grid.child_at(col, row).unwrap() == cell_box);
         }
     }
     multiple_view_scrolled_window.set_child(Some(&multiple_view_panel));
