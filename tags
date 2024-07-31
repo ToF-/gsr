@@ -11,6 +11,7 @@ Colors	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Colors = us
 Coords	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub type Coords = (usize, usize);$/;"	T
 DEFAULT_DIR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const DEFAULT_DIR :&str    = "images\/";$/;"	c
 DEFAULT_HEIGHT	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const DEFAULT_HEIGHT: i32  = 1000;$/;"	c
+DEFAULT_TMP_DIR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const DEFAULT_TMP_DIR :&str    = ".";$/;"	c
 DEFAULT_WIDTH	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const DEFAULT_WIDTH: i32   = 1000;$/;"	c
 DIR_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const DIR_ENV_VAR: &str = "GALLSHDIR";$/;"	c
 Direction	/Users/christophethibaut/Coding/gsr/src/direction.rs	/^pub enum Direction {$/;"	g
@@ -26,6 +27,7 @@ Palette	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Palette = 
 PictureEntry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub struct PictureEntry {$/;"	s
 Rank	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
 THUMB_SUFFIX	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const THUMB_SUFFIX: &str = "THUMB";$/;"	c
+TMP_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const TMP_ENV_VAR: &str = "GALLSHTMP";$/;"	c
 VALID_EXTENSIONS	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];$/;"	c
 WIDTH_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";$/;"	c
 add_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_input_char(&mut self, ch: char) {$/;"	f
@@ -201,6 +203,7 @@ sorting_catalog_by_different_criteria	/Users/christophethibaut/Coding/gsr/src/ca
 start_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn start_set(&mut self) {$/;"	f
 startup_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn startup_gui(_application: &gtk::Application) {$/;"	f
 state_indicators	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn state_indicators() {$/;"	f
+temp_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn temp_directory() -> String {$/;"	f
 thumbnail_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn thumbnail_file_path(&self) -> String {$/;"	f
 thumbnail_path_is_the_file_path_with_thumbnail_suffix	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn thumbnail_path_is_the_file_path_with_thumbnail_suffix() {$/;"	f
 title_display	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn title_display(&self) -> String {$/;"	f

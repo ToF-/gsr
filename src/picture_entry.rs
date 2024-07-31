@@ -147,7 +147,7 @@ impl PictureEntry {
     }
 
     pub fn delete_files(&self) {
-        delete_file(&self.original_file_name());
+        delete_file(&self.original_file_path());
         delete_file(&self.thumbnail_file_path());
         delete_file(&self.image_data_file_path());
     }
