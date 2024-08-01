@@ -3,6 +3,7 @@ use crate::rank::Rank;
 use std::io::{Result, Error, ErrorKind};
 use std::fs::read_to_string;
 use crate::picture_entry::PictureEntry;
+use crate::picture_io::check_or_create_thumbnail_file;
 use crate::path::{get_picture_file_paths, interactive_check_label_path, check_file, is_thumbnail};
 use crate::args::Args;
 use std::path::PathBuf;
@@ -97,6 +98,18 @@ impl Catalog {
             }
         });
         result
+    }
+
+    pub fn update_files(&self) -> Result<()> {
+        let mut update_result = Ok(());
+        for entry in &self.picture_entries {
+            let result = check_or_create_thumbnail_file(&entry.thumbnail_file_path(), &entry.original_file_path());
+            if result.is_err() {
+                update_result = result;
+                break
+            }
+        };
+        update_result
     }
 
     pub fn file_operations(&self) {

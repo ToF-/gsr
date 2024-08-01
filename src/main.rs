@@ -36,6 +36,10 @@ fn main() {
                 },
                 Ok(mut catalog) => {
                     println!("{:?} entries", catalog.length());
+                    if args.update {
+                        catalog.update_files();
+                        exit(0);
+                    }
                     catalog.sort_by(args.order.clone());
                     let catalog_rc = Rc::new(RefCell::new(catalog));
                     let application = Application::builder()
