@@ -123,7 +123,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
             cell_box.set_halign(Align::Center);
             cell_box.set_hexpand(true);
             cell_box.set_vexpand(true);
-            setup_picture_cell(&multiple_view_grid, &cell_box, col, row, &catalog_rc);
+            setup_picture_cell(&cell_box, col, row, &catalog_rc);
             multiple_view_grid.attach(&cell_box, col, row, 1, 1);
             assert!(multiple_view_grid.child_at(col, row).unwrap() == cell_box);
         }
@@ -363,6 +363,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             },
             "A" => catalog.move_to_first(),
             "Z" => catalog.move_to_last(),
+            "space" => catalog.move_next_page(),
             "Return" => catalog.start_set(),
             "Escape" => catalog.cancel_set(),
             "plus" => {
@@ -586,7 +587,7 @@ fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool
     }
 }
 
-fn setup_picture_cell(multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {
+fn setup_picture_cell(cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {
     if let Ok(catalog) = catalog_rc.try_borrow() {
         let coords = (col as usize, row as usize);
         if let Some(index) = catalog.index_from_position(coords) {

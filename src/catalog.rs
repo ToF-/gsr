@@ -139,6 +139,7 @@ impl Catalog {
             Ok(())
         }
     }
+    #[allow(dead_code)]
     pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {
         self.picture_entries.append(picture_entries)
     }
@@ -231,10 +232,6 @@ impl Catalog {
 
     pub fn page_length(&self) -> usize {
         self.page_size * self.page_size
-    }
-
-    pub fn page_limit_on(&self) -> bool {
-        self.page_limit_on
     }
 
     pub fn palette_on(&self) -> bool {
@@ -935,7 +932,7 @@ mod tests {
     fn moving_next_picture_can_be_blocked_or_allowed() {
         let mut catalog = my_larger_catalog();
         assert_eq!(7, catalog.length());
-        assert_eq!(true, catalog.page_limit_on());
+        assert_eq!(true, catalog.page_limit_on);
         catalog.set_page_size(2);
         catalog.move_to_index(0);
         catalog.move_towards(Direction::Right);
@@ -958,7 +955,7 @@ mod tests {
         catalog.move_towards(Direction::Down);
         assert_eq!(false, catalog.can_move_towards(Direction::Down));
         catalog.toggle_page_limit();
-        assert_eq!(false, catalog.page_limit_on());
+        assert_eq!(false, catalog.page_limit_on);
         assert_eq!(3, catalog.index().unwrap());
         catalog.move_towards(Direction::Down);
         assert_eq!(5, catalog.index().unwrap());
@@ -985,9 +982,9 @@ mod tests {
         catalog.add_input_char('o');
         catalog.add_input_char('o');
         catalog.add_input_char('-');
-        assert_eq!(String::from("Foo-"), catalog.input());
+        assert_eq!(String::from("Foo-"), catalog.input.clone().unwrap());
         catalog.del_input_char();
-        assert_eq!(String::from("Foo"), catalog.input());
+        assert_eq!(String::from("Foo"), catalog.input.clone().unwrap());
         catalog.cancel_input();
         assert_eq!(false, catalog.input_on());
     }
@@ -1060,7 +1057,7 @@ mod tests {
         catalog.copy_label();
         catalog.move_to_index(1);
         assert_eq!(Some(String::from("REX")), catalog.current_entry().unwrap().label());
-        let _ = catalog.paste_label();
+        let _ = catalog.set_label();
         assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
     }
 
@@ -1148,11 +1145,11 @@ mod tests {
         let mut catalog = my_catalog();
         catalog.move_to_index(0);
         assert_eq!(false, catalog.current_entry().unwrap().selected);
-        assert_eq!(true, catalog.toggle_delete_entry().is_ok());
+        catalog.delete();
         assert_eq!(true, catalog.current_entry().unwrap().deleted);
         let _ = catalog.toggle_select();
         assert_eq!(false, catalog.current_entry().unwrap().selected);
-        assert_eq!(true, catalog.toggle_delete_entry().is_ok());
+        catalog.delete();
         assert_eq!(false, catalog.current_entry().unwrap().deleted);
         let _ = catalog.toggle_select();
         assert_eq!(true, catalog.current_entry().unwrap().selected);

@@ -37,8 +37,13 @@ fn main() {
                 Ok(mut catalog) => {
                     println!("{:?} entries", catalog.length());
                     if args.update {
-                        catalog.update_files();
-                        exit(0);
+                        match catalog.update_files() {
+                            Ok(()) => exit(0),
+                            Err(err) => {
+                                eprintln!("{}", err);
+                                exit(1)
+                            },
+                        }
                     }
                     catalog.sort_by(args.order.clone());
                     let catalog_rc = Rc::new(RefCell::new(catalog));

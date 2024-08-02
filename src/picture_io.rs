@@ -169,7 +169,6 @@ pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_p
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::{DateTime,Utc};
 
     #[test]
     fn get_palette_from_a_picture_file() {

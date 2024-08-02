@@ -163,7 +163,6 @@ page_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_
 page_index_depends_on_page_size_and_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn page_index_depends_on_page_size_and_index() {$/;"	f
 page_index_of	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_index_of(&self, index: usize) -> usize {$/;"	f
 page_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_length(&self) -> usize {$/;"	f
-page_limit_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_limit_on(&self) -> bool {$/;"	f
 page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 palette_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
@@ -194,7 +193,7 @@ set_rank	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_ran
 set_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_rank(&mut self, rank: Rank) {$/;"	f
 set_title	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_title(gui: &Gui, catalog: &Catalog) {$/;"	f
 setting_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn setting_label() {$/;"	f
-setup_picture_cell	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn setup_picture_cell(multiple_view_grid: &gtk::Grid, cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {$/;"	f
+setup_picture_cell	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn setup_picture_cell(cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {$/;"	f
 show	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    pub fn show(&self) -> String {$/;"	f
 single_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    pub fn single_view_mode(&self) -> bool {$/;"	f
 sort_by	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(&mut self, order: Order) {$/;"	f
