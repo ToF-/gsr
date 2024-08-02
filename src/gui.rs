@@ -1,3 +1,5 @@
+use crate::glib::timeout_add_local;
+use std::time::Duration;
 use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow};
 use crate::rank::Rank;
 use gtk::cairo::{Context, Format, ImageSurface};
@@ -213,6 +215,17 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     evk.connect_key_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_, key, _, _| {
         process_key(&catalog_rc, &gui_rc, key) 
     }));
+    if let Some(seconds) = args.seconds {
+        timeout_add_local(Duration::new(seconds, 0), clone!(@strong catalog_rc, @strong gui_rc => move | | {
+            if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
+                if let Ok(gui) = gui_rc.try_borrow() {
+                    catalog.move_next_page();
+                    refresh_view(&gui, &catalog);
+                }
+            };
+            Continue(true)
+        }));
+    };
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
         if let Ok(gui) = gui_rc.try_borrow() {
             gui.application_window.add_controller(evk);

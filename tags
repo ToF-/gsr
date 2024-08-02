@@ -8,6 +8,7 @@ Args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub struct Args {$/;"	s
 COLOR_MAX	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    const COLOR_MAX: f64 = 9.0;$/;"	c
 Catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
 Colors	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Colors = usize;$/;"	T
+Command	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub enum Command {$/;"	g
 Coords	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub type Coords = (usize, usize);$/;"	T
 DEFAULT_DIR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const DEFAULT_DIR :&str    = "images\/";$/;"	c
 DEFAULT_HEIGHT	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const DEFAULT_HEIGHT: i32  = 1000;$/;"	c

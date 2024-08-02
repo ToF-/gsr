@@ -1,3 +1,4 @@
+use std::time::Duration;
 use std::io::Result;
 use clap::Parser;
 use std::env;
