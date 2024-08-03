@@ -1,15 +1,3 @@
-mod args;
-mod catalog;
-mod direction;
-mod gui;
-mod image_data;
-mod order;
-mod palette;
-mod path;
-mod picture_entry;
-mod picture_io;
-mod rank;
-
 use clap::Parser;
 use crate::args::Args;
 use crate::catalog::Catalog;
@@ -20,6 +8,19 @@ use gtk::{self, Application, glib};
 use std::process::exit;
 use std::cell::RefCell;
 use std::rc::Rc;
+
+mod args;
+mod catalog;
+mod commands;
+mod direction;
+mod gui;
+mod image_data;
+mod order;
+mod palette;
+mod path;
+mod picture_entry;
+mod picture_io;
+mod rank;
 
 fn main() {
     let result = Args::parse().checked_args();
