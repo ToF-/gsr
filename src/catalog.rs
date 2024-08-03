@@ -1,4 +1,5 @@
 use regex::Regex;
+use rand::Rng;
 use crate::rank::Rank;
 use std::io::{Result, Error, ErrorKind};
 use std::fs::read_to_string;
@@ -735,6 +736,11 @@ impl Catalog {
                 panic!("couldn't find entry with original file name= {}", original_file_path)
             }
         }
+    }
+
+    pub fn move_to_random_index(&mut self) {
+        let index = thread_rng().gen_range(0..self.length());
+        self.move_to_index(index);
     }
 
     pub fn move_to_index(&mut self, index: usize) {

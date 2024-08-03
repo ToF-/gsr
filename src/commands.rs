@@ -1,3 +1,5 @@
+use std::fs::File;
+use std::path::Path;
 use std::collections::HashMap;
 use std::process::exit;
 use std::env;
@@ -16,6 +18,7 @@ pub enum Command {
     Delete,
     Down,
     EndPosition,
+    ExportCommands,
     FirstPosition,
     GotoIndex,
     Info,
@@ -26,7 +29,6 @@ pub enum Command {
     NextPage,
     NoStar,
     OneStar,
-    Palette,
     PasteLabel,
     PrevPage,
     Quit,
@@ -34,7 +36,6 @@ pub enum Command {
     Right,
     Search,
     SetRange,
-    Size,
     StartPosition,
     ThreeStars,
     ToggleExpand,
@@ -48,10 +49,9 @@ pub enum Command {
     Unlabel,
     UnselectAll,
     Up,
-    Value,
 }
 
-type Shortcuts = HashMap<String, Command>;
+pub type Shortcuts = HashMap<String, Command>;
 
 pub fn default_shortcuts() -> Shortcuts {
     let shortcuts: Shortcuts = HashMap::from([
@@ -71,14 +71,14 @@ pub fn default_shortcuts() -> Shortcuts {
         (String::from("z"), Command::LastPosition),
         (String::from("Left"), Command::Left),
         (String::from("t"), Command::Left),
-        (String::from("Space"), Command::Next),
+        (String::from("space"), Command::Next),
         (String::from("n"), Command::NextPage),
         (String::from("0"), Command::NoStar),
         (String::from("1"), Command::OneStar),
         (String::from("plus"), Command::PasteLabel),
         (String::from("p"), Command::PrevPage),
         (String::from("q"), Command::Quit),
-        (String::from("r"), Command::Random),
+        (String::from("R"), Command::Random),
         (String::from("Right"), Command::Right),
         (String::from("r"), Command::Right),
         (String::from("S"), Command::Search),
@@ -96,23 +96,43 @@ pub fn default_shortcuts() -> Shortcuts {
         (String::from("minus"), Command::Unlabel),
         (String::from("U"), Command::UnselectAll),
         (String::from("Up"), Command::Up),
-        (String::from("d"), Command::Up),]);
+        (String::from("d"), Command::Up),
+        (String::from("K"), Command::ExportCommands)]);
     shortcuts
 }
 
 pub fn load_shortcuts() -> Shortcuts {
     let gallshkey = env::var(KEY_CMD_FILE_VAR);
     if let Ok(key_file_name) = &gallshkey {
-        let content = read_to_string(key_file_name).expect(&format!("can't read file {}", key_file_name));
-        match serde_json::from_str(&content) {
-            Err(err) => {
-                eprintln!("{}",&format!("can't deserialize file {} : error: {}", key_file_name, err));
-                exit(1)
+        match read_to_string(key_file_name) {
+            Ok(content) => match serde_json::from_str(&content) {
+                    Err(err) => {
+                        eprintln!("{}",&format!("can't deserialize file {} : error: {}", key_file_name, err));
+                        exit(1)
+                    },
+                    Ok(shortcuts) => shortcuts,
             },
-            Ok(shortcuts) => shortcuts,
+            Err(_) => default_shortcuts(),
         }
     } else {
         default_shortcuts()
-
     }
 }
+
+pub fn export_shortcuts(shortcuts: &Shortcuts) {
+    let content = serde_json::to_string(shortcuts);
+    let path = Path::new("./gallshkey.json");
+    match File::create(path) {
+        Ok(file) => {
+            match serde_json::to_writer(file, &shortcuts) {
+                Ok(_) => {},
+                Err(err) => {
+                    eprintln!("{}",format!("error while creating ./gallshkey.json : {}", err));
+                },
+            }
+        },
+            Err(err) => {
+                eprintln!("{}",format!("error while creating ./gallshkey.json : {}", err));
+            },
+        }
+    }

@@ -1,4 +1,5 @@
 use crate::glib::timeout_add_local;
+use crate::commands::{Command,Shortcuts, export_shortcuts};
 use std::time::Duration;
 use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow};
 use crate::rank::Rank;
@@ -25,6 +26,7 @@ struct Gui {
     single_view_box: gtk::Box,
     single_view_picture: gtk::Picture,
     cells_per_row: i32,
+    shortcuts: Shortcuts,
 }
 
 impl Gui {
@@ -40,7 +42,7 @@ impl Gui {
     }
 }
 
-pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>) {
+pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>, shortcuts: &Shortcuts) {
     let cells_per_row: i32 = match catalog_rc.try_borrow() {
         Ok(catalog) => catalog.cells_per_row() as i32,
         Err(err) => panic!("{}", err),
@@ -151,6 +153,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         single_view_box: view_box,
         single_view_picture: picture,
         cells_per_row: cells_per_row,
+        shortcuts: shortcuts.clone(),
     };
     let gui_rc = Rc::new(RefCell::new(gui));
 
@@ -320,85 +323,92 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
     let mut refresh: bool = true;
     match key.name() {
         None => refresh = false,
-        Some(key_name) => match key_name.as_str() {
-            "0"|"dollar" => {
-                let _ = catalog.end_set_rank(Rank::NoStar);
+        Some(key_name) =>
+            match gui.shortcuts.get(&key_name.to_string()) {
+                None => println!("{}", key_name),
+                Some(command) => {
+                    match command {
+                        Command::NoStar => {
+                            let _ = catalog.end_set_rank(Rank::NoStar);
+                        },
+                        Command::OneStar => {
+                            let _ = catalog.end_set_rank(Rank::OneStar);
+                        },
+                        Command::TwoStars => {
+                            let _ = catalog.end_set_rank(Rank::TwoStars);
+                        },
+                        Command::ThreeStars => {
+                            let _ = catalog.end_set_rank(Rank::ThreeStars);
+                        },
+                        Command::FirstPosition => refresh = left_click_command_view_mode(0,0, gui, catalog),
+                        Command::LastPosition => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
+                        Command::CopyLabel => catalog.copy_label(),
+                        Command::CopyTemp => {
+                            let _ = catalog.copy_to_current_dir();
+                        },
+                        Command::Delete => catalog.delete(),
+                        Command::ToggleExpand => catalog.toggle_expand(),
+                        Command::ToggleFullSize => if gui.single_view_mode() {
+                            catalog.toggle_full_size()
+                        },
+                        Command::GotoIndex => catalog.begin_input(InputKind::IndexInput),
+                        Command::Random => catalog.move_to_random_index(),
+                        Command::Info => catalog.print_info(),
+                        Command::ExportCommands => export_shortcuts(&gui.shortcuts),
+                        Command::NextPage => catalog.move_next_page(),
+                        Command::TogglePageLimit => catalog.toggle_page_limit(),
+                        Command::PrevPage => catalog.move_prev_page(),
+                        Command::Quit => gui.application_window.close(),
+                        Command::CopyAndQuit => {
+                            catalog.file_operations();
+                            gui.application_window.close()
+                        },
+                        Command::Search => catalog.begin_input(InputKind::SearchInput),
+                        Command::UnSelectPage => { let _ = catalog.unselect_page(); },
+                        Command::UnselectAll => { let _ = catalog.unselect_all(); },
+                        Command::TogglePalette => {
+                            catalog.toggle_palette();
+                            set_title(gui, catalog);
+                        },
+                        Command::StartPosition => catalog.move_to_first(),
+                        Command::EndPosition => catalog.move_to_last(),
+                        Command::Next => catalog.move_next_page(),
+                        Command::SetRange => catalog.start_set(),
+                        Command::Cancel => catalog.cancel_set(),
+                        Command::PasteLabel => {
+                            let _ = catalog.end_set_label();
+                        },
+                        Command::Unlabel => {
+                            let _ = catalog.end_unlabel();
+                        },
+                        Command::ToggleSingleView => if catalog.page_size() > 1 {
+                            if gui.single_view_mode() {
+                                gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
+                            } else {
+                                gui.view_stack.set_visible_child(&gui.single_view_scrolled_window);
+                            }
+                        },
+                        Command::ChooseOrder => catalog.begin_sort_selection(),
+                        Command::ToggleSelect => {
+                            let _ = catalog.end_set_select();
+                            catalog.count_selected()
+                        },
+                        Command::Label => catalog.begin_input(InputKind::LabelInput),
+                        Command::Right => {
+                            refresh = arrow_command(Direction::Right, gui, catalog)
+                        },
+                        Command::Left => {
+                            refresh = arrow_command(Direction::Left, gui, catalog)
+                        },
+                        Command::Down => {
+                            refresh = arrow_command(Direction::Down, gui, catalog)
+                        },
+                        Command::Up => {
+                            refresh = arrow_command(Direction::Up, gui, catalog)
+                        },
+                    }
+                },
             },
-            "1"|"quotedbl" => {
-                let _ = catalog.end_set_rank(Rank::OneStar);
-            },
-            "2"|"guillemotleft" => {
-                let _ = catalog.end_set_rank(Rank::TwoStars);
-            },
-            "3"|"guillemotright" => {
-                let _ = catalog.end_set_rank(Rank::ThreeStars);
-            },
-            "a" => refresh = left_click_command_view_mode(0,0, gui, catalog),
-            "z" => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
-            "c" => catalog.copy_label(),
-            "C" => {
-                let _ = catalog.copy_to_current_dir();
-            },
-            "D" => catalog.delete(),
-            "e" => catalog.toggle_expand(),
-            "f" => if gui.single_view_mode() {
-                catalog.toggle_full_size()
-            },
-            "G" => catalog.begin_input(InputKind::IndexInput),
-            "I" => catalog.print_info(),
-            "n" => catalog.move_next_page(),
-            "o" => catalog.toggle_page_limit(),
-            "p" => catalog.move_prev_page(),
-            "q" => gui.application_window.close(),
-            "Q" => {
-                catalog.file_operations();
-                gui.application_window.close()
-            },
-            "S" => catalog.begin_input(InputKind::SearchInput),
-            "u" => { let _ = catalog.unselect_page(); },
-            "U" => { let _ = catalog.unselect_all(); },
-            "x" => {
-                catalog.toggle_palette();
-                set_title(gui, catalog);
-            },
-            "A" => catalog.move_to_first(),
-            "Z" => catalog.move_to_last(),
-            "space" => catalog.move_next_page(),
-            "Return" => catalog.start_set(),
-            "Escape" => catalog.cancel_set(),
-            "plus" => {
-                let _ = catalog.end_set_label();
-            },
-            "minus" => {
-                let _ = catalog.end_unlabel();
-            },
-            "period" => if catalog.page_size() > 1 {
-                if gui.single_view_mode() {
-                    gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
-                } else {
-                    gui.view_stack.set_visible_child(&gui.single_view_scrolled_window);
-                }
-            },
-            "equal" => catalog.begin_sort_selection(),
-            "comma" => {
-                let _ = catalog.end_set_select();
-                catalog.count_selected()
-            },
-            "slash" => catalog.begin_input(InputKind::LabelInput),
-            "Right"|"r" => {
-                refresh = arrow_command(Direction::Right, gui, catalog)
-            },
-            "Left"|"t" => {
-                refresh = arrow_command(Direction::Left, gui, catalog)
-            },
-            "Down"|"s" => {
-                refresh = arrow_command(Direction::Down, gui, catalog)
-            },
-            "Up"|"d" => {
-                refresh = arrow_command(Direction::Up, gui, catalog)
-            },
-            _ => { } ,
-        },
     };
     refresh
 }
