@@ -1,5 +1,10 @@
 use std::collections::HashMap;
+use std::process::exit;
+use std::env;
 use serde::{Deserialize, Serialize};
+use std::fs::read_to_string;
+
+const KEY_CMD_FILE_VAR: &str = "GALLSHKEY";
 
 #[derive(PartialEq, Copy, Clone, Debug, Deserialize, Serialize)]
 pub enum Command {
@@ -48,8 +53,8 @@ pub enum Command {
 
 type Shortcuts = HashMap<String, Command>;
 
-pub fn default_shorcuts() -> Shortcuts {
-    let mut shortcuts: Shortcuts = HashMap::from([
+pub fn default_shortcuts() -> Shortcuts {
+    let shortcuts: Shortcuts = HashMap::from([
         (String::from("Escape"), Command::Cancel),
         (String::from("equal"), Command::ChooseOrder),
         (String::from("Q"), Command::CopyAndQuit),
@@ -95,3 +100,19 @@ pub fn default_shorcuts() -> Shortcuts {
     shortcuts
 }
 
+pub fn load_shortcuts() -> Shortcuts {
+    let gallshkey = env::var(KEY_CMD_FILE_VAR);
+    if let Ok(key_file_name) = &gallshkey {
+        let content = read_to_string(key_file_name).expect(&format!("can't read file {}", key_file_name));
+        match serde_json::from_str(&content) {
+            Err(err) => {
+                eprintln!("{}",&format!("can't deserialize file {} : error: {}", key_file_name, err));
+                exit(1)
+            },
+            Ok(shortcuts) => shortcuts,
+        }
+    } else {
+        default_shortcuts()
+
+    }
+}

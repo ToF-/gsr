@@ -8,6 +8,7 @@ use gtk::{self, Application, glib};
 use std::process::exit;
 use std::cell::RefCell;
 use std::rc::Rc;
+use crate::commands::load_shortcuts;
 
 mod args;
 mod catalog;
@@ -24,6 +25,7 @@ mod rank;
 
 fn main() {
     let result = Args::parse().checked_args();
+    let shortcuts = load_shortcuts();
     match result {
         Err(err) => {
             eprintln!("{}", err);
