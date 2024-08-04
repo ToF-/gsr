@@ -68,6 +68,7 @@ pub fn default_shortcuts() -> Shortcuts {
         (String::from("G"), Command::GotoIndex),
         (String::from("I"), Command::Info),
         (String::from("l"), Command::Label),
+        (String::from("slash"), Command::Label),
         (String::from("z"), Command::LastPosition),
         (String::from("Left"), Command::Left),
         (String::from("t"), Command::Left),
