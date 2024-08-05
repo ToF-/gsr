@@ -102,7 +102,7 @@ pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {
 }
 
 pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {
-    let image = image::open(file_path).expect("can't open image file for palette extraction");
+    let image = image::open(file_path).expect(&format!("can't open image file {} for palette extraction", file_path));
     let palette = get_palette(&image);
     let colors = get_colors(&image);
     Ok((palette,colors))
