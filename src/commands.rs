@@ -1,4 +1,5 @@
 use std::io::{Result, BufReader, Error, ErrorKind};
+use std::io;
 use std::fs::File;
 use std::result;
 use std::path::Path;
@@ -110,14 +111,28 @@ pub fn default_shortcuts() -> Shortcuts {
 }
 
 pub fn load_shortcuts() -> Result<Shortcuts> {
-    let gallshkey = env::var(KEY_CMD_FILE_VAR);
-    if let Ok(key_file_name) = &gallshkey {
+    if let Ok(key_file_name) = &env::var(KEY_CMD_FILE_VAR) {
         match read_to_string(key_file_name) {
             Ok(content) => match serde_json::from_str(&content) {
                     Err(err) => Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err))),
                     Ok(shortcuts) => Ok(shortcuts)
             },
-            Err(_) => Ok(default_shortcuts()),
+            Err(err) => {
+                println!("the key map file: {} can't be read. Create a default key map file in the current directory before leaving?", key_file_name);
+                let mut response = String::new();
+                let stdin = io::stdin();
+                stdin.read_line(&mut response).expect("can't read from stdin");
+                match response.chars().next() {
+                    Some(ch) if ch == 'y' || ch == 'Y' => {
+                        let shortcuts = default_shortcuts();
+                        export_shortcuts(&shortcuts);
+                        Err::<Shortcuts, std::io::Error>(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err)))
+                        },
+
+                        _ => Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err))),
+                };
+                Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err)))
+            },
         }
     } else {
         Ok(default_shortcuts())
