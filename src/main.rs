@@ -25,7 +25,13 @@ mod rank;
 
 fn main() {
     let result = Args::parse().checked_args();
-    let shortcuts = load_shortcuts();
+    let shortcuts = match load_shortcuts() {
+        Ok(result) => result,
+        Err(err) => {
+            println!("{}", err);    
+            exit(1)
+        },
+    };
     match result {
         Err(err) => {
             eprintln!("{}", err);

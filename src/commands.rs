@@ -1,4 +1,6 @@
+use std::io::{Result, BufReader, Error, ErrorKind};
 use std::fs::File;
+use std::result;
 use std::path::Path;
 use std::collections::HashMap;
 use std::process::exit;
@@ -106,21 +108,18 @@ pub fn default_shortcuts() -> Shortcuts {
     shortcuts
 }
 
-pub fn load_shortcuts() -> Shortcuts {
+pub fn load_shortcuts() -> Result<Shortcuts> {
     let gallshkey = env::var(KEY_CMD_FILE_VAR);
     if let Ok(key_file_name) = &gallshkey {
         match read_to_string(key_file_name) {
             Ok(content) => match serde_json::from_str(&content) {
-                    Err(err) => {
-                        eprintln!("{}",&format!("can't deserialize file {} : error: {}", key_file_name, err));
-                        exit(1)
-                    },
-                    Ok(shortcuts) => shortcuts,
+                    Err(err) => Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err))),
+                    Ok(shortcuts) => Ok(shortcuts)
             },
-            Err(_) => default_shortcuts(),
+            Err(_) => Ok(default_shortcuts()),
         }
     } else {
-        default_shortcuts()
+        Ok(default_shortcuts())
     }
 }
 
