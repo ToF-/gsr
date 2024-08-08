@@ -9,6 +9,7 @@ use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
 
 const KEY_CMD_FILE_VAR: &str = "GALLSHKEY";
+const KEY_MAP_FILE: &str = "./gallshkey.json";
 
 #[derive(PartialEq, Copy, Clone, Debug, Deserialize, Serialize)]
 pub enum Command {
@@ -123,20 +124,14 @@ pub fn load_shortcuts() -> Result<Shortcuts> {
     }
 }
 
-pub fn export_shortcuts(shortcuts: &Shortcuts) {
+pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {
     let content = serde_json::to_string(shortcuts);
-    let path = Path::new("./gallshkey.json");
+    let path = Path::new(KEY_MAP_FILE);
     match File::create(path) {
-        Ok(file) => {
-            match serde_json::to_writer(file, &shortcuts) {
-                Ok(_) => {},
-                Err(err) => {
-                    eprintln!("{}",format!("error while creating ./gallshkey.json : {}", err));
-                },
-            }
-        },
-            Err(err) => {
-                eprintln!("{}",format!("error while creating ./gallshkey.json : {}", err));
+        Ok(file) => match serde_json::to_writer(file, &shortcuts) {
+                Ok(_) => Ok(()),
+                Err(err) => Err(Error::new(ErrorKind::Other, format!("error while creating ./gallshkey.json : {}", err))),
             },
-        }
+        Err(err) => Err(Error::new(ErrorKind::Other, format!("error while creating ./gallshkey.json : {}", err))),
     }
+}

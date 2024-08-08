@@ -113,13 +113,14 @@ impl Catalog {
         update_result
     }
 
-    pub fn file_operations(&self) {
+    pub fn file_operations(&self) -> Result<()> {
         self.delete_files();
         let args = self.args.as_ref().unwrap();
         if let Some(all_move_target_dir) = &args.all_move {
-            let _ = self.move_all_labelled_files(&all_move_target_dir);
-        };
-
+            self.move_all_labelled_files(&all_move_target_dir)
+        } else {
+            Ok(())
+        }
     }
 
     fn delete_files(&self) {
@@ -367,9 +368,12 @@ impl Catalog {
         display
     }
 
-    pub fn copy_to_current_dir(&self) -> Result<u64> {
+    pub fn copy_to_current_dir(&self) -> Result<()> {
         let entry = self.current_entry().unwrap();
-        entry.copy_file_to_current_dir()
+        match entry.copy_file_to_current_dir() {
+            Ok(_) => Ok(()),
+            Err(err) => Err(err),
+        }
     }
 
     pub fn print_info(&self) {

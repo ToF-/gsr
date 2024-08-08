@@ -1,4 +1,5 @@
 use crate::glib::timeout_add_local;
+use std::io::Result;
 use crate::commands::{Command,Shortcuts, export_shortcuts};
 use std::time::Duration;
 use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow};
@@ -327,6 +328,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             match gui.shortcuts.get(&key_name.to_string()) {
                 None => println!("{}", key_name),
                 Some(command) => {
+                    let mut result: Result<()> = Ok(());
                     match command {
                         Command::NoStar => {
                             let _ = catalog.end_set_rank(Rank::NoStar);
@@ -343,9 +345,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::FirstPosition => refresh = left_click_command_view_mode(0,0, gui, catalog),
                         Command::LastPosition => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
                         Command::CopyLabel => catalog.copy_label(),
-                        Command::CopyTemp => {
-                            let _ = catalog.copy_to_current_dir();
-                        },
+                        Command::CopyTemp => result = catalog.copy_to_current_dir(),
                         Command::Delete => catalog.delete(),
                         Command::ToggleExpand => catalog.toggle_expand(),
                         Command::ToggleFullSize => if gui.single_view_mode() {
@@ -354,18 +354,18 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::GotoIndex => catalog.begin_input(InputKind::IndexInput),
                         Command::Random => catalog.move_to_random_index(),
                         Command::Info => catalog.print_info(),
-                        Command::ExportCommands => export_shortcuts(&gui.shortcuts),
+                        Command::ExportCommands => result = export_shortcuts(&gui.shortcuts),
                         Command::NextPage => catalog.move_next_page(),
                         Command::TogglePageLimit => catalog.toggle_page_limit(),
                         Command::PrevPage => catalog.move_prev_page(),
                         Command::Quit => gui.application_window.close(),
                         Command::CopyAndQuit => {
-                            catalog.file_operations();
+                            result = catalog.file_operations();
                             gui.application_window.close()
                         },
                         Command::Search => catalog.begin_input(InputKind::SearchInput),
-                        Command::UnSelectPage => { let _ = catalog.unselect_page(); },
-                        Command::UnselectAll => { let _ = catalog.unselect_all(); },
+                        Command::UnSelectPage => result = catalog.unselect_page(),
+                        Command::UnselectAll => result = catalog.unselect_all(),
                         Command::TogglePalette => {
                             catalog.toggle_palette();
                             set_title(gui, catalog);
@@ -375,12 +375,8 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::Next => catalog.move_next_page(),
                         Command::SetRange => catalog.start_set(),
                         Command::Cancel => catalog.cancel_set(),
-                        Command::PasteLabel => {
-                            let _ = catalog.end_set_label();
-                        },
-                        Command::Unlabel => {
-                            let _ = catalog.end_unlabel();
-                        },
+                        Command::PasteLabel => result = catalog.end_set_label(),
+                        Command::Unlabel => result = catalog.end_unlabel(),
                         Command::ToggleSingleView => if catalog.page_size() > 1 {
                             if gui.single_view_mode() {
                                 gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
@@ -390,7 +386,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         },
                         Command::ChooseOrder => catalog.begin_sort_selection(),
                         Command::ToggleSelect => {
-                            let _ = catalog.end_set_select();
+                            result = catalog.end_set_select();
                             catalog.count_selected()
                         },
                         Command::Label => catalog.begin_input(InputKind::LabelInput),
@@ -406,6 +402,9 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::Up => {
                             refresh = arrow_command(Direction::Up, gui, catalog)
                         },
+                    };
+                    if result.is_err() {
+                        eprintln!("{}", result.unwrap_err())
                     }
                 },
             },
