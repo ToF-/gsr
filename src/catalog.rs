@@ -317,7 +317,7 @@ impl Catalog {
 
     pub fn index_input_pattern(&mut self) -> Option<usize> {
         if let Some(pattern) = &self.input {
-            self.picture_entries.iter().position(|entry| entry.original_file_name().contains(&*pattern))
+            self.picture_entries.iter().position(|entry| entry.original_file_path().contains(&*pattern))
         } else {
             None
         }
