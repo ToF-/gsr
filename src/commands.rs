@@ -125,17 +125,21 @@ pub fn load_shortcuts() -> Result<Shortcuts> {
                 match response.chars().next() {
                     Some(ch) if ch == 'y' || ch == 'Y' => {
                         let shortcuts = default_shortcuts();
-                        export_shortcuts(&shortcuts);
-                        Err::<Shortcuts, std::io::Error>(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err)))
-                        },
-
-                        _ => Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err))),
-                };
-                Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err)))
+                        match export_shortcuts(&shortcuts) {
+                            Ok(()) => { 
+                                println!("default key map file copied to current directory");
+                                Ok(shortcuts)
+                            },
+                            Err(err) => Err(Error::new(ErrorKind::Other, format!("can't export default key map file:{}", err))),
+                        }
+                    },
+                    _ => Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err))),
+                }
             },
         }
-    } else {
-        Ok(default_shortcuts())
+    }
+    else {
+        Err(Error::new(ErrorKind::Other, "variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json"))
     }
 }
 
