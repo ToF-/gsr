@@ -1,9 +1,9 @@
 use std::path::PathBuf;
+use anyhow::{anyhow, Result};
 use std::cmp::Ordering;
 use std::cmp::Ordering::*;
 use std::time::SystemTime;
 use crate::rank::Rank;
-use crate::error::{GenericError, GenericResult};
 use crate::image_data::ImageData;
 use crate::picture_io::{copy_file_to_target_directory, delete_file, write_image_data, read_or_create_image_data, read_file_info};
 use crate::path::{THUMB_SUFFIX, image_data_file_path, temp_directory};
@@ -43,7 +43,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
 
 impl PictureEntry {
 
-    pub fn from_file(file_path: &str) -> GenericResult<Self> {
+    pub fn from_file(file_path: &str) -> Result<Self> {
         match read_file_info(file_path) {
             Ok((file_size, modified_time)) => {
                 match read_or_create_image_data(file_path) {
@@ -55,7 +55,7 @@ impl PictureEntry {
                             Some(image_data.palette),
                             Some(image_data.label),
                             image_data.selected)),
-                    Err(err) => Err(GenericError::from(err)),
+                    Err(err) => Err(anyhow!(err)),
                 }
             }
             Err(err) => Err(err),
@@ -152,7 +152,7 @@ impl PictureEntry {
         delete_file(&self.image_data_file_path());
     }
 
-    pub fn copy_files(&self, target_dir: &str) -> GenericResult<u64> {
+    pub fn copy_files(&self, target_dir: &str) -> Result<u64> {
         copy_file_to_target_directory(&self.original_file_path(), target_dir)
             .and_then(|r1| {
                 copy_file_to_target_directory(&self.thumbnail_file_path(), target_dir)
@@ -165,11 +165,11 @@ impl PictureEntry {
             })
     }
 
-    pub fn copy_file_to_current_dir(&self) -> GenericResult<u64> {
+    pub fn copy_file_to_current_dir(&self) -> Result<u64> {
         copy_file_to_target_directory(&self.original_file_path(), &temp_directory())
     }
 
-    pub fn save_image_data(&self) -> GenericResult<()> {
+    pub fn save_image_data(&self) -> Result<()> {
         let image_data = ImageData {
             colors: self.colors,
             rank: self.rank.clone(),

@@ -1,6 +1,6 @@
 use crate::args::Args;
+use anyhow::{anyhow, Result};
 use crate::direction::Direction;
-use crate::error::{GenericError, GenericResult};
 use crate::order::Order;
 use crate::path::{get_picture_file_paths, interactive_check_label_path, check_file, is_thumbnail};
 use crate::picture_entry::PictureEntry;
@@ -11,7 +11,6 @@ use rand::prelude::SliceRandom;
 use rand::thread_rng;
 use regex::Regex;
 use std::fs::read_to_string;
-use std::io::{Error, ErrorKind};
 use std::path::PathBuf;
 
 pub type Coords = (usize, usize);
@@ -65,23 +64,23 @@ impl Catalog {
         }
     }
 
-    pub fn init_catalog(args: &Args) -> GenericResult<Self> {
+    pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
-        let add_result:GenericResult<()> = catalog.add_picture_entries_from_source(args);
+        let add_result:Result<()> = catalog.add_picture_entries_from_source(args);
         if let Err(err) = add_result {
             return Err(err)
         };
         catalog.set_page_size(args.grid.unwrap());
         catalog.count_selected();
         if catalog.length() == 0 {
-            return Err(GenericError::from(Error::new(ErrorKind::Other,"no picture to show")))
+            return Err(anyhow!("no picture to show"))
         };
         catalog.args = Some(args.clone());
         Ok(catalog)
     }
 
-    fn move_all_labelled_files(&self, target_dir: &str) -> GenericResult<()> {
-        let mut result: GenericResult<()> = Ok(());
+    fn move_all_labelled_files(&self, target_dir: &str) -> Result<()> {
+        let mut result: Result<()> = Ok(());
         self.picture_entries.clone().into_iter().filter(|entry| entry.label().is_some()).for_each(|entry| {
             if result.is_ok() {
                 let label = entry.label().unwrap();
@@ -102,7 +101,7 @@ impl Catalog {
         result
     }
 
-    pub fn update_files(&self) -> GenericResult<()> {
+    pub fn update_files(&self) -> Result<()> {
         let mut update_result = Ok(());
         for entry in &self.picture_entries {
             let result = check_or_create_thumbnail_file(&entry.thumbnail_file_path(), &entry.original_file_path());
@@ -114,7 +113,7 @@ impl Catalog {
         update_result
     }
 
-    pub fn file_operations(&self) -> GenericResult<()> {
+    pub fn file_operations(&self) -> Result<()> {
         self.delete_files();
         let args = self.args.as_ref().unwrap();
         if let Some(all_move_target_dir) = &args.all_move {
@@ -131,7 +130,7 @@ impl Catalog {
         };
 
     }
-    fn add_picture_entries_from_source(&mut self, args: &Args) -> GenericResult<()> {
+    fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {
         if let Some(file) = &args.file {
             self.add_picture_entry_from_file(&file)
         } else if let Some(list) = &args.reading {
@@ -147,7 +146,7 @@ impl Catalog {
         self.picture_entries.append(picture_entries)
     }
 
-    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>) -> GenericResult<()> {
+    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>) -> Result<()> {
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
                 for file_path in file_paths {
@@ -159,26 +158,26 @@ impl Catalog {
                                     Some(_) => true,
                                     None => false,
                                 },
-                                Err(err) => return Err(GenericError::from(err)),
+                                Err(err) => return Err(anyhow!(err)),
                             }
                         },
                     };
                     if matches_pattern {
                         match PictureEntry::from_file(&file_path) {
                             Ok(picture_entry) => self.picture_entries.push(picture_entry),
-                            Err(err) => return Err(err),
+                            Err(err) => return Err(anyhow!(err)),
                         }
                     }
                 }
                 Ok(())
             },
-            Err(err) => Err(GenericError::from(err)),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 
-    pub fn add_picture_entries_from_file_list(&mut self, file_list: &str) -> GenericResult<()> {
+    pub fn add_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {
         match read_to_string(file_list) {
-            Err(err) => Err(GenericError::from(err)),
+            Err(err) => Err(anyhow!(err)),
             Ok(content) => {
                 for path in content.lines()
                     .map(String::from)
@@ -189,7 +188,7 @@ impl Catalog {
                             let file_path = path.to_str().unwrap().to_string();
                             match PictureEntry::from_file(&file_path) {
                                 Ok(picture_entry) => self.picture_entries.push(picture_entry),
-                                Err(err) => return Err(err),
+                                Err(err) => return Err(anyhow!(err)),
                             }
                         };
                 Ok(())
@@ -197,13 +196,13 @@ impl Catalog {
         }
     }
 
-    pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> GenericResult<()> {
+    pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
         match check_file(file_path) {
             Ok(_) => match PictureEntry::from_file(file_path) {
                 Ok(picture_entry) => Ok(self.picture_entries.push(picture_entry)),
-                Err(err) => Err(err),
+                Err(err) => Err(anyhow!(err)),
             },
-            Err(err) => Err(GenericError::from(err)),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 
@@ -369,11 +368,11 @@ impl Catalog {
         display
     }
 
-    pub fn copy_to_current_dir(&self) -> GenericResult<()> {
+    pub fn copy_to_current_dir(&self) -> Result<()> {
         let entry = self.current_entry().unwrap();
         match entry.copy_file_to_current_dir() {
             Ok(_) => Ok(()),
-            Err(err) => Err(err),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 
@@ -502,7 +501,7 @@ impl Catalog {
         })
     }
 
-    fn apply_label(&mut self, label: String) -> GenericResult<()> {
+    fn apply_label(&mut self, label: String) -> Result<()> {
         if let Some(index) = self.index() {
             self.label = Some(label.clone());
             let entry = &mut self.picture_entries[index];
@@ -513,7 +512,7 @@ impl Catalog {
         }
     }
 
-    pub fn set_rank(&mut self, rank: Rank) -> GenericResult<()> {
+    pub fn set_rank(&mut self, rank: Rank) -> Result<()> {
         if let Some(index) = self.index() {
             let entry = &mut self.picture_entries[index];
             entry.set_rank(rank);
@@ -523,14 +522,14 @@ impl Catalog {
         }
     }
 
-    pub fn set_label_with_input(&mut self) -> GenericResult<()> {
+    pub fn set_label_with_input(&mut self) -> Result<()> {
         match &self.input {
             Some(s) => self.apply_label(s.clone()),
             None => Ok(()),
         }
     }
 
-    pub fn set_label(&mut self) -> GenericResult<()> {
+    pub fn set_label(&mut self) -> Result<()> {
         match &self.label {
             Some(s) => self.apply_label(s.clone()),
             None => Ok(()),
@@ -551,7 +550,7 @@ impl Catalog {
         self.full_size_on = !self.full_size_on
     }
 
-    pub fn unlabel(&mut self) -> GenericResult<()> {
+    pub fn unlabel(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
@@ -562,7 +561,7 @@ impl Catalog {
         }
     }
 
-    pub fn end_set_label(&mut self) -> GenericResult<()> {
+    pub fn end_set_label(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 if let Some(label) = &self.label {
@@ -586,11 +585,11 @@ impl Catalog {
                     Ok(())
                 }
             },
-            None => Err(GenericError::from(Error::new(ErrorKind::Other, "empty catalog"))),
+            None => Err(anyhow!("empty catalog")),
         }
     }
 
-    pub fn end_set_rank(&mut self, rank: Rank) -> GenericResult<()> {
+    pub fn end_set_rank(&mut self, rank: Rank) -> Result<()> {
         match self.index() {
             Some(index) => {
                 match self.start_index {
@@ -610,11 +609,11 @@ impl Catalog {
                     },
                 }
             },
-            None => Err(GenericError::from(Error::new(ErrorKind::Other, "empty catalog"))),
+            None => Err(anyhow!("empty catalog")),
         }
     }
 
-    pub fn end_unlabel(&mut self) -> GenericResult<()> {
+    pub fn end_unlabel(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 match self.start_index {
@@ -634,10 +633,10 @@ impl Catalog {
                     },
                 }
             },
-            None => Err(GenericError::from(Error::new(ErrorKind::Other, "empty catalog"))),
+            None => Err(anyhow!("empty catalog")),
         }
     }
-    pub fn toggle_select(&mut self) -> GenericResult<()> {
+    pub fn toggle_select(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
@@ -652,7 +651,7 @@ impl Catalog {
         }
     }
 
-    pub fn end_set_select(&mut self) -> GenericResult<()> {
+    pub fn end_set_select(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 match self.start_index {
@@ -673,11 +672,11 @@ impl Catalog {
                     },
                 }
             },
-            None => Err(GenericError::from(Error::new(ErrorKind::Other, "empty catalog"))),
+            None => Err(anyhow!("empty catalog")),
         }
     }
 
-    pub fn unselect_page(&mut self) -> GenericResult<()> {
+    pub fn unselect_page(&mut self) -> Result<()> {
         match self.index() {
             Some(_) => {
                 let start = self.page_index();
@@ -693,11 +692,11 @@ impl Catalog {
                 self.count_selected();
                 Ok(())
             },
-            None => Err(GenericError::from(Error::new(ErrorKind::Other, "empty catalog"))),
+            None => Err(anyhow!("empty catalog")),
         }
     }
 
-    pub fn unselect_all(&mut self) -> GenericResult<()> {
+    pub fn unselect_all(&mut self) -> Result<()> {
         match self.index() {
             Some(_) => {
                 let start = 0;
@@ -713,7 +712,7 @@ impl Catalog {
                 self.count_selected();
                 Ok(())
             },
-            None => Err(GenericError::from(Error::new(ErrorKind::Other, "empty catalog"))),
+            None => Err(anyhow!("empty catalog")),
         }
     }
 

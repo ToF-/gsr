@@ -1,11 +1,9 @@
-use crate::error::{GenericError, GenericResult};
+use anyhow::{anyhow, Result};
 use walkdir::WalkDir;
 use std::io;
 use std::fs;
 use std::env;
 use std::path::PathBuf;
-
-use std::io::{Result, Error, ErrorKind};
 
 const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];
 
@@ -35,20 +33,20 @@ pub fn is_thumbnail(file_name: &str) -> bool {
 pub fn check_path(source: &str) -> Result<PathBuf> {
     let path = PathBuf::from(source);
     if !path.exists() {
-        Err(Error::new(ErrorKind::Other, format!("directory {} doesn't exist", source)))
+        Err(anyhow!(format!("directory {} doesn't exist", source)))
     } else {
         match fs::metadata(path.clone()) {
             Ok(metadata) => if metadata.is_dir() {
                 Ok(path)
             } else {
-                Err(Error::new(ErrorKind::Other, format!("{} is not a directory", source)))
+                Err(anyhow!(format!("{} is not a directory", source)))
             },
-            Err(err) => Err(err),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 }
 
-pub fn interactive_check_path(dir: &str) -> GenericResult<PathBuf> {
+pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {
     let path = PathBuf::from(dir);
     if !path.exists() {
         println!("directory {} doesn't exist. Create ?", dir);
@@ -59,21 +57,21 @@ pub fn interactive_check_path(dir: &str) -> GenericResult<PathBuf> {
             Some(ch) if ch == 'y' || ch == 'Y' => {
                 match fs::create_dir(path.clone()) {
                     Ok(()) => Ok(path),
-                    Err(err) => return Err(GenericError::from(err)),
+                    Err(err) => return Err(anyhow!(err)),
                 }
             },
-            _ => Err(GenericError::from(Error::new(ErrorKind::Other, "directory creation cancelled"))),
+            _ => Err(anyhow!("directory creation cancelled")),
         }
     } else {
         if is_valid_directory(dir) {
             Ok(path)
         } else {
-            Err(GenericError::from(Error::new(ErrorKind::Other, format!("path {} doesn't exist", dir))))
+            Err(anyhow!(format!("path {} doesn't exist", dir)))
         }
     }
 }
 
-pub fn interactive_check_label_path(target_parent: &str, label: &str) -> GenericResult<PathBuf> {
+pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {
     let path = PathBuf::from(target_parent).join(label);
     interactive_check_path(path.to_str().unwrap())
 }
@@ -81,7 +79,7 @@ pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Generic
 pub fn check_file(source: &str) -> Result<PathBuf> {
     let path = PathBuf::from(source);
     if !path.exists() {
-        Err(Error::new(ErrorKind::Other, format!("file {} doesn't exist", source)))
+        Err(anyhow!(format!("file {} doesn't exist", source)))
     } else {
         match fs::metadata(path.clone()) {
             Ok(_) => {
@@ -96,10 +94,10 @@ pub fn check_file(source: &str) -> Result<PathBuf> {
                 if path.is_file() && valid_extension && not_a_thumbnail {
                     Ok(path)
                 } else {
-                    Err(Error::new(ErrorKind::Other, format!("{} is not a valid file", source)))
+                    Err(anyhow!(format!("{} is not a valid file", source)))
                 }
             },
-            Err(err) => Err(err),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 }

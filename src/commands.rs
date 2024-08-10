@@ -1,4 +1,4 @@
-use crate::error::{GenericError, GenericResult};
+use anyhow::{anyhow, Result};
 use std::io::{Error, ErrorKind};
 use std::io;
 use std::fs::File;
@@ -109,11 +109,11 @@ pub fn default_shortcuts() -> Shortcuts {
     shortcuts
 }
 
-pub fn load_shortcuts() -> GenericResult<Shortcuts> {
+pub fn load_shortcuts() -> Result<Shortcuts> {
     if let Ok(key_file_name) = &env::var(KEY_CMD_FILE_VAR) {
         match read_to_string(key_file_name) {
             Ok(content) => match serde_json::from_str(&content) {
-                    Err(err) => Err(GenericError::from(err)),
+                    Err(err) => Err(anyhow!(err)),
                     Ok(shortcuts) => Ok(shortcuts)
             },
             Err(err) => {
@@ -129,27 +129,27 @@ pub fn load_shortcuts() -> GenericResult<Shortcuts> {
                                 println!("default key map file copied to current directory");
                                 Ok(shortcuts)
                             },
-                            Err(err) => Err(GenericError::from(err)),
+                            Err(err) => Err(anyhow!(err)),
                         }
                     },
-                    _ => Err(GenericError::from(err)),
+                    _ => Err(anyhow!(err)),
                 }
             },
         }
     }
     else {
-        Err(GenericError::from(Error::new(ErrorKind::Other, "variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json")))
+        Err(anyhow!("variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json"))
     }
 }
 
-pub fn export_shortcuts(shortcuts: &Shortcuts) -> GenericResult<()> {
+pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {
     let content = serde_json::to_string(shortcuts);
     let path = Path::new(KEY_MAP_FILE);
     match File::create(path) {
         Ok(file) => match serde_json::to_writer(file, &shortcuts) {
                 Ok(_) => Ok(()),
-                Err(err) => Err(GenericError::from(err)),
+                Err(err) => Err(anyhow!(err)),
             },
-        Err(err) => Err(GenericError::from(err)),
+        Err(err) => Err(anyhow!(err)),
     }
 }

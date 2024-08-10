@@ -14,7 +14,6 @@ mod args;
 mod catalog;
 mod commands;
 mod direction;
-mod error;
 mod gui;
 mod image_data;
 mod order;
@@ -29,7 +28,7 @@ fn main() {
     let shortcuts = match load_shortcuts() {
         Ok(result) => result,
         Err(err) => {
-            println!("{}", err);    
+            println!("{}", err);
             exit(1)
         },
     };

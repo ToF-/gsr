@@ -756,6 +756,7 @@ dependencies = [
 name = "gsr"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "chrono",
  "clap",
  "gtk4",

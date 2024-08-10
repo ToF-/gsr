@@ -1,5 +1,5 @@
-use crate::error::GenericResult;
 use crate::glib::timeout_add_local;
+use anyhow::{anyhow, Result};
 use crate::commands::{Command,Shortcuts, export_shortcuts};
 use std::time::Duration;
 use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow};
@@ -328,7 +328,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
             match gui.shortcuts.get(&key_name.to_string()) {
                 None => println!("{}", key_name),
                 Some(command) => {
-                    let mut result: GenericResult<()> = Ok(());
+                    let mut result: Result<()> = Ok(());
                     match command {
                         Command::NoStar => {
                             let _ = catalog.end_set_rank(Rank::NoStar);
