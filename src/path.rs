@@ -1,3 +1,4 @@
+use crate::error::{GenericError, GenericResult};
 use walkdir::WalkDir;
 use std::io;
 use std::fs;
@@ -47,7 +48,7 @@ pub fn check_path(source: &str) -> Result<PathBuf> {
     }
 }
 
-pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {
+pub fn interactive_check_path(dir: &str) -> GenericResult<PathBuf> {
     let path = PathBuf::from(dir);
     if !path.exists() {
         println!("directory {} doesn't exist. Create ?", dir);
@@ -58,21 +59,21 @@ pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {
             Some(ch) if ch == 'y' || ch == 'Y' => {
                 match fs::create_dir(path.clone()) {
                     Ok(()) => Ok(path),
-                    Err(err) => return Err(err),
+                    Err(err) => return Err(GenericError::from(err)),
                 }
             },
-            _ => Err(Error::new(ErrorKind::Other, "directory creation cancelled")),
+            _ => Err(GenericError::from(Error::new(ErrorKind::Other, "directory creation cancelled"))),
         }
     } else {
         if is_valid_directory(dir) {
             Ok(path)
         } else {
-            Err(Error::new(ErrorKind::Other, format!("path {} doesn't exist", dir)))
+            Err(GenericError::from(Error::new(ErrorKind::Other, format!("path {} doesn't exist", dir))))
         }
     }
 }
 
-pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {
+pub fn interactive_check_label_path(target_parent: &str, label: &str) -> GenericResult<PathBuf> {
     let path = PathBuf::from(target_parent).join(label);
     interactive_check_path(path.to_str().unwrap())
 }

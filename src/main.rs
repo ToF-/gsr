@@ -14,6 +14,7 @@ mod args;
 mod catalog;
 mod commands;
 mod direction;
+mod error;
 mod gui;
 mod image_data;
 mod order;

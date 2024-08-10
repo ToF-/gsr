@@ -1,10 +1,9 @@
-use std::io::{Result, BufReader, Error, ErrorKind};
+use crate::error::{GenericError, GenericResult};
+use std::io::{Error, ErrorKind};
 use std::io;
 use std::fs::File;
-use std::result;
 use std::path::Path;
 use std::collections::HashMap;
-use std::process::exit;
 use std::env;
 use serde::{Deserialize, Serialize};
 use std::fs::read_to_string;
@@ -110,11 +109,11 @@ pub fn default_shortcuts() -> Shortcuts {
     shortcuts
 }
 
-pub fn load_shortcuts() -> Result<Shortcuts> {
+pub fn load_shortcuts() -> GenericResult<Shortcuts> {
     if let Ok(key_file_name) = &env::var(KEY_CMD_FILE_VAR) {
         match read_to_string(key_file_name) {
             Ok(content) => match serde_json::from_str(&content) {
-                    Err(err) => Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err))),
+                    Err(err) => Err(GenericError::from(err)),
                     Ok(shortcuts) => Ok(shortcuts)
             },
             Err(err) => {
@@ -130,27 +129,27 @@ pub fn load_shortcuts() -> Result<Shortcuts> {
                                 println!("default key map file copied to current directory");
                                 Ok(shortcuts)
                             },
-                            Err(err) => Err(Error::new(ErrorKind::Other, format!("can't export default key map file:{}", err))),
+                            Err(err) => Err(GenericError::from(err)),
                         }
                     },
-                    _ => Err(Error::new(ErrorKind::Other, format!("can't deserialize file {} : error: {}", key_file_name, err))),
+                    _ => Err(GenericError::from(err)),
                 }
             },
         }
     }
     else {
-        Err(Error::new(ErrorKind::Other, "variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json"))
+        Err(GenericError::from(Error::new(ErrorKind::Other, "variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json")))
     }
 }
 
-pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {
+pub fn export_shortcuts(shortcuts: &Shortcuts) -> GenericResult<()> {
     let content = serde_json::to_string(shortcuts);
     let path = Path::new(KEY_MAP_FILE);
     match File::create(path) {
         Ok(file) => match serde_json::to_writer(file, &shortcuts) {
                 Ok(_) => Ok(()),
-                Err(err) => Err(Error::new(ErrorKind::Other, format!("error while creating ./gallshkey.json : {}", err))),
+                Err(err) => Err(GenericError::from(err)),
             },
-        Err(err) => Err(Error::new(ErrorKind::Other, format!("error while creating ./gallshkey.json : {}", err))),
+        Err(err) => Err(GenericError::from(err)),
     }
 }
