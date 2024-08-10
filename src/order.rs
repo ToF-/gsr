@@ -5,6 +5,20 @@ pub enum Order {
     Colors, Date, Label, Name, Palette, Size, Value, Random,
 }
 
+pub fn order_from_string(s: &str) -> Option<Order> {
+    match s {
+            "c" => Some(Order::Colors),
+            "d" => Some(Order::Date),
+            "l" => Some(Order::Label),
+            "n" => Some(Order::Name),
+            "p" => Some(Order::Palette),
+            "r" => Some(Order::Random),
+            "s" => Some(Order::Size),
+            "v" => Some(Order::Value),
+            _ => None,
+    }
+}
+
 impl std::fmt::Display for Order {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{:?}", self)

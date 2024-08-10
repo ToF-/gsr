@@ -161,6 +161,7 @@ my_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn my_entrie
 my_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn my_entry(file_path: &str) -> PictureEntry {$/;"	f
 my_larger_catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn my_larger_catalog() -> Catalog {$/;"	f
 new	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn new() -> Self {$/;"	f
+order_from_string	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub fn order_from_string(s: &str) -> Option<Order> {$/;"	f
 original_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_name(&self) -> String {$/;"	f
 original_file_name_is_the_file_path_without_folders	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn original_file_name_is_the_file_path_without_folders() {$/;"	f
 original_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_path(&self) -> String {$/;"	f

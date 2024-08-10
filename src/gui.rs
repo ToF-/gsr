@@ -8,7 +8,7 @@ use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
 use crate::direction::Direction;
 use crate::Args;
-use crate::order::Order;
+use crate::order::{order_from_string, Order};
 use crate::Catalog;
 use crate::catalog::InputKind;
 use crate::picture_entry::PictureEntry;
@@ -305,16 +305,11 @@ fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {
     match key.name() {
         None => refresh = false,
         Some(key_name) => match key_name.as_str() {
-            "c" => catalog.sort_by(Order::Colors),
-            "d" => catalog.sort_by(Order::Date),
-            "l" => catalog.sort_by(Order::Label),
-            "n" => catalog.sort_by(Order::Name),
-            "p" => catalog.sort_by(Order::Palette),
-            "r" => catalog.sort_by(Order::Random),
-            "s" => catalog.sort_by(Order::Size),
-            "v" => catalog.sort_by(Order::Value),
             "Escape" => catalog.cancel_sort_selection(),
-            _ => {},
+            s => match order_from_string(s) {
+                Some(order) => catalog.sort_by(order),
+                None => {},
+            },
         }
     };
     refresh
