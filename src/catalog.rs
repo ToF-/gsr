@@ -3,7 +3,7 @@ use anyhow::{anyhow, Result};
 use crate::direction::Direction;
 use crate::order::Order;
 use crate::path::{get_picture_file_paths, interactive_check_label_path, check_file, is_thumbnail};
-use crate::picture_entry::PictureEntry;
+use crate::picture_entry::{PictureEntry};
 use crate::picture_io::check_or_create_thumbnail_file;
 use crate::rank::Rank;
 use rand::Rng;
@@ -101,7 +101,25 @@ impl Catalog {
         result
     }
 
-    pub fn deduplicate_files(&self, target_dir: &str) -> Result<()> {
+    pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {
+        let mut deduplicate_result: Result<()> = Ok(());
+        self.sort_by(Order::Size);
+        let mut prev_entry: Option<PictureEntry> = None;
+        for entry in &self.picture_entries {
+            if let Some(prev) = prev_entry {
+                match entry.equal_content(&prev) {
+                    Ok(true) => {
+                        println!("removing duplicate entry {}", prev.original_file_path());
+                        if prev.copy_files(target_dir).is_ok() {
+                            prev.delete_files();
+                        }
+                    },
+                    Ok(false) => {} ,
+                    Err(err) => return Err(anyhow!(err)),
+                };
+            }
+            prev_entry = Some(entry.clone());
+        };
         Ok(())
     }
     pub fn update_files(&self) -> Result<()> {

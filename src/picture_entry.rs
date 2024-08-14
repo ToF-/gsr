@@ -104,6 +104,32 @@ impl PictureEntry {
         image_data_file_path(&self.original_file_path())
     }
 
+
+    pub fn equal_content(&self, other:&PictureEntry) -> Result<bool> {
+        if self.file_size == 0 {
+            return Ok(false);
+        }
+        if self.file_size != other.file_size {
+            return Ok(false);
+        };
+        match std::fs::read(self.file_path.clone()) {
+            Ok(self_bytes) => {
+                match std::fs::read(other.file_path.clone()) {
+                    Ok(other_bytes) => {
+                        for i in 0 .. self_bytes.len() {
+                            if self_bytes[i] != other_bytes[i] {
+                                return Ok(false)
+                            }
+                        };
+                        Ok(true)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
     pub fn label(&self) -> Option<String> {
         if self.label.len() > 0 {
             Some(self.label.clone())
