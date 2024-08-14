@@ -109,7 +109,7 @@ impl Catalog {
             if let Some(prev) = prev_entry {
                 match entry.equal_content(&prev) {
                     Ok(true) => {
-                        println!("removing duplicate entry {}", prev.original_file_path());
+                        println!("removing duplicate entry {}, same as {}", prev.original_file_path(), entry.original_file_path());
                         if prev.copy_files(target_dir).is_ok() {
                             prev.delete_files();
                         }
