@@ -101,6 +101,9 @@ impl Catalog {
         result
     }
 
+    pub fn deduplicate_files(&self, target_dir: &str) -> Result<()> {
+        Ok(())
+    }
     pub fn update_files(&self) -> Result<()> {
         let mut update_result = Ok(());
         for entry in &self.picture_entries {

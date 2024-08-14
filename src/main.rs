@@ -54,6 +54,15 @@ fn main() {
                             },
                         }
                     }
+                    if args.deduplicate.is_some() {
+                        match catalog.deduplicate_files(&args.deduplicate.unwrap()) {
+                            Ok(()) => exit(0),
+                            Err(err) => {
+                                eprintln!("{}", err);
+                                exit(1)
+                            },
+                        }
+                    }
                     catalog.sort_by(args.order.clone());
                     let catalog_rc = Rc::new(RefCell::new(catalog));
                     let application = Application::builder()

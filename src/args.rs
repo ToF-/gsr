@@ -17,6 +17,10 @@ pub struct Args {
      /// Directory to search (default is set with variable GALLSHDIR)
     pub directory: Option<String>,
 
+    /// move all duplicate files to TARGET_DIR
+    #[arg(long, value_name = "TARGET_DIR")]
+    pub deduplicate: Option<String>,
+
     /// move all labelled pictures to their matching folder on TARGET_DIR
     #[arg(short, long, value_name = "TARGET_DIR")]
     pub all_move: Option<String>,
@@ -111,6 +115,16 @@ impl Args {
             },
 
             date: self.date,
+
+            deduplicate: {
+                match self.deduplicate.clone() {
+                    Some(dir) => match check_path(&dir) {
+                        Ok(_) => Some(dir.to_string()),
+                        Err(err) => return Err(err),
+                    },
+                    None => None,
+                }
+            },
 
             directory: {
                 let dir = directory(self.directory.clone());
