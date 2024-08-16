@@ -73,6 +73,10 @@ pub struct Args {
     #[arg(short, long, value_name="FILE_LIST")]
     pub reading: Option<String>,
 
+    /// sample pictures from each directory within of size N between 2 and 4
+    #[arg(long, value_name="N")]
+    pub sample: Option<usize>,
+
     /// wait N seconds between each picture
     #[arg(short, long, value_name="N")]
     pub seconds: Option<u64>,
@@ -183,6 +187,12 @@ impl Args {
                     Ok(_) => Some(path.to_string()),
                     Err(err) => return Err(err),
                 },
+            },
+
+            sample: match self.sample {
+                None => None,
+                Some(n) if n >= 2 && n <= 4 => Some(n),
+                Some(n) => Some(2),
             },
 
             seconds: self.seconds,

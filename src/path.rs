@@ -3,7 +3,7 @@ use walkdir::WalkDir;
 use std::io;
 use std::fs;
 use std::env;
-use std::path::PathBuf;
+use std::path::{Path,PathBuf};
 
 const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];
 
@@ -124,6 +124,11 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
         },
         Err(err) => Err(err),
     }
+}
+
+pub fn file_path_directory(source: &str) -> String {
+    let path = Path::new(source);
+    path.parent().expect("can't get file_path parent").display().to_string()
 }
 
 pub fn image_data_file_path(original_file_path: &str) -> String {

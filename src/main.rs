@@ -63,7 +63,9 @@ fn main() {
                             },
                         }
                     }
-                    catalog.sort_by(args.order.clone());
+                    if !catalog.sample_on() {
+                        catalog.sort_by(args.order.clone());
+                    }
                     let catalog_rc = Rc::new(RefCell::new(catalog));
                     let application = Application::builder()
                         .application_id("org.example.gallsh")

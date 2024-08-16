@@ -258,6 +258,8 @@ fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key
                 input_mode_process_key(key, &gui, &mut catalog)
             } else if catalog.sort_selection_on() {
                 sort_selection_process_key(key, &mut catalog)
+            } else if catalog.sample_on() {
+                sample_mode_process_key(key, &gui, &mut catalog)
             } else {
                 view_mode_process_key(key, &gui, &mut catalog)
             };
@@ -313,6 +315,10 @@ fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {
         }
     };
     refresh
+}
+
+fn sample_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
+    view_mode_process_key(key, gui, catalog)
 }
 
 fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {

@@ -1,8 +1,9 @@
 use crate::args::Args;
+use core::cmp::Ordering;
 use anyhow::{anyhow, Result};
 use crate::direction::Direction;
 use crate::order::Order;
-use crate::path::{get_picture_file_paths, interactive_check_label_path, check_file, is_thumbnail};
+use crate::path::{get_picture_file_paths, file_path_directory, interactive_check_label_path, check_file, is_thumbnail};
 use crate::picture_entry::{PictureEntry};
 use crate::picture_io::check_or_create_thumbnail_file;
 use crate::rank::Rank;
@@ -66,16 +67,21 @@ impl Catalog {
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
-        let add_result:Result<()> = catalog.add_picture_entries_from_source(args);
+        catalog.args = Some(args.clone());
+        let add_result:Result<()> = if args.sample.is_some() {
+            catalog.set_page_size(args.sample.unwrap());
+            catalog.add_pictures_entries_for_sample(args)
+        } else {
+            catalog.set_page_size(args.grid.unwrap());
+            catalog.add_picture_entries_from_source(args)
+        };
         if let Err(err) = add_result {
             return Err(err)
         };
-        catalog.set_page_size(args.grid.unwrap());
         catalog.count_selected();
         if catalog.length() == 0 {
             return Err(anyhow!("no picture to show"))
         };
-        catalog.args = Some(args.clone());
         Ok(catalog)
     }
 
@@ -162,6 +168,59 @@ impl Catalog {
             Ok(())
         }
     }
+
+    pub fn add_pictures_entries_for_sample(&mut self, args: &Args) -> Result<()> {
+        let mut picture_entries: Vec<PictureEntry> = Vec::new();
+        if let Some(directory) = &args.directory {
+            let cells_per_row = args.sample.unwrap();
+            let page_size = cells_per_row * cells_per_row;
+            match get_picture_file_paths(directory) {
+                Ok(file_paths) => {
+                    for file_path in file_paths {
+                        match PictureEntry::from_file(&file_path) {
+                            Ok(picture_entry) => picture_entries.push(picture_entry),
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    };
+                    picture_entries.sort_by(|a, b|  {
+                        match file_path_directory(&a.file_path).cmp(&file_path_directory(&b.file_path)) {
+                            Ordering::Equal => a.cmp_rank(&b),
+                            other => other,
+                        }
+                    });
+                    let mut current_parent = String::from("");
+                    let mut page_len: usize = 0;
+                    let mut last_entry: PictureEntry = picture_entries[0].clone();
+                    let mut started: bool = false;
+                    for entry in &picture_entries {
+                        let parent = file_path_directory(&entry.file_path);
+                        if parent != current_parent {
+                            println!("{}", parent);
+                            while page_len < page_size {
+                                if started {
+                                    self.picture_entries.push(last_entry.clone())
+                                }
+                                page_len += 1;
+                            };
+                            page_len = 0;
+                        };
+                        started = true;
+                        if page_len < page_size {
+                            self.picture_entries.push(entry.clone());
+                            page_len += 1;
+                        };
+                        current_parent = parent;
+                        last_entry = entry.clone()
+                    };
+                    Ok(())
+                },
+                Err(err) => Err(anyhow!(err)),
+            }
+        } else {
+            Ok(())
+        }
+    }
+
     #[allow(dead_code)]
     pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {
         self.picture_entries.append(picture_entries)
@@ -239,6 +298,10 @@ impl Catalog {
 
     pub fn expand_on(&self) -> bool {
         self.expand_on
+    }
+
+    pub fn sample_on(&self) -> bool {
+        self.args.as_ref().unwrap().sample.is_some()
     }
 
     pub fn length(&self) -> usize {
@@ -363,7 +426,13 @@ impl Catalog {
 
     pub fn title_display(&self) -> String {
         let entry_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
-        let display= format!("S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
+        let file_path = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).file_path;
+        let display= format!("{} S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
+            if self.sample_on() {
+                file_path_directory(file_path)
+            } else {
+                String::from("")
+            },
             self.max_selected,
             if self.start_index.is_some() { "…" } else { "" },
             if let Some(order) = self.order.clone() {
