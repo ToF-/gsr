@@ -38,6 +38,7 @@ pub struct Catalog {
     input_kind: Option<InputKind>,
     previous_order: Option<Order>,
     args: Option<Args>,
+    discarded: Vec<usize>,
 }
 
 impl Catalog {
@@ -62,6 +63,7 @@ impl Catalog {
             input_kind: None,
             previous_order: Some(Order::Random),
             args: None,
+            discarded: Vec::new(),
         }
     }
 
@@ -192,12 +194,15 @@ impl Catalog {
                     let mut page_len: usize = 0;
                     let mut last_entry: PictureEntry = picture_entries[0].clone();
                     let mut started: bool = false;
+                    let mut index: usize = 0;
                     for entry in &picture_entries {
                         let parent = file_path_directory(&entry.file_path);
                         if parent != current_parent {
                             println!("{}", parent);
                             while page_len < page_size {
                                 if started {
+                                    self.discarded.push(index);
+                                    index += 1;
                                     self.picture_entries.push(last_entry.clone())
                                 }
                                 page_len += 1;
@@ -207,6 +212,7 @@ impl Catalog {
                         started = true;
                         if page_len < page_size {
                             self.picture_entries.push(entry.clone());
+                            index += 1;
                             page_len += 1;
                         };
                         current_parent = parent;
@@ -347,7 +353,7 @@ impl Catalog {
 
     pub fn index_from_position(&self, coords: Coords) -> Option<usize> {
         let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size) as usize;
-        if index < self.length() {
+        if index < self.length() && !self.discarded.contains(&index) {
             Some(index)
         } else {
             None
@@ -379,7 +385,7 @@ impl Catalog {
     }
 
     pub fn can_move_to_index(&self, index: usize) -> bool {
-        index < self.picture_entries.len()
+        index < self.picture_entries.len() && ! self.discarded.contains(&index)
     }
 
     pub fn can_move_towards(&self, direction: Direction) -> bool {
@@ -474,8 +480,10 @@ impl Catalog {
     // update
 
     pub fn begin_sort_selection(&mut self) {
-        self.previous_order = self.order.clone();
-        self.order = None
+        if ! self.sample_on() {
+            self.previous_order = self.order.clone();
+            self.order = None
+        }
     }
 
     pub fn cancel_sort_selection(&mut self) {
@@ -834,13 +842,17 @@ impl Catalog {
 
     pub fn move_to_random_index(&mut self) {
         let index = thread_rng().gen_range(0..self.length());
-        self.move_to_index(index);
+        if self.can_move_to_index(index) {
+            self.move_to_index(index)
+        }
     }
 
     pub fn move_to_index(&mut self, index: usize) {
-        let old_page_index = self.page_index();
-        self.index = index;
-        self.page_changed = self.page_index() != old_page_index
+        if index != self.index {
+            let old_page_index = self.page_index();
+            self.index = index;
+            self.page_changed = self.page_index() != old_page_index
+        }
     }
 
     pub fn move_to_first(&mut self) {
@@ -852,61 +864,43 @@ impl Catalog {
     }
 
     pub fn move_next_page(&mut self) {
-        let new_index = self.page_index() + self.page_length();
-        self.index = if new_index < self.length() {
-            new_index
-        } else {
-            0
-        };
-        self.page_changed = true;
+        let candidate_index = self.page_index() + self.page_length();
+        self.move_to_index( if candidate_index < self.length() { candidate_index } else { 0 });
     }
 
     pub fn move_towards(&mut self, direction: Direction) {
-        let page_index = self.page_index();
         if self.can_move_towards(direction.clone()) {
+            let mut index = self.index;
             match direction {
-                Direction::Right => {
-                    if self.index + 1 < self.length() {
-                        self.index += 1
-                    }
-                },
-                Direction::Left => {
-                    if self.index > 0 {
-                        self.index -= 1
-                    }
-                },
-                Direction::Down => {
-                    if self.index + self.page_size < self.length() {
-                        self.index += self.page_size
-                    } else {
-                        self.index = 0
-                    }
-                },
+                Direction::Right => if index + 1 < self.length() { index += 1 },
+                Direction::Left => if index > 0 { index -= 1 },
+                Direction::Down => if index + self.page_size < self.length() { index += self.page_size } else { index = 0 },
                 Direction::Up => {
-                    if self.index >= self.page_size {
-                        self.index -= self.page_size
+                    if index >= self.page_size {
+                        index -= self.page_size
                     } else {
-                        let offset = self.index - self.page_index();
+                        let offset = index - self.page_index();
                         let new_page_index = self.last() - (self.last() % self.page_length());
                         let new_index = new_page_index + self.page_length() - self.page_size() + offset;
-                        self.index = if new_index < self.length() {
+                        index = if new_index < self.length() {
                             new_index
                         } else {
                             self.last()
                         }
                     }
                 },
-            }
-        };
-        self.page_changed = self.page_index() != page_index
+            };
+            self.move_to_index(index);
+        }
     }
 
     pub fn move_prev_page(&mut self) {
-        self.index = if self.page_index() >= self.page_length() {
+        let index = if self.page_index() >= self.page_length() {
             self.page_index() - self.page_length()
         } else {
             self.page_index_of(self.length()-1)
-        }
+        };
+        self.move_to_index(index);
     }
 }
 
