@@ -293,6 +293,10 @@ impl Catalog {
     }
 
     // queries
+    
+    pub fn discarded(&self) -> &Vec<usize> {
+        &self.discarded
+    }
 
     pub fn sort_selection_on(&self) -> bool {
         self.order.is_none()
@@ -395,10 +399,10 @@ impl Catalog {
         let row = (index - self.page_index()) / cells_per_row;
         if self.page_limit_on {
             match direction {
-                Direction::Left => col > 0,
-                Direction::Right => col+1 < cells_per_row && index+1 < self.length(),
-                Direction::Up => row > 0,
-                Direction::Down => row+1 < cells_per_row && index + cells_per_row < self.length()
+                Direction::Left => col > 0 && !self.discarded.contains(&(index-1)),
+                Direction::Right => col+1 < cells_per_row && index+1 < self.length() && !self.discarded.contains(&(index+1)),
+                Direction::Up => row > 0 && !self.discarded.contains(&(index - cells_per_row)),
+                Direction::Down => row+1 < cells_per_row && index + cells_per_row < self.length() && !self.discarded.contains(&(index+cells_per_row)),
             }
         } else {
             true
@@ -529,14 +533,18 @@ impl Catalog {
             match kind {
                 InputKind::SearchInput => {
                     if let Some(index) = self.index_input_pattern() {
-                        self.move_to_index(index)
+                        if self.can_move_to_index(index) {
+                            self.move_to_index(index)
+                        }
                     };
                     self.input_kind = None;
                     self.input = None
                 },
                 InputKind::IndexInput => {
                     if let Some(index) = self.index_input_number() {
-                        self.move_to_index(index)
+                        if self.can_move_to_index(index) {
+                            self.move_to_index(index)
+                        }
                     };
                     self.input_kind = None;
                     self.input = None

@@ -97,6 +97,7 @@ delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub 
 deleting_en_entry_makes_it_non_selectable	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
 dimension	/Users/christophethibaut/Coding/gsr/src/args.rs	/^fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {$/;"	f
 directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn directory(directory: Option<String>) -> String {$/;"	f
+discarded	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn discarded(&self) -> &Vec<usize> {$/;"	f
 draw_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {$/;"	f
 editing_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn editing_input() {$/;"	f
 end_set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_set_label(&mut self) -> Result<()> {$/;"	f

@@ -495,11 +495,13 @@ fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: usize)
         cell_box.remove(&child)
     };
     if let Some(index) = catalog.index_from_position((col,row)) {
-        let entry = catalog.entry_at_index(index).unwrap();
-        let picture = picture_for_entry(&entry, &catalog);
-        let label = label_for_entry(&entry, index == catalog.index().unwrap());
-        cell_box.append(&picture);
-        cell_box.append(&label);
+        if !catalog.discarded().contains(&index) {
+            let entry = catalog.entry_at_index(index).unwrap();
+            let picture = picture_for_entry(&entry, &catalog);
+            let label = label_for_entry(&entry, index == catalog.index().unwrap());
+            cell_box.append(&picture);
+            cell_box.append(&label);
+        }
     }
 }
 
