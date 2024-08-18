@@ -38,6 +38,7 @@ pub struct Catalog {
     input_kind: Option<InputKind>,
     previous_order: Option<Order>,
     args: Option<Args>,
+    sample_on: bool,
     discarded: Vec<usize>,
 }
 
@@ -63,6 +64,7 @@ impl Catalog {
             input_kind: None,
             previous_order: Some(Order::Random),
             args: None,
+            sample_on: false,
             discarded: Vec::new(),
         }
     }
@@ -72,6 +74,7 @@ impl Catalog {
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
             catalog.set_page_size(args.sample.unwrap());
+            catalog.sample_on = true;
             catalog.add_pictures_entries_for_sample(args)
         } else {
             catalog.set_page_size(args.grid.unwrap());
@@ -315,7 +318,7 @@ impl Catalog {
     }
 
     pub fn sample_on(&self) -> bool {
-        self.args.as_ref().unwrap().sample.is_some()
+        self.sample_on
     }
 
     pub fn length(&self) -> usize {
