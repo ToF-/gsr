@@ -298,6 +298,10 @@ impl Catalog {
         &self.discarded
     }
 
+    pub fn discarded_index(&self, index: usize) -> bool {
+        self.sample_on() && self.discarded.contains(&index)
+    }
+
     pub fn sort_selection_on(&self) -> bool {
         self.order.is_none()
     }
@@ -357,7 +361,7 @@ impl Catalog {
 
     pub fn index_from_position(&self, coords: Coords) -> Option<usize> {
         let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size) as usize;
-        if index < self.length() && !self.discarded.contains(&index) {
+        if index < self.length() && !self.discarded_index(index) {
             Some(index)
         } else {
             None
@@ -389,7 +393,7 @@ impl Catalog {
     }
 
     pub fn can_move_to_index(&self, index: usize) -> bool {
-        index < self.picture_entries.len() && ! self.discarded.contains(&index)
+        index < self.picture_entries.len() && ! self.discarded_index(index)
     }
 
     pub fn can_move_towards(&self, direction: Direction) -> bool {
@@ -399,10 +403,10 @@ impl Catalog {
         let row = (index - self.page_index()) / cells_per_row;
         if self.page_limit_on {
             match direction {
-                Direction::Left => col > 0 && !self.discarded.contains(&(index-1)),
-                Direction::Right => col+1 < cells_per_row && index+1 < self.length() && !self.discarded.contains(&(index+1)),
-                Direction::Up => row > 0 && !self.discarded.contains(&(index - cells_per_row)),
-                Direction::Down => row+1 < cells_per_row && index + cells_per_row < self.length() && !self.discarded.contains(&(index+cells_per_row)),
+                Direction::Left => col > 0 && !self.discarded_index(index-1),
+                Direction::Right => col+1 < cells_per_row && index+1 < self.length() && !self.discarded_index(index+1),
+                Direction::Up => row > 0 && !self.discarded_index(index - cells_per_row),
+                Direction::Down => row+1 < cells_per_row && index + cells_per_row < self.length() && !self.discarded_index(index+cells_per_row),
             }
         } else {
             true
