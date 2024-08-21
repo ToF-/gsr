@@ -1,5 +1,5 @@
 use crate::glib::timeout_add_local;
-use anyhow::{anyhow, Result};
+use anyhow::{Result};
 use crate::commands::{Command,Shortcuts, export_shortcuts};
 use std::time::Duration;
 use gtk::{Align, ApplicationWindow, CssProvider, Grid, gdk, Label, Orientation, Picture, ScrolledWindow};
@@ -8,7 +8,7 @@ use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
 use crate::direction::Direction;
 use crate::Args;
-use crate::order::{order_from_string, Order};
+use crate::order::order_from_string;
 use crate::Catalog;
 use crate::catalog::InputKind;
 use crate::picture_entry::PictureEntry;

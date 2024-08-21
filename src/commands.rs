@@ -1,5 +1,4 @@
 use anyhow::{anyhow, Result};
-use std::io::{Error, ErrorKind};
 use std::io;
 use std::fs::File;
 use std::path::Path;
@@ -143,7 +142,6 @@ pub fn load_shortcuts() -> Result<Shortcuts> {
 }
 
 pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {
-    let content = serde_json::to_string(shortcuts);
     let path = Path::new(KEY_MAP_FILE);
     match File::create(path) {
         Ok(file) => match serde_json::to_writer(file, &shortcuts) {

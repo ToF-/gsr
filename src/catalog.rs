@@ -113,7 +113,6 @@ impl Catalog {
     }
 
     pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {
-        let mut deduplicate_result: Result<()> = Ok(());
         self.sort_by(Order::Size);
         let mut prev_entry: Option<PictureEntry> = None;
         for entry in &self.picture_entries {
@@ -181,6 +180,9 @@ impl Catalog {
             let page_size = cells_per_row * cells_per_row;
             match get_picture_file_paths(directory) {
                 Ok(file_paths) => {
+                    if file_paths.is_empty() {
+                        return Err(anyhow!("no picture to show"))
+                    };
                     for file_path in file_paths {
                         match PictureEntry::from_file(&file_path) {
                             Ok(picture_entry) => picture_entries.push(picture_entry),

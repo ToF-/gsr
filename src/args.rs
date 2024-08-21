@@ -192,7 +192,7 @@ impl Args {
             sample: match self.sample {
                 None => None,
                 Some(n) if n >= 2 && n <= 4 => Some(n),
-                Some(n) => Some(2),
+                Some(_) => Some(2),
             },
 
             seconds: self.seconds,
