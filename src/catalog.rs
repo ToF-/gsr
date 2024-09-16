@@ -627,6 +627,18 @@ impl Catalog {
         }
     }
 
+    pub fn apply_label_all(&mut self, label:String) -> Result<()> {
+        for i in 0..self.picture_entries.len() {
+            self.index = i;
+            match self.apply_label(label.clone()) {
+                Ok(()) => {},
+                Err(err) => return Err(err),
+            }
+        }
+        Ok(())
+    }
+        
+
     pub fn set_rank(&mut self, rank: Rank) -> Result<()> {
         if let Some(index) = self.index() {
             let entry = &mut self.picture_entries[index];

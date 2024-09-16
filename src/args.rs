@@ -49,9 +49,9 @@ pub struct Args {
     #[arg(short, long, value_name="N")]
     pub index: Option<usize>,
 
-    /// order pictures by Label
-    #[arg(short, long, default_value_t = false)]
-    pub label: bool,
+    /// label all pictures in the set
+    #[arg(short, long)]
+    pub label: Option<String>,
 
     /// move selected files to TARGET_DIR
     #[arg(short, long, value_name = "TARGET_DIR")]
@@ -157,7 +157,7 @@ impl Args {
 
             index: self.index,
 
-            label: self.label,
+            label: self.label.clone(),
 
             move_selection: match &self.move_selection {
                 None => None,

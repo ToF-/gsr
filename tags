@@ -48,6 +48,7 @@ adding_entry_from_a_single_file	/Users/christophethibaut/Coding/gsr/src/catalog.
 after_adding_entries_length_is_updated	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
 after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
 apply_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn apply_label(&mut self, label: String) -> Result<()> {$/;"	f
+apply_label_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn apply_label_all(&mut self, label:String) -> Result<()> {$/;"	f
 arrow_command	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 arrow_command_full_size	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {$/;"	f
 arrow_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f

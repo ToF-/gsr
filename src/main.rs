@@ -44,6 +44,15 @@ fn main() {
                     exit(1);
                 },
                 Ok(mut catalog) => {
+                    if let Some(ref label) = args.label {
+                        match catalog.apply_label_all(label.clone()) {
+                            Ok(()) => {},
+                            Err(err) => {
+                                eprintln!("{}", err);
+                                exit(1)
+                            }
+                        }
+                    };
                     println!("{:?} entries", catalog.length());
                     if args.update {
                         match catalog.update_files() {
