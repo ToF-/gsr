@@ -355,6 +355,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::GotoIndex => catalog.begin_input(InputKind::IndexInput),
                         Command::Random => catalog.move_to_random_index(),
                         Command::Info => catalog.print_info(),
+                        Command::Jump => catalog.begin_input(InputKind::SearchLabel),
                         Command::ExportCommands => result = export_shortcuts(&gui.shortcuts),
                         Command::NextPage => catalog.move_next_page(),
                         Command::TogglePageLimit => catalog.toggle_page_limit(),

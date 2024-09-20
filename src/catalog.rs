@@ -18,7 +18,7 @@ pub type Coords = (usize, usize);
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum InputKind {
-    SearchInput, LabelInput, IndexInput, }
+    SearchInput, SearchLabel, LabelInput, IndexInput, }
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -426,6 +426,17 @@ impl Catalog {
         }
     }
 
+    pub fn index_label_search(&mut self) -> Option<usize> {
+        if let Some(pattern) = &self.input {
+            self.picture_entries.iter().position(|entry| if let Some(label) = entry.label() {
+                    label.contains(&*pattern)
+                } else {
+                    false
+                })
+        } else {
+            None
+        }
+    }
     pub fn index_input_number(&mut self) -> Option<usize> {
         if let Some(number) = &self.input {
             let index = number.parse::<usize>().unwrap();
@@ -467,6 +478,7 @@ impl Catalog {
             if let Some(kind) = self.input_kind.clone() {
                 match kind {
                     InputKind::SearchInput => format!("search:{}", self.input.as_ref().unwrap()),
+                    InputKind::SearchLabel => format!("lsearch:{}", self.input.as_ref().unwrap()),
                     InputKind::LabelInput => format!("label:{}", self.input.as_ref().unwrap()),
                     InputKind::IndexInput => format!("index:{}", self.input.as_ref().unwrap()),
                 }
@@ -549,6 +561,15 @@ impl Catalog {
                     self.input_kind = None;
                     self.input = None
                 },
+                InputKind::SearchLabel => {
+                    if let Some(index) = self.index_label_search() {
+                        if self.can_move_to_index(index) {
+                            self.move_to_index(index)
+                        }
+                    };
+                    self.input_kind = None;
+                    self.input = None
+                },
                 InputKind::IndexInput => {
                     if let Some(index) = self.index_input_number() {
                         if self.can_move_to_index(index) {
@@ -588,7 +609,7 @@ impl Catalog {
                         _ => false,
                     }
                 },
-                InputKind::LabelInput => {
+                InputKind::LabelInput|InputKind::SearchLabel => {
                     match ch {
                         'a'..='z' => true,
                         '0'..='9' => true,
