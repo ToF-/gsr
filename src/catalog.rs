@@ -1337,3 +1337,7 @@ mod tests {
         assert_eq!(String::from("cumulus.jpeg"), catalog.picture_entries[2].original_file_name());
     }
 }
+
+// shift+click = select/unselect
+// R = input relabel (has to be on a selected pic)
+// return = confirm relabel = all pic selected get labelled
