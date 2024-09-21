@@ -209,6 +209,7 @@ set_picture_for_cell_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_
 set_picture_for_single_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_rank	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_rank(&mut self, rank: Rank) -> Result<()> {$/;"	f
 set_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_rank(&mut self, rank: Rank) {$/;"	f
+set_selected_labels_with_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_selected_labels_with_input(&mut self) -> Result<()> {$/;"	f
 set_title	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_title(gui: &Gui, catalog: &Catalog) {$/;"	f
 setting_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn setting_label() {$/;"	f
 setup_picture_cell	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn setup_picture_cell(cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<RefCell<Catalog>>) {$/;"	f

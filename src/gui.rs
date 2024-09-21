@@ -392,6 +392,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                             catalog.count_selected()
                         },
                         Command::Label => catalog.begin_input(InputKind::LabelInput),
+                        Command::Relabel => catalog.begin_input(InputKind::RelabelInput),
                         Command::Right => {
                             refresh = arrow_command(Direction::Right, gui, catalog)
                         },

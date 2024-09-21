@@ -18,7 +18,7 @@ pub type Coords = (usize, usize);
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum InputKind {
-    SearchInput, SearchLabel, LabelInput, IndexInput, }
+    SearchInput, SearchLabel, LabelInput, RelabelInput, IndexInput, }
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -480,6 +480,7 @@ impl Catalog {
                     InputKind::SearchInput => format!("search:{}", self.input.as_ref().unwrap()),
                     InputKind::SearchLabel => format!("lsearch:{}", self.input.as_ref().unwrap()),
                     InputKind::LabelInput => format!("label:{}", self.input.as_ref().unwrap()),
+                    InputKind::RelabelInput => format!("relabel:{}", self.input.as_ref().unwrap()),
                     InputKind::IndexInput => format!("index:{}", self.input.as_ref().unwrap()),
                 }
             } else {
@@ -584,6 +585,11 @@ impl Catalog {
                     self.input_kind = None;
                     self.input = None;
                 },
+                InputKind::RelabelInput => {
+                    let _ = self.set_selected_labels_with_input();
+                    self.input_kind = None;
+                    self.input = None;
+                },
             }
         }
     }
@@ -609,7 +615,7 @@ impl Catalog {
                         _ => false,
                     }
                 },
-                InputKind::LabelInput|InputKind::SearchLabel => {
+                InputKind::LabelInput|InputKind::RelabelInput|InputKind::SearchLabel => {
                     match ch {
                         'a'..='z' => true,
                         '0'..='9' => true,
@@ -673,6 +679,22 @@ impl Catalog {
     pub fn set_label_with_input(&mut self) -> Result<()> {
         match &self.input {
             Some(s) => self.apply_label(s.clone()),
+            None => Ok(()),
+        }
+    }
+
+    pub fn set_selected_labels_with_input(&mut self) -> Result<()> {
+        match &self.input {
+            Some(label) => {
+                for index in 0..self.picture_entries.len() {
+                    let entry = &mut self.picture_entries[index];
+                    if entry.selected {
+                        entry.set_label(label.to_string());
+                        let _ = entry.save_image_data();
+                    }
+                }
+                Ok(())
+            },
             None => Ok(()),
         }
     }
