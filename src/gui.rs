@@ -575,6 +575,7 @@ fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mu
         catalog.start_set();
         if catalog.can_move_to_index(new_index) {
             catalog.move_to_index(new_index);
+            let _ = catalog.toggle_select();
             set_picture_for_single_view(gui, catalog);
             if catalog.page_index() != old_page_index {
                 set_all_pictures_for_multiple_view(gui, catalog)
