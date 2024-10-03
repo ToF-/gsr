@@ -67,6 +67,7 @@ cells_per_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn ce
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
 check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
+check_reading_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {$/;"	f
 checked_args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    pub fn checked_args(&mut self) -> Result<Args> {$/;"	f
 checked_args_default_grid_size_is_one	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_default_grid_size_is_one() {$/;"	f
 checked_args_set_order_to_date_if_option_date_picked	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    fn checked_args_set_order_to_date_if_option_date_picked() {$/;"	f

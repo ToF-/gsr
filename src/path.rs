@@ -102,6 +102,19 @@ pub fn check_file(source: &str) -> Result<PathBuf> {
     }
 }
 
+pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {
+    let path = PathBuf::from(source);
+    if !path.exists() {
+        Err(anyhow!(format!("file {} doesn't exist", source)))
+    } else {
+        if path.is_file() {
+            Ok(path)
+        } else {
+            Err(anyhow!(format!("{} is not a valid file", source)))
+        }
+    }
+}
+
 pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
     match check_path(source) {
         Ok(directory) => {

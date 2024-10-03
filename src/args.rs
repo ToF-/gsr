@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::Parser;
 use std::env;
 use crate::order::Order;
-use crate::path::{directory, check_file, check_path};
+use crate::path::{directory, check_file, check_reading_list_file, check_path};
 
 const DEFAULT_WIDTH: i32   = 1000;
 const DEFAULT_HEIGHT: i32  = 1000;
@@ -183,7 +183,7 @@ impl Args {
 
             reading: match &self.reading {
                 None => None,
-                Some(path) => match check_file(&path) {
+                Some(path) => match check_reading_list_file(&path) {
                     Ok(_) => Some(path.to_string()),
                     Err(err) => return Err(err),
                 },

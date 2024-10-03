@@ -270,6 +270,7 @@ impl Catalog {
         match read_to_string(file_list) {
             Err(err) => Err(anyhow!(err)),
             Ok(content) => {
+                println!("reading {} file list", file_list);
                 for path in content.lines()
                     .map(String::from)
                         .filter(|p| !is_thumbnail(p))
