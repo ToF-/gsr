@@ -343,6 +343,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::ThreeStars => {
                             let _ = catalog.end_set_rank(Rank::ThreeStars);
                         },
+                        Command::Extract => catalog.extract(),
                         Command::FirstPosition => refresh = left_click_command_view_mode(0,0, gui, catalog),
                         Command::LastPosition => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
                         Command::CopyLabel => catalog.copy_label(),

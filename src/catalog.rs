@@ -5,7 +5,7 @@ use crate::direction::Direction;
 use crate::order::Order;
 use crate::path::{get_picture_file_paths, file_path_directory, interactive_check_label_path, check_file, is_thumbnail};
 use crate::picture_entry::{PictureEntry};
-use crate::picture_io::check_or_create_thumbnail_file;
+use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
 use rand::Rng;
 use rand::prelude::SliceRandom;
@@ -497,6 +497,28 @@ impl Catalog {
             Ok(_) => Ok(()),
             Err(err) => Err(anyhow!(err)),
         }
+    }
+
+    pub fn extract(&self) {
+        let entry = self.current_entry().unwrap();
+        let file_path = entry.original_file_path();
+        if let Some(args) = &self.args {
+            if let Some(extract_file_path) = &args.extract {
+                match append_to_extract_file(&file_path, &extract_file_path) {
+                    Ok(_) => {
+                        println!("appended {} in {}", file_path, extract_file_path)
+                    },
+                    Err(err) => {
+                        eprintln!("{}", err)
+                    },
+                }
+            } else {
+                eprintln!("no extract file path info");
+            }
+        } else {
+            eprintln!("no args value");
+        }
+
     }
 
     pub fn print_info(&self) {

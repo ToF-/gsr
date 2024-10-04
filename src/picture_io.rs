@@ -104,6 +104,20 @@ pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {
         Err(err) => Err(anyhow!(err)),
     }
 }
+use std::fs::OpenOptions;
+use std::io::Write;
+
+pub fn append_to_extract_file(name: &str, extract_file_path: &str) -> Result<()> {
+    match OpenOptions::new().append(true).open(extract_file_path) {
+        Ok(mut extract_file) => {
+            match writeln!(extract_file, "{}", name) {
+                Ok(_) => Ok(()),
+                Err(err) => Err(anyhow!(err)),
+            }
+        },
+        Err(err) => Err(anyhow!(format!("Can't open extract file {}: {}", extract_file_path, err))),
+    }
+}
 
 pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {
     let image = image::open(file_path).expect(&format!("can't open image file {} for palette extraction", file_path));

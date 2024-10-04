@@ -8,6 +8,7 @@ const DEFAULT_WIDTH: i32   = 1000;
 const DEFAULT_HEIGHT: i32  = 1000;
 const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";
 const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
+const DEFAULT_EXTRACT_FILE: &str = "./gsr_extract.txt";
 
 #[derive(Parser, Clone, Debug)]
 #[command(infer_long_args = true, infer_subcommands = true)]
@@ -32,6 +33,10 @@ pub struct Args {
     /// order pictures by Date
     #[arg(short, long, default_value_t = false)]
     pub date: bool,
+
+    /// extract list
+    #[arg(short, long, value_name="FILE_NAME")]
+    pub extract: Option<String>,
 
     /// display only FILE_NAME
     #[arg(short, long, value_name="FILE_NAME")]
@@ -136,6 +141,17 @@ impl Args {
                     Ok(_) => Some(dir),
                     Err(err) => return Err(err),
                 }
+            },
+
+            extract: match &self.extract {
+                None => match check_reading_list_file(DEFAULT_EXTRACT_FILE) {
+                    Ok(_) => Some(DEFAULT_EXTRACT_FILE.to_string()),
+                    Err(err) => return Err(err),
+                },
+                Some(path) => match check_reading_list_file(&path) {
+                    Ok(_) => Some(path.to_string()),
+                    Err(err) => return Err(err),
+                },
             },
 
             file: match &self.file {
