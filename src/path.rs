@@ -1,9 +1,10 @@
 use anyhow::{anyhow, Result};
-use walkdir::WalkDir;
-use std::io;
-use std::fs;
+use dirs::home_dir;
 use std::env;
+use std::fs;
+use std::io;
 use std::path::{Path,PathBuf};
+use walkdir::WalkDir;
 
 const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];
 
@@ -13,6 +14,17 @@ const DEFAULT_DIR :&str    = "images/";
 pub const DIR_ENV_VAR: &str = "GALLSHDIR";
 pub const DEFAULT_TMP_DIR :&str    = ".";
 pub const TMP_ENV_VAR: &str = "GALLSHTMP";
+pub const DEFAULT_EXTRACT_LIST_FILE_NAME: &str = "gsr_extract.txt";
+
+pub fn default_extract_list_file() -> Result<String> {
+    match home_dir() {
+        Some(mut path_buf) => {
+            path_buf.push(DEFAULT_EXTRACT_LIST_FILE_NAME);
+            Ok(path_buf.display().to_string())
+        },
+        None => Err(anyhow!("cannot open home directory")),
+    }
+}
 
 pub fn is_valid_directory(dir: &str) -> bool {
     let path = PathBuf::from(dir);
@@ -104,14 +116,15 @@ pub fn check_file(source: &str) -> Result<PathBuf> {
 
 pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {
     let path = PathBuf::from(source);
-    if !path.exists() {
-        Err(anyhow!(format!("file {} doesn't exist", source)))
-    } else {
-        if path.is_file() {
+    match path.try_exists() {
+        Ok(true) => if path.is_file() {
             Ok(path)
         } else {
             Err(anyhow!(format!("{} is not a valid file", source)))
-        }
+        },
+        Ok(false) => Err(anyhow!(format!("file {} doesn't exist", source))),
+        Err(err) => Err(anyhow!(format!("file {} error : {}", source, err))),
+
     }
 }
 

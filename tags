@@ -11,7 +11,7 @@ Colors	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Colors = us
 Command	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub enum Command {$/;"	g
 Coords	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub type Coords = (usize, usize);$/;"	T
 DEFAULT_DIR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const DEFAULT_DIR :&str    = "images\/";$/;"	c
-DEFAULT_EXTRACT_FILE	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const DEFAULT_EXTRACT_FILE: &str = ".\/gsr_extract.txt";$/;"	c
+DEFAULT_EXTRACT_LIST_FILE_NAME	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const DEFAULT_EXTRACT_LIST_FILE_NAME: &str = "gsr_extract.txt";$/;"	c
 DEFAULT_HEIGHT	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const DEFAULT_HEIGHT: i32  = 1000;$/;"	c
 DEFAULT_TMP_DIR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const DEFAULT_TMP_DIR :&str    = ".";$/;"	c
 DEFAULT_WIDTH	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const DEFAULT_WIDTH: i32   = 1000;$/;"	c
@@ -92,6 +92,7 @@ count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn c
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
 deduplicate_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {$/;"	f
+default_extract_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn default_extract_list_file() -> Result<String> {$/;"	f
 default_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn default_shortcuts() -> Shortcuts {$/;"	f
 del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&mut self) {$/;"	f
