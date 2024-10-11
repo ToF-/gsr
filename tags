@@ -139,6 +139,7 @@ index_input_number	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub 
 index_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn index_input_pattern(&mut self) -> Option<usize> {$/;"	f
 index_label_search	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn index_label_search(&mut self) -> Option<usize> {$/;"	f
 index_of_entry_by_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn index_of_entry_by_input() {$/;"	f
+info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn info(&self) {$/;"	f
 init_catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn init_catalog(args: &Args) -> Result<Self> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f

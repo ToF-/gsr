@@ -63,6 +63,10 @@ fn main() {
                             },
                         }
                     }
+                    if args.info {
+                        catalog.info();
+                        exit(0);
+                    }
                     if args.deduplicate.is_some() {
                         match catalog.deduplicate_files(&args.deduplicate.unwrap()) {
                             Ok(()) => exit(0),

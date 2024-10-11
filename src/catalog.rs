@@ -1,6 +1,6 @@
-use crate::args::Args;
-use core::cmp::Ordering;
 use anyhow::{anyhow, Result};
+use core::cmp::Ordering;
+use crate::args::Args;
 use crate::direction::Direction;
 use crate::order::Order;
 use crate::path::{get_picture_file_paths, file_path_directory, interactive_check_label_path, check_file, is_thumbnail};
@@ -11,6 +11,7 @@ use rand::Rng;
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
 use regex::Regex;
+use std::collections::HashMap;
 use std::fs::read_to_string;
 use std::path::PathBuf;
 
@@ -142,6 +143,42 @@ impl Catalog {
             }
         };
         update_result
+    }
+
+    pub fn info(&self) {
+        let mut total: f32 = 0.0;
+        let mut three_stars: f32 = 0.0;
+        let mut two_stars: f32 = 0.0;
+        let mut one_stars: f32 = 0.0;
+        let mut no_stars: f32 = 0.0;
+        let mut labelled: f32 = 0.0;
+        let mut labels: HashMap<String,f32> = HashMap::new();
+        for entry in &self.picture_entries {
+            total += 1.0;
+            match entry.rank {
+                Rank::ThreeStars => { three_stars += 1.0 },
+                Rank::TwoStars => { two_stars += 1.0 },
+                Rank::OneStar => { one_stars += 1.0 }
+                Rank::NoStar => { no_stars += 1.0 },
+            };
+            if entry.label != String::from("") {
+                labelled += 1.0;
+                if let Some(number) = labels.get_mut(&entry.label) {
+                    *number = *number + 1.0
+                } else {
+                    labels.insert(entry.label.clone(), 1.0);
+                }
+            };
+        }
+        println!("total: {}", total);
+        println!("{}: {} ({:.2}%)", Rank::ThreeStars.to_string(), three_stars, three_stars / total * 100.0);
+        println!("{}: {} ({:.2}%)", Rank::TwoStars.to_string(), two_stars, two_stars / total * 100.0);
+        println!("{}: {} ({:.2}%)", Rank::OneStar.to_string(), one_stars, one_stars / total * 100.0);
+        println!("{}: {} ({:.2}%)", Rank::NoStar.to_string(), no_stars, no_stars / total * 100.0);
+        println!("labelled: {} ({:.2}%)", labelled, labelled / total * 100.0);
+        let mut all_labels = Vec::from_iter(labels.keys());
+        all_labels.sort();
+        println!("{:?} ", all_labels);
     }
 
     pub fn file_operations(&self) -> Result<()> {

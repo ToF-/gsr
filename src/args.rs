@@ -53,6 +53,10 @@ pub struct Args {
     #[arg(short, long, value_name="N")]
     pub index: Option<usize>,
 
+    /// show information about this folder
+    #[arg(long)]
+    pub info: bool,
+
     /// label all pictures in the set
     #[arg(short, long)]
     pub label: Option<String>,
@@ -176,6 +180,8 @@ impl Args {
             height: Some(dimension(self.height, HEIGHT_ENV_VAR, "height", DEFAULT_HEIGHT)),
 
             index: self.index,
+
+            info: self.info,
 
             label: self.label.clone(),
 
