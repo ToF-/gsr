@@ -52,7 +52,7 @@ impl Catalog {
             picture_entries : Vec::new(),
             index: 0,
             page_size: 1,
-            page_limit_on: true,
+            page_limit_on: false,
             input: None,
             label: None,
             palette_on: false,
