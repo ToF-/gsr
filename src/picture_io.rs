@@ -120,10 +120,14 @@ pub fn append_to_extract_file(name: &str, extract_file_path: &str) -> Result<()>
 }
 
 pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {
-    let image = image::open(file_path).expect(&format!("can't open image file {} for palette extraction", file_path));
-    let palette = get_palette(&image);
-    let colors = get_colors(&image);
-    Ok((palette,colors))
+    match image::open(file_path) {
+        Ok(image) => {
+            let palette = get_palette(&image);
+            let colors = get_colors(&image);
+            Ok((palette,colors))
+        },
+        Err(_) => Err(anyhow!(format!("can't open image file {} for palette extraction", file_path))),
+    }
 }
 
 fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, extension: &str, mut output_file: File) -> ThumbResult<()> {

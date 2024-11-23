@@ -277,6 +277,7 @@ impl Catalog {
     pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>) -> Result<()> {
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
+                let mut error: bool = false;
                 for file_path in file_paths {
                     let matches_pattern = match pattern_opt {
                         None => true,
@@ -293,11 +294,18 @@ impl Catalog {
                     if matches_pattern {
                         match PictureEntry::from_file(&file_path) {
                             Ok(picture_entry) => self.picture_entries.push(picture_entry),
-                            Err(err) => return Err(anyhow!(err)),
+                            Err(err) => {
+                                    eprintln!("{}", err);
+                                    error = true;
+                            }
                         }
                     }
                 }
-                Ok(())
+                if error {
+                    Err(anyhow!(format!("Some pictures could not be opened")))
+                } else {
+                    Ok(())
+                }
             },
             Err(err) => Err(anyhow!(err)),
         }
