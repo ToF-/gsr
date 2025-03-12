@@ -14,6 +14,10 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 /// Gallery Show
 pub struct Args {
     
+    /// copy representative pictures of each subfolders in CATALOG_DIR
+    #[arg(long, value_name = "CATALOG_DIR")]
+    pub catalog: Option<String>,
+
      /// Directory to search (default is set with variable GALLSHDIR)
     pub directory: Option<String>,
 
@@ -110,6 +114,14 @@ impl Args {
 
     pub fn checked_args(&mut self) -> Result<Args> {
         let result: Args = Args {
+            catalog: match &self.catalog {
+                None => None,
+                Some(dir) => match check_path(&dir) {
+                    Ok(_) => Some(dir.to_string()),
+                    Err(err) => return Err(err),
+                },
+            },
+
             all_move: match &self.all_move {
                 None => None,
                 Some(dir) => match check_path(&dir) {
