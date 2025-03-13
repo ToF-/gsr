@@ -129,6 +129,7 @@ pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {
 }
 
 pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
+    let mut picture_number: usize = 0;
     match check_path(source) {
         Ok(directory) => {
             let mut file_paths: Vec<String> = Vec::new();
@@ -143,6 +144,8 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
                         _ => false,
                     };
                     if path.is_file() && valid_extension && not_a_thumbnail {
+                        picture_number += 1;
+                        println!("{}", picture_number);
                         file_paths.push((&path.display()).to_string())
                     }
                 };

@@ -237,10 +237,13 @@ impl Catalog {
                     let mut last_entry: PictureEntry = picture_entries[0].clone();
                     let mut started: bool = false;
                     let mut index: usize = 0;
+                    let mut parent_number: usize = 0;
+                    let total_entries: usize = picture_entries.len();
                     for entry in &picture_entries {
                         let parent = file_path_directory(&entry.file_path);
                         if parent != current_parent {
-                            println!("{}", parent);
+                            parent_number += 1;
+                            println!("{} {}", parent_number, parent);
                             while page_len < page_size {
                                 if started {
                                     self.discarded.push(index);
@@ -260,6 +263,7 @@ impl Catalog {
                         current_parent = parent;
                         last_entry = entry.clone()
                     };
+                    println!("{}/{}",index,total_entries);
                     Ok(())
                 },
                 Err(err) => Err(anyhow!(err)),
