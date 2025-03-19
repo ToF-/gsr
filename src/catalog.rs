@@ -244,6 +244,9 @@ impl Catalog {
                         if parent != current_parent {
                             parent_number += 1;
                             println!("{} {}", parent_number, parent);
+                            // if the current page was not full, fill it
+                            // the indices that fill it are discarded (blank at display)
+                            // the images that fill it are a copy of the last picture added
                             while page_len < page_size {
                                 if started {
                                     self.discarded.push(index);
@@ -255,6 +258,7 @@ impl Catalog {
                             page_len = 0;
                         };
                         started = true;
+                        // if the current page is not full, add the current picture to the page
                         if page_len < page_size {
                             self.picture_entries.push(entry.clone());
                             index += 1;

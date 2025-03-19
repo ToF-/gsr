@@ -128,13 +128,13 @@ pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {
     }
 }
 
+// recursively collect all file paths from pictures in the <source> folder
+// filtering for files with valid extensions (jpeg,jpg,png) and not including "THUMB" in their name 
 pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
-    let mut picture_number: usize = 0;
     match check_path(source) {
         Ok(directory) => {
             let mut file_paths: Vec<String> = Vec::new();
-            for path in WalkDir::new(directory).into_iter().filter_map(|e| e.ok())
-                .map(|e| e.into_path()) {
+            for path in WalkDir::new(directory).into_iter().filter_map(|e| e.ok()).map(|e| e.into_path()) {
                     let valid_extension = match path.extension() {
                         Some(extension) => VALID_EXTENSIONS.contains(&extension.to_str().unwrap()),
                         None => false,
@@ -144,8 +144,6 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
                         _ => false,
                     };
                     if path.is_file() && valid_extension && not_a_thumbnail {
-                        picture_number += 1;
-                        println!("{}", picture_number);
                         file_paths.push((&path.display()).to_string())
                     }
                 };
