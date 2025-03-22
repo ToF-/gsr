@@ -153,6 +153,7 @@ impl Catalog {
         let mut no_stars: f32 = 0.0;
         let mut labelled: f32 = 0.0;
         let mut labels: HashMap<String,f32> = HashMap::new();
+        let mut parents: HashMap<String,usize> = HashMap::new();
         for entry in &self.picture_entries {
             total += 1.0;
             match entry.rank {
@@ -169,6 +170,12 @@ impl Catalog {
                     labels.insert(entry.label.clone(), 1.0);
                 }
             };
+            let parent:String = entry.parent_path();
+            if let Some(count) = parents.get_mut(&parent) {
+                *count = *count + 1
+                } else {
+                    parents.insert(parent, 1);
+            }
         }
         println!("total: {}", total);
         println!("{}: {} ({:.2}%)", Rank::ThreeStars.to_string(), three_stars, three_stars / total * 100.0);
@@ -178,7 +185,20 @@ impl Catalog {
         println!("labelled: {} ({:.2}%)", labelled, labelled / total * 100.0);
         let mut all_labels = Vec::from_iter(labels.keys());
         all_labels.sort();
-        println!("{:?} ", all_labels);
+        for key in all_labels.iter() {
+            if let Some(val) = labels.get(&key as &str) {
+                println!("{key}:{val}")
+            } else {
+            };
+        }
+        let mut all_parents :Vec<(usize,String)> = Vec::new();
+        for(key,val) in parents.iter() {
+            all_parents.push((*val,key.to_string()));
+        }
+        all_parents.sort_by(|a,b| a.0.cmp(&b.0));
+        for (val,key) in all_parents.iter() {
+            println!("{val:>12} {key}");
+        }
     }
 
     pub fn file_operations(&self) -> Result<()> {
@@ -1174,6 +1194,7 @@ mod tests {
     fn moving_next_picture_can_be_blocked_or_allowed() {
         let mut catalog = my_larger_catalog();
         assert_eq!(7, catalog.length());
+        catalog.toggle_page_limit();
         assert_eq!(true, catalog.page_limit_on);
         catalog.set_page_size(2);
         catalog.move_to_index(0);

@@ -62,6 +62,11 @@ impl PictureEntry {
         }
     }
 
+    pub fn parent_path(&self) -> String {
+        let original = &self.file_path;
+        let path = PathBuf::from(original);
+        path.parent().unwrap().to_str().unwrap().to_string()
+    }
     pub fn original_file_name(&self) -> String {
         let original = &self.file_path;
         let path = PathBuf::from(original);
@@ -252,6 +257,14 @@ mod tests {
         assert_eq!(String::from("foo.jpeg"), entry.original_file_name());
     }
 
+    #[test]
+    fn parent_path_is_the_file_path_without_file_name() {
+        let entry = my_entry("photos/foo/bar/qux.jpeg");
+        assert_eq!(String::from("photos/foo/bar"), entry.parent_path());
+        let orphan = my_entry("foo.jpeg");
+        assert_eq!(String::from(""), orphan.parent_path());
+
+    }
     #[test]
     fn thumbnail_path_is_the_file_path_with_thumbnail_suffix() {
         let entry = my_entry("photos/foo.jpeg");
