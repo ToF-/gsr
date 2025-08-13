@@ -63,6 +63,15 @@ fn main() {
                             },
                         }
                     }
+                    if args.tags {
+                        match catalog.print_labels_all() {
+                            Ok(()) => exit(0),
+                            Err(err) => {
+                                eprintln!("{}", err);
+                                exit(1);
+                            },
+                        }
+                    }
                     if args.info {
                         catalog.info();
                         exit(0);

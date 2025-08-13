@@ -761,6 +761,22 @@ impl Catalog {
         Ok(())
     }
         
+    pub fn print_labels_all(&mut self) -> Result<()> {
+        let mut tags:HashMap<String,usize> = HashMap::new();
+
+        for i in 0..self.picture_entries.len() {
+            self.index = i;
+            let entry = &self.picture_entries[i];
+            if entry.label != String::new() {
+                let stat = tags.entry(entry.label.clone()).or_insert(0);
+                *stat += 1;
+            }
+        }
+        for (tag,stat) in tags {
+            println!("{tag}:{stat}");
+        }
+        Ok(())
+    }
 
     pub fn set_rank(&mut self, rank: Rank) -> Result<()> {
         if let Some(index) = self.index() {

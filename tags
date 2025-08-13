@@ -187,6 +187,8 @@ page_index_of	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn pa
 page_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_length(&self) -> usize {$/;"	f
 page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 palette_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
+parent_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn parent_path(&self) -> String {$/;"	f
+parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn parent_path_is_the_file_path_without_file_name() {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
 position_from_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f
 print_info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_info(&self) {$/;"	f

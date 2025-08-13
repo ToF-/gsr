@@ -53,10 +53,6 @@ pub struct Args {
     #[arg(long, value_name="N")]
     pub height: Option<i32>,
 
-    /// show the Nth picture first
-    #[arg(short, long, value_name="N")]
-    pub index: Option<usize>,
-
     /// show information about this folder
     #[arg(long)]
     pub info: bool,
@@ -92,6 +88,10 @@ pub struct Args {
     /// wait N seconds between each picture
     #[arg(short, long, value_name="N")]
     pub seconds: Option<u64>,
+
+    /// list all the tags attached to pictures
+    #[arg(long, default_value_t = false)]
+    pub tags: bool,
 
     /// show thumbnails only
     #[arg(short, long, default_value_t = false)]
@@ -191,8 +191,6 @@ impl Args {
 
             height: Some(dimension(self.height, HEIGHT_ENV_VAR, "height", DEFAULT_HEIGHT)),
 
-            index: self.index,
-
             info: self.info,
 
             label: self.label.clone(),
@@ -234,6 +232,8 @@ impl Args {
             },
 
             seconds: self.seconds,
+
+            tags: self.tags,
 
             thumbnails: self.thumbnails,
 
