@@ -70,6 +70,7 @@ impl Catalog {
         }
     }
 
+
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
         catalog.args = Some(args.clone());
@@ -373,6 +374,9 @@ impl Catalog {
 
     // queries
     
+    pub fn entries(&self) -> &Vec<PictureEntry> {
+        &self.picture_entries
+    }
     pub fn discarded(&self) -> &Vec<usize> {
         &self.discarded
     }
