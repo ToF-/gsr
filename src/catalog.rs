@@ -83,12 +83,6 @@ impl Catalog {
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
-        match catalog.database.check_create_schema(&catalog) {
-            Ok(()) => {},
-            Err(err) => {
-                return Err(anyhow!(err))
-            },
-        };
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
             catalog.set_page_size(args.sample.unwrap());
@@ -104,6 +98,12 @@ impl Catalog {
         catalog.count_selected();
         if catalog.length() == 0 {
             return Err(anyhow!("no picture to show"))
+        };
+        match catalog.database.check_create_schema(&catalog) {
+            Ok(()) => {},
+            Err(err) => {
+                return Err(anyhow!(err))
+            },
         };
         Ok(catalog)
     }
@@ -620,6 +620,13 @@ impl Catalog {
         println!("{:?}", self.current_entry().expect("can't access current entry"));
     }
     // update
+    
+    fn update_image_data(database: &Database, entry: &PictureEntry) -> Result<()> {
+            match entry.save_image_data() {
+                Ok(()) => database.update_image_data(entry),
+                Err(err) => Err(anyhow!(err)),
+            }
+    }
 
     pub fn begin_sort_selection(&mut self) {
         if ! self.sample_on() {
@@ -764,10 +771,7 @@ impl Catalog {
             self.label = Some(label.clone());
             let entry = &mut self.picture_entries[index];
             entry.set_label(label);
-            match entry.save_image_data() {
-                Ok(()) => self.database.update_image_data(entry),
-                Err(err) => Err(anyhow!(err)),
-            }
+            Self::update_image_data(&self.database, &entry.clone())
         } else {
             Ok(())
         }
@@ -805,7 +809,7 @@ impl Catalog {
         if let Some(index) = self.index() {
             let entry = &mut self.picture_entries[index];
             entry.set_rank(rank);
-            entry.save_image_data()
+            Self::update_image_data(&self.database, entry)
         } else {
             Ok(())
         }
@@ -825,7 +829,10 @@ impl Catalog {
                     let entry = &mut self.picture_entries[index];
                     if entry.selected {
                         entry.set_label(label.to_string());
-                        let _ = entry.save_image_data();
+                        match Self::update_image_data(&self.database, entry) {
+                            Ok(()) => {},
+                            Err(err) => return Err(anyhow!(err)),
+                        }
                     }
                 }
                 Ok(())
@@ -860,7 +867,7 @@ impl Catalog {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 entry.unlabel();
-                entry.save_image_data()
+                Self::update_image_data(&self.database, entry)
             },
             None => Ok(()),
         }
@@ -877,9 +884,9 @@ impl Catalog {
                             for i in start..end+1 {
                                 let entry: &mut PictureEntry = &mut self.picture_entries[i];
                                 entry.set_label(label.to_string());
-                                match entry.save_image_data() {
-                                    Ok(()) => {},
-                                    Err(err) => return Err(err),
+                                match Self::update_image_data(&self.database, entry) {
+                                        Ok(()) => {},
+                                        Err(err) => return Err(anyhow!(err)),
                                 }
                             };
                             self.start_index = None;
@@ -904,9 +911,9 @@ impl Catalog {
                         for i in start..end+1 {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
                             entry.set_rank(rank);
-                            match entry.save_image_data() {
+                            match Self::update_image_data(&self.database, entry) {
                                 Ok(()) => {},
-                                Err(err) => return Err(err),
+                                Err(err) => return Err(anyhow!(err)),
                             }
                         };
                         self.start_index = None;
@@ -928,9 +935,9 @@ impl Catalog {
                         for i in start..end+1 {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
                             entry.unlabel();
-                            match entry.save_image_data() {
+                            match Self::update_image_data(&self.database, entry) {
                                 Ok(()) => {},
-                                Err(err) => return Err(err),
+                                Err(err) => return Err(anyhow!(err)),
                             }
                         };
                         self.start_index = None;
@@ -947,10 +954,7 @@ impl Catalog {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 if !entry.deleted {
                     entry.selected = !entry.selected;
-                    match entry.save_image_data() {
-                        Ok(()) => self.database.update_image_data(entry),
-                        Err(err) => Err(anyhow!(err)),
-                    }
+                    Self::update_image_data(&self.database, entry)
                 } else {
                     Ok(())
                 }
@@ -969,9 +973,9 @@ impl Catalog {
                         for i in start..end+1 {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
                             entry.selected = true;
-                            match entry.save_image_data() {
+                            match Self::update_image_data(&self.database, entry) {
                                 Ok(()) => {},
-                                Err(err) => return Err(err),
+                                Err(err) => return Err(anyhow!(err)),
                             }
                         };
                         self.start_index = None;
@@ -992,9 +996,9 @@ impl Catalog {
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
                     entry.selected = false;
-                    match entry.save_image_data() {
+                    match Self::update_image_data(&self.database, entry) {
                         Ok(()) => {},
-                        Err(err) => return Err(err),
+                        Err(err) => return Err(anyhow!(err)),
                     }
                 };
                 self.count_selected();
@@ -1012,9 +1016,9 @@ impl Catalog {
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
                     entry.selected = false;
-                    match entry.save_image_data() {
+                    match Self::update_image_data(&self.database, entry) {
                         Ok(()) => {},
-                        Err(err) => return Err(err),
+                        Err(err) => return Err(anyhow!(err)),
                     }
                 };
                 self.count_selected();

@@ -45,23 +45,32 @@ impl Database {
         let mut count: i64 = 0;
         match self.connection.prepare(query) {
             Ok(mut statement) => {
-                let picture_iter = statement.query_map([], |row| {
-                    println!("file_path={}", row.get::<usize, String>(0).unwrap());
-                    count +=1;
-                    Ok(())
+                let file_paths = statement.query_map([], |row| {
+                    let file_path = row.get::<usize, String>(0).unwrap();
+                    Ok(file_path)
                 })?;
-                eprintln!("{} records in the picture table. Populating the table.", count);
-                self.populate_tables(catalog)
+                for file_path in file_paths {
+                    println!("{:?}", file_path);
+                    count += 1;
+                };
+                if count == 0 {
+                    eprintln!("{} records in the picture table. Populating the table.", count);
+                    self.populate_tables(catalog)
+                } else {
+                    eprintln!("{} records in the picture table.", count);
+                    Ok(())
+                }
             },
             Err(err) => {
                 Err(anyhow!(err))
-            }
+            },
         }
     }
 
     fn populate_tables(&self, catalog: &Catalog) -> Result<()> {
         let mut count: usize = 0;
         let total = catalog.entries().len();
+        println!("{} records to insert", total);
         for entry in catalog.entries() {
             match self.connection.execute("INSERT INTO Picture VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
             params![&*entry.file_path,
