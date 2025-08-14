@@ -1,11 +1,15 @@
+use rusqlite::DatabaseName;
+use rusqlite::types::Type::Blob;
+use std::time::Duration;
 use crate::picture_entry::PictureEntry;
-use crate::palette::palette_to_blob;
+use crate::palette::{palette_to_blob,blob_to_palette};
 use rusqlite::{params, Connection};
 use std::time::UNIX_EPOCH;
 use std::path::Path;
 use anyhow::{anyhow, Result};
 use std::env;
 use crate::Catalog;
+use crate::rank::Rank;
 
 const DATABASE_CONNECTION: &str = "GALLSHDB";
 
@@ -55,7 +59,7 @@ impl Database {
                 };
                 if count == 0 {
                     eprintln!("{} records in the picture table. Populating the table.", count);
-                    self.populate_tables(catalog)
+                    self.populate(catalog)
                 } else {
                     eprintln!("{} records in the picture table.", count);
                     Ok(())
@@ -67,7 +71,7 @@ impl Database {
         }
     }
 
-    fn populate_tables(&self, catalog: &Catalog) -> Result<()> {
+    fn populate(&self, catalog: &Catalog) -> Result<()> {
         let mut count: usize = 0;
         let total = catalog.entries().len();
         println!("{} records to insert", total);
@@ -109,6 +113,40 @@ impl Database {
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<PictureEntry> {
+        let mut statement = self.connection.prepare(" SELECT File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;")?;
+        let mut rows = statement.query([file_path])?;
+        if let Ok(Some(row)) = rows.next() {
+
+            let rowid: i64 = row.get(8)?;
+            let blob = self.connection.blob_open(DatabaseName::Main, "Picture", "palette", rowid, true)?;
+            let mut blob_data: [u8;36] = [0; 36];
+            blob.read_at(&mut blob_data, 0)?;
+            Ok(PictureEntry {
+                file_path: file_path.to_string(),
+                file_size: row.get(0)?,
+                colors: row.get(1)?,
+                modified_time: UNIX_EPOCH + Duration::new(row.get::<usize, i64>(2)? as u64, 0),
+                rank: {
+                    let result:i64 = row.get(3)?;
+                    Rank::from(result)
+                },
+                palette: blob_to_palette(&blob_data),
+                label: row.get(5)?,
+                selected: {
+                    let result:bool = row.get(6)?;
+                    result
+                },
+                deleted: {
+                    let result:bool = row.get(7)?;
+                    result
+                },
+            })
+        } else {
+            Err(anyhow!("couldn't find {} in database", file_path))
         }
     }
 

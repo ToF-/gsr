@@ -126,6 +126,8 @@ file_path_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn fil
 finding_a_picture_entry_by_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn finding_a_picture_entry_by_input_pattern() {$/;"	f
 fmt	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {$/;"	f
 fmt	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {$/;"	f
+from	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn from(n: i64) -> Self {$/;"	f
+from_and_to_i64	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn from_and_to_i64() {$/;"	f
 from_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn from_file(file_path: &str) -> Result<Self> {$/;"	f
 full_size_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn full_size_on(&self) -> bool {$/;"	f
 get_all_pictures_including_sub_folders_except_thumbnails	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn get_all_pictures_including_sub_folders_except_thumbnails() {$/;"	f
@@ -199,7 +201,7 @@ palette_to_blob	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn pale
 parent_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn parent_path(&self) -> String {$/;"	f
 parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn parent_path_is_the_file_path_without_file_name() {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
-populate_tables	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate_tables(&self, catalog: &Catalog) -> Result<()> {$/;"	f
+populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, catalog: &Catalog) -> Result<()> {$/;"	f
 position_from_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f
 print_info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_info(&self) {$/;"	f
 print_labels_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_labels_all(&mut self) -> Result<()> {$/;"	f
@@ -211,6 +213,7 @@ read_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	
 read_picture_file_info_read_file_size	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn read_picture_file_info_read_file_size() {$/;"	f
 refresh	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn refresh(&mut self) {$/;"	f
 refresh_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_view(gui: &Gui, catalog: &Catalog) {$/;"	f
+retrieve_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
