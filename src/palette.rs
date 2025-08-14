@@ -16,6 +16,19 @@ pub fn get_palette(image: &DynamicImage) -> Palette {
     palette
 }
 
+pub fn palette_to_blob(palette: &Palette) -> [u8;36] {
+    let mut result: [u8;36] = [0; 36];
+    for i in 0..8 {
+        let mut value: u32 = palette[i];
+        for j in 0..3 {
+            let pos:usize = i * 4 + j;
+            result[pos] = (value & 255) as u8;
+            value = value >> 8;
+        }
+    }
+    return result;
+}
+
 fn rgba_key(rgba: Rgba<u8>) -> u32 {
     let mut result: u32 = 0;
     for i in 0..4 {

@@ -18,8 +18,8 @@ impl Rank {
 
 }
 
-impl Into<u64> for Rank {
-    fn into(self) -> u64 {
+impl Into<i64> for Rank {
+    fn into(self) -> i64 {
         match self {
             Rank::ThreeStars => 0,
             Rank::TwoStars => 1,
