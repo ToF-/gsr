@@ -59,6 +59,7 @@ arrow_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn arro
 at_creation_length_is_0	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn at_creation_length_is_0() {$/;"	f
 begin_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_input(&mut self, kind: InputKind) {$/;"	f
 begin_sort_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn begin_sort_selection(&mut self) {$/;"	f
+blob_to_palette	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn blob_to_palette(blob: &[u8;36]) -> Palette {$/;"	f
 build_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>, shortcuts: &Shortcuts) {$/;"	f
 can_move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_to_index(&self, index: usize) -> bool {$/;"	f
 can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn can_move_towards(&self, direction: Direction) -> bool {$/;"	f
@@ -86,6 +87,7 @@ checked_args_wont_accept_a_wrong_move_selection_target	/Users/christophethibaut/
 cmp_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_label(&self, other: &PictureEntry) -> Ordering {$/;"	f
 cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {$/;"	f
 confirm_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn confirm_input(&mut self) {$/;"	f
+convert_to_blob_and_vice_versa	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^    fn convert_to_blob_and_vice_versa() {$/;"	f
 copy_file_to_current_dir	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn copy_file_to_current_dir(&self) -> Result<u64> {$/;"	f
 copy_file_to_target_directory	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn copy_file_to_target_directory(source_file_path_str: &str, target_directory_name: &str) -> Result<u64> {$/;"	f
 copy_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn copy_files(&self, target_dir: &str) -> Result<u64> {$/;"	f
@@ -193,6 +195,7 @@ page_index_of	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn pa
 page_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_length(&self) -> usize {$/;"	f
 page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn page_size(&self) -> usize {$/;"	f
 palette_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn palette_on(&self) -> bool {$/;"	f
+palette_to_blob	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn palette_to_blob(palette: &Palette) -> [u8;36] {$/;"	f
 parent_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn parent_path(&self) -> String {$/;"	f
 parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn parent_path_is_the_file_path_without_file_name() {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
@@ -254,6 +257,7 @@ unlabel	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn un
 unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_all(&mut self) -> Result<()> {$/;"	f
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
 update_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn update_files(&self) -> Result<()> {$/;"	f
+update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {$/;"	f
 value_variants	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn value_variants<'a>() -> &'a [Self] {$/;"	f
 view_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 write_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f

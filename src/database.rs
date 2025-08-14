@@ -1,3 +1,4 @@
+use crate::picture_entry::PictureEntry;
 use crate::palette::palette_to_blob;
 use rusqlite::{params, Connection};
 use std::time::UNIX_EPOCH;
@@ -8,6 +9,7 @@ use crate::Catalog;
 
 const DATABASE_CONNECTION: &str = "GALLSHDB";
 
+#[derive(Debug)]
 pub struct Database {
     pub connection_string: String,
     connection: Connection,
@@ -80,6 +82,25 @@ impl Database {
             count += 1;
         };
         Ok(())
+    }
+
+    pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {
+        match self.connection.execute(" UPDATE Picture SET File_Size = ?1, Colors = ?2, Modified_Time = ?3, Rank = ?4, Palette = ?5, Label = ?6, Selected = ?7, Deleted = ?8 WHERE File_Path = ?9;",
+        params![entry.file_size as i64,
+        entry.colors as i64,
+        entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+        entry.rank as i64,
+        palette_to_blob(&entry.palette),
+        &*entry.label,
+        entry.selected as i64,
+        entry.selected as i64,
+        &*entry.file_path]) {
+            Ok(updated) => {
+                println!("{} row updated", updated);
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
     }
 
 }

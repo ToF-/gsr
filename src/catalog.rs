@@ -1,3 +1,5 @@
+use std::process::exit;
+use crate::database::Database;
 use anyhow::{anyhow, Result};
 use core::cmp::Ordering;
 use crate::args::Args;
@@ -41,6 +43,7 @@ pub struct Catalog {
     args: Option<Args>,
     sample_on: bool,
     discarded: Vec<usize>,
+    database: Database,
 }
 
 impl Catalog {
@@ -67,12 +70,25 @@ impl Catalog {
             args: None,
             sample_on: false,
             discarded: Vec::new(),
+            database: match Database::initialize() {
+                Ok(database) => database,
+                Err(err) => {
+                    eprintln!("{}", err);
+                    exit(1);
+                }
+            }
         }
     }
 
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
+        match catalog.database.check_create_schema(&catalog) {
+            Ok(()) => {},
+            Err(err) => {
+                return Err(anyhow!(err))
+            },
+        };
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
             catalog.set_page_size(args.sample.unwrap());
@@ -748,7 +764,10 @@ impl Catalog {
             self.label = Some(label.clone());
             let entry = &mut self.picture_entries[index];
             entry.set_label(label);
-            entry.save_image_data()
+            match entry.save_image_data() {
+                Ok(()) => self.database.update_image_data(entry),
+                Err(err) => Err(anyhow!(err)),
+            }
         } else {
             Ok(())
         }
@@ -928,7 +947,10 @@ impl Catalog {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 if !entry.deleted {
                     entry.selected = !entry.selected;
-                    entry.save_image_data()
+                    match entry.save_image_data() {
+                        Ok(()) => self.database.update_image_data(entry),
+                        Err(err) => Err(anyhow!(err)),
+                    }
                 } else {
                     Ok(())
                 }
