@@ -17,6 +17,17 @@ impl Rank {
     }
 
 }
+
+impl Into<u64> for Rank {
+    fn into(self) -> u64 {
+        match self {
+            Rank::ThreeStars => 0,
+            Rank::TwoStars => 1,
+            Rank::OneStar => 2,
+            Rank::NoStar => 3,
+        }
+    }
+}
 impl fmt::Display for Rank {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", match self {
