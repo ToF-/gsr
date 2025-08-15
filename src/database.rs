@@ -117,36 +117,41 @@ impl Database {
     }
 
     pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<PictureEntry> {
-        let mut statement = self.connection.prepare(" SELECT File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;")?;
-        let mut rows = statement.query([file_path])?;
-        if let Ok(Some(row)) = rows.next() {
-
-            let rowid: i64 = row.get(8)?;
-            let blob = self.connection.blob_open(DatabaseName::Main, "Picture", "palette", rowid, true)?;
-            let mut blob_data: [u8;36] = [0; 36];
-            blob.read_at(&mut blob_data, 0)?;
-            Ok(PictureEntry {
-                file_path: file_path.to_string(),
-                file_size: row.get(0)?,
-                colors: row.get(1)?,
-                modified_time: UNIX_EPOCH + Duration::new(row.get::<usize, i64>(2)? as u64, 0),
-                rank: {
-                    let result:i64 = row.get(3)?;
-                    Rank::from(result)
-                },
-                palette: blob_to_palette(&blob_data),
-                label: row.get(5)?,
-                selected: {
-                    let result:bool = row.get(6)?;
-                    result
-                },
-                deleted: {
-                    let result:bool = row.get(7)?;
-                    result
-                },
-            })
-        } else {
-            Err(anyhow!("couldn't find {} in database", file_path))
+        match self.connection.prepare(" SELECT File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
+            Ok(mut statement) => {
+                let mut rows = statement.query([file_path])?;
+                match rows.next() {
+                    Ok(Some(row)) => {
+                        let rowid: i64 = row.get(8)?;
+                        let blob = self.connection.blob_open(DatabaseName::Main, "Picture", "palette", rowid, true)?;
+                        let mut blob_data: [u8;36] = [0; 36];
+                        blob.read_at(&mut blob_data, 0)?;
+                        Ok(PictureEntry {
+                            file_path: file_path.to_string(),
+                            file_size: row.get(0)?,
+                            colors: row.get(1)?,
+                            modified_time: UNIX_EPOCH + Duration::new(row.get::<usize, i64>(2)? as u64, 0),
+                            rank: {
+                                let result:i64 = row.get(3)?;
+                                Rank::from(result)
+                            },
+                            palette: blob_to_palette(&blob_data),
+                            label: row.get(5)?,
+                            selected: {
+                                let result:bool = row.get(6)?;
+                                result
+                            },
+                            deleted: {
+                                let result:bool = row.get(7)?;
+                                result
+                            },
+                        })
+                    },
+                    Ok(None) => Err(anyhow!("couldn't find {} in database", file_path)),
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
         }
     }
 
