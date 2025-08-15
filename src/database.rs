@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use crate::picture_io::read_file_info;
 use crate::picture_io::get_palette_from_picture;
 use crate::image_data::ImageData;
@@ -54,7 +55,37 @@ impl Database {
     // on confirmation, removing those pictures that are in the database and not in the catalog
     // these actions should also be available on command line argument
 
-    pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {
+    pub fn update_database(&self, catalog: &Catalog) -> Result<()> {
+        let catalog_set: HashSet<String> = HashSet::from_iter(catalog.entries().iter().map(|e| e.file_path.clone()));
+        let mut database_set: HashSet<String> = HashSet::new();
+        let query = "SELECT file_path from Picture";
+        match self.connection.prepare(query) {
+            Ok(mut statement) => {
+                match statement.query_map([], |row| {
+                    Ok(row.get::<usize, String>(0).unwrap())
+                }) {
+                    Ok(rows) => {
+                        for row in rows {
+                            match row {
+                                Ok(file_path) => {
+                                    let _ = database_set.insert(file_path);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }
+            },
+            Err(err) => return Err(anyhow!(err)),
+        };
+        for x in catalog_set.symmetric_difference(&database_set) {
+            println!("{x}");
+        }
+        Ok(())
+    }
+
+        pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {
         println!("checking database {} picture table", self.connection_string);
         let query = "SELECT file_path from Picture";
         let mut count: i64 = 0;
@@ -68,6 +99,7 @@ impl Database {
                     println!("{:?}", file_path);
                     count += 1;
                 };
+                self.update_database(catalog)?;
                 if count != catalog.entries().len() as i64 {
                     eprintln!("{} records in the picture table. Populating the table.", count);
                     self.populate(catalog)
