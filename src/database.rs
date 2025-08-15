@@ -48,6 +48,12 @@ impl Database {
         }
     }
 
+    // database population policy: if the list of pictures currently in the catalog differs from the
+    // list of pictures in the database, one should be asked if any update is in order
+    // on confirmation, adding those pictures that are in the catalog, into the database
+    // on confirmation, removing those pictures that are in the database and not in the catalog
+    // these actions should also be available on command line argument
+
     pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {
         println!("checking database {} picture table", self.connection_string);
         let query = "SELECT file_path from Picture";
@@ -62,7 +68,7 @@ impl Database {
                     println!("{:?}", file_path);
                     count += 1;
                 };
-                if count == 0 {
+                if count != catalog.entries().len() as i64 {
                     eprintln!("{} records in the picture table. Populating the table.", count);
                     self.populate(catalog)
                 } else {
