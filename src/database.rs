@@ -135,8 +135,8 @@ impl Database {
                         };
                         let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected);
                         match self.connection.execute(" INSERT INTO Picture 
-            (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);",
+            (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted, Palette)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
             params![
             entry.file_path,
             entry.file_size as i64,
@@ -145,13 +145,10 @@ impl Database {
             entry.rank as i64,
             entry.label,
             entry.selected as i64,
-            entry.selected as i64]) {
+            entry.selected as i64,
+            palette_to_blob(&entry.palette)]) {
                             Ok(inserted) => {
                                 println!("{} row inserted", inserted);
-                                let rowid: i64 = self.connection.last_insert_rowid();
-                                let mut blob = self.connection.blob_open(DatabaseName::Main, "Picture", "palette", rowid, false)?;
-                                let blob_data: [u8;36] = palette_to_blob(&entry.palette);
-                                blob.write_at(&blob_data, 0)?;
                                 return Ok(entry)
                             },
                             Err(err) => return Err(anyhow!(err)),
@@ -170,10 +167,6 @@ impl Database {
                 let mut rows = statement.query([file_path])?;
                 match rows.next() {
                     Ok(Some(row)) => {
-                        let rowid: i64 = row.get(8)?;
-                        let blob = self.connection.blob_open(DatabaseName::Main, "Picture", "palette", rowid, true)?;
-                        let mut blob_data: [u8;36] = [0; 36];
-                        blob.read_at(&mut blob_data, 0)?;
                         Ok(PictureEntry {
                             file_path: file_path.to_string(),
                             file_size: row.get(0)?,
@@ -183,7 +176,14 @@ impl Database {
                                 let result:i64 = row.get(3)?;
                                 Rank::from(result)
                             },
-                            palette: blob_to_palette(&blob_data),
+                            palette: {
+                                let blob : Vec<u8> = row.get(4)?;
+                                let mut bytes: [u8;36] = [0;36];
+                                for i in 0..36 {
+                                    bytes[i] = blob[i];
+                                }
+                                blob_to_palette(&bytes)
+                            },
                             label: row.get(5)?,
                             selected: {
                                 let result:bool = row.get(6)?;
