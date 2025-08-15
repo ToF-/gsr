@@ -1,3 +1,8 @@
+use crate::picture_io::read_file_info;
+use crate::picture_io::get_palette_from_picture;
+use crate::image_data::ImageData;
+use crate::picture_entry::make_picture_entry;
+use std::io;
 use rusqlite::DatabaseName;
 use rusqlite::types::Type::Blob;
 use std::time::Duration;
@@ -116,6 +121,49 @@ impl Database {
         }
     }
 
+    pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
+        match read_file_info(file_path) {
+            Ok((file_size, modified_time)) => {
+                match get_palette_from_picture(file_path) {
+                    Ok((palette, colors)) => {
+                        let image_data = ImageData{
+                            colors: colors,
+                            rank: Rank::NoStar,
+                            selected: false,
+                            palette: palette,
+                            label: String::from(""),
+                        };
+                        let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected);
+                        match self.connection.execute(" INSERT INTO Picture 
+            (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8);",
+            params![
+            entry.file_path,
+            entry.file_size as i64,
+            entry.colors as i64,
+            entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+            entry.rank as i64,
+            entry.label,
+            entry.selected as i64,
+            entry.selected as i64]) {
+                            Ok(inserted) => {
+                                println!("{} row inserted", inserted);
+                                let rowid: i64 = self.connection.last_insert_rowid();
+                                let mut blob = self.connection.blob_open(DatabaseName::Main, "Picture", "palette", rowid, false)?;
+                                let blob_data: [u8;36] = palette_to_blob(&entry.palette);
+                                blob.write_at(&blob_data, 0)?;
+                                return Ok(entry)
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
     pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<PictureEntry> {
         match self.connection.prepare(" SELECT File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
             Ok(mut statement) => {
@@ -147,7 +195,19 @@ impl Database {
                             },
                         })
                     },
-                    Ok(None) => Err(anyhow!("couldn't find {} in database", file_path)),
+                    Ok(None) => {
+                        println!("couldn't find {} in database; insert image data from this file ?", file_path);
+                        let mut response = String::new();
+                        let stdin = io::stdin();
+                        stdin.read_line(&mut response).expect("can't read from stdin");
+                        match response.chars().next() {
+                            Some(ch) if ch == 'y' || ch == 'Y' => {
+                                self.insert_image_data(file_path)
+                            },
+                            Some(_)|
+                            None => Err(anyhow!(format!("couldn't find {} in database", file_path))),
+                        }
+                    },
                     Err(err) => Err(anyhow!(err)),
                 }
             },
