@@ -167,6 +167,15 @@ pub fn image_data_file_path(original_file_path: &str) -> String {
     new_path.to_str().unwrap().to_string()
 }
 
+pub fn standard_directory() -> String {
+    let gallshdir = env::var(DIR_ENV_VAR);
+    if let Ok(standard_dir) = &gallshdir {
+        String::from(standard_dir)
+    } else {
+        String::new()
+    }
+}
+
 pub fn directory(directory: Option<String>) -> String {
     let gallshdir = env::var(DIR_ENV_VAR);
     if let Some(directory_arg) = directory {

@@ -337,7 +337,7 @@ impl Catalog {
                         },
                     };
                     if matches_pattern {
-                        match PictureEntry::from_file(&file_path) {
+                        match PictureEntry::from_file_or_database(&file_path, &self.database) {
                             Ok(picture_entry) => self.picture_entries.push(picture_entry),
                             Err(err) => {
                                     eprintln!("{}", err);
@@ -381,7 +381,8 @@ impl Catalog {
     pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
         match check_file(file_path) {
             Ok(_) => match self.database.retrieve_or_create_image_data(file_path) {
-                Ok(picture_entry) => Ok(self.picture_entries.push(picture_entry)),
+                Ok(Some(picture_entry)) => Ok(self.picture_entries.push(picture_entry)),
+                Ok(None) => Err(anyhow!("{} image data not found in database'", file_path)),
                 Err(err) => Err(anyhow!(err)),
             },
             Err(err) => Err(anyhow!(err)),
@@ -620,12 +621,8 @@ impl Catalog {
         println!("{:?}", self.current_entry().expect("can't access current entry"));
     }
     // update
-    
     fn update_image_data(database: &Database, entry: &PictureEntry) -> Result<()> {
-            match entry.save_image_data() {
-                Ok(()) => database.update_image_data(entry),
-                Err(err) => Err(anyhow!(err)),
-            }
+        database.update_image_data(entry)
     }
 
     pub fn begin_sort_selection(&mut self) {

@@ -1,3 +1,4 @@
+use crate::path::{standard_directory,file_path_directory};
 use std::collections::HashSet;
 use std::hash::RandomState;
 use std::collections::hash_set::Difference;
@@ -56,6 +57,9 @@ impl Database {
     // on confirmation, adding those pictures that are in the catalog, into the database
     // on confirmation, removing those pictures that are in the database and not in the catalog
     // these actions should also be available on command line argument
+    //
+
+
 
     pub fn update_database(&self, catalog: &Catalog) -> Result<()> {
         let catalog_set: HashSet<String> = HashSet::from_iter(catalog.entries().iter().map(|e| e.file_path.clone()));
@@ -101,10 +105,7 @@ impl Database {
                 Some(_)| None => {},
             }
         }
-        println!("pictures in the database that are not in this selection:");
-        for x in database_set.difference(&catalog_set) {
-            println!("{x}");
-        }
+        println!("{} pictures in the database that are not in this selection:", database_set.difference(&catalog_set).count());
         Ok(())
     }
 
@@ -212,13 +213,13 @@ impl Database {
         }
     }
 
-    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<PictureEntry> {
+    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {
         match self.connection.prepare(" SELECT File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
             Ok(mut statement) => {
                 let mut rows = statement.query([file_path])?;
                 match rows.next() {
                     Ok(Some(row)) => {
-                        Ok(PictureEntry {
+                        Ok(Some(PictureEntry {
                             file_path: file_path.to_string(),
                             file_size: row.get(0)?,
                             colors: row.get(1)?,
@@ -244,19 +245,26 @@ impl Database {
                                 let result:bool = row.get(7)?;
                                 result
                             },
-                        })
+                        }))
                     },
                     Ok(None) => {
-                        println!("couldn't find {} in database; insert image data from this file ?", file_path);
-                        let mut response = String::new();
-                        let stdin = io::stdin();
-                        stdin.read_line(&mut response).expect("can't read from stdin");
-                        match response.chars().next() {
-                            Some(ch) if ch == 'y' || ch == 'Y' => {
-                                self.insert_image_data(file_path)
-                            },
-                            Some(_)|
-                            None => Err(anyhow!(format!("couldn't find {} in database", file_path))),
+                        if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
+                            println!("couldn't find {} in database; insert image data from this file ?", file_path);
+                            let mut response = String::new();
+                            let stdin = io::stdin();
+                            stdin.read_line(&mut response).expect("can't read from stdin");
+                            match response.chars().next() {
+                                Some(ch) if ch == 'y' || ch == 'Y' => {
+                                    match self.insert_image_data(file_path) {
+                                        Ok(picture_entry) => Ok(Some(picture_entry)),
+                                        Err(err) => return Err(anyhow!(err)),
+                                    }
+                                },
+                                Some(_)|
+                                    None => Ok(None),
+                            }
+                        } else {
+                            Ok(None)
                         }
                     },
                     Err(err) => Err(anyhow!(err)),

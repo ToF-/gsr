@@ -1,3 +1,4 @@
+use crate::Database;
 use std::path::PathBuf;
 use anyhow::{anyhow, Result};
 use std::cmp::Ordering;
@@ -42,6 +43,14 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
 }
 
 impl PictureEntry {
+
+    pub fn from_file_or_database(file_path: &str, database: &Database) -> Result<Self> {
+        match database.retrieve_or_create_image_data(file_path) {
+            Err(err) => Err(anyhow!(err)),
+            Ok(Some(picture_entry)) => Ok(picture_entry),
+            Ok(None) => Self::from_file(file_path),
+            }
+    }
 
     pub fn from_file(file_path: &str) -> Result<Self> {
         match read_file_info(file_path) {
