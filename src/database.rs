@@ -1,4 +1,6 @@
 use std::collections::HashSet;
+use std::hash::RandomState;
+use std::collections::hash_set::Difference;
 use crate::picture_io::read_file_info;
 use crate::picture_io::get_palette_from_picture;
 use crate::image_data::ImageData;
@@ -79,7 +81,28 @@ impl Database {
             },
             Err(err) => return Err(anyhow!(err)),
         };
-        for x in catalog_set.symmetric_difference(&database_set) {
+        let catalog_difference = catalog_set.difference(&database_set);
+        if catalog_difference.clone().count() > 0 {
+            println!("pictures in this selection that are not in the database:");
+            for x in catalog_difference.clone() {
+                println!("{x}");
+            }
+            println!("insert image data for these pictures in the database ?");
+            let mut response = String::new();
+            let stdin = io::stdin();
+            stdin.read_line(&mut response).expect("can't read from stdin");
+            match response.chars().next() {
+                Some(ch) if ch == 'y' || ch == 'Y' => {
+                    match self.populate(catalog, Some(HashSet::from_iter(catalog_difference.into_iter()))) {
+                        Ok(()) => {},
+                        Err(err) => return Err(anyhow!(err)),
+                    }
+                },
+                Some(_)| None => {},
+            }
+        }
+        println!("pictures in the database that are not in this selection:");
+        for x in database_set.difference(&catalog_set) {
             println!("{x}");
         }
         Ok(())
@@ -90,52 +113,42 @@ impl Database {
         let query = "SELECT file_path from Picture";
         let mut count: i64 = 0;
         match self.connection.prepare(query) {
-            Ok(mut statement) => {
-                let file_paths = statement.query_map([], |row| {
-                    let file_path = row.get::<usize, String>(0).unwrap();
-                    Ok(file_path)
-                })?;
-                for file_path in file_paths {
-                    println!("{:?}", file_path);
-                    count += 1;
-                };
-                self.update_database(catalog)?;
-                if count != catalog.entries().len() as i64 {
-                    eprintln!("{} records in the picture table. Populating the table.", count);
-                    self.populate(catalog)
-                } else {
-                    eprintln!("{} records in the picture table.", count);
-                    Ok(())
-                }
-            },
-            Err(err) => {
-                Err(anyhow!(err))
-            },
+            Ok(_) => self.update_database(catalog),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 
-    fn populate(&self, catalog: &Catalog) -> Result<()> {
+    fn populate(&self, catalog: &Catalog, difference_opt: Option<HashSet<&String>>) -> Result<()> {
         let mut count: usize = 0;
-        let total = catalog.entries().len();
-        println!("{} records to insert", total);
+        let total = match difference_opt {
+            Some(ref difference) => difference.len(),
+            None => catalog.length(),
+        };
         for entry in catalog.entries() {
-            match self.connection.execute("INSERT INTO Picture VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
-            params![&*entry.file_path,
-            entry.file_size as i64,
-            entry.colors as i64,
-            entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-            entry.rank as i64,
-            palette_to_blob(&entry.palette),
-            &*entry.label,
-            entry.selected as i64,
-            entry.selected as i64]) {
-                Ok(size) => {
-                    println!("{}", size);
-                },
-                Err(err) => return Err(anyhow!(err)),
+            let insertion:bool = match difference_opt {
+                Some(ref set) => set.contains(&entry.file_path),
+                None => false,
             };
-            println!("{}/{}", count, total);
-            count += 1;
+            if insertion {
+                println!("inserting {}", entry.file_path);
+                match self.connection.execute("INSERT INTO Picture VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
+                params![&*entry.file_path,
+                entry.file_size as i64,
+                entry.colors as i64,
+                entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+                entry.rank as i64,
+                palette_to_blob(&entry.palette),
+                &*entry.label,
+                entry.selected as i64,
+                entry.selected as i64]) {
+                    Ok(size) => {
+                        println!("{}", size);
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                };
+                println!("{}/{}", count, total);
+                count += 1;
+            }
         };
         Ok(())
     }

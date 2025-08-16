@@ -69,7 +69,7 @@ cancel_sort_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    p
 cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
 cell_box_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {$/;"	f
 cells_per_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cells_per_row(&self) -> usize {$/;"	f
-check_create_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {$/;"	f
+check_create_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^        pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {$/;"	f
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
 check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
@@ -152,6 +152,7 @@ init_catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn ini
 initialize	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn initialize() -> Result<Self> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
+insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 interactive_check_label_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {$/;"	f
 interactive_check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {$/;"	f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
@@ -201,7 +202,7 @@ palette_to_blob	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn pale
 parent_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn parent_path(&self) -> String {$/;"	f
 parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn parent_path_is_the_file_path_without_file_name() {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
-populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, catalog: &Catalog) -> Result<()> {$/;"	f
+populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, catalog: &Catalog, mut difference: Option<Difference<String,RandomState>>) -> Result<()> {$/;"	f
 position_from_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f
 print_info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_info(&self) {$/;"	f
 print_labels_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_labels_all(&mut self) -> Result<()> {$/;"	f
@@ -259,6 +260,7 @@ unlabel	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unlabel(
 unlabel	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn unlabel(&mut self) {$/;"	f
 unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_all(&mut self) -> Result<()> {$/;"	f
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
+update_database	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn update_database(&self, catalog: &Catalog) -> Result<()> {$/;"	f
 update_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn update_files(&self) -> Result<()> {$/;"	f
 update_image_data	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn update_image_data(database: &Database, entry: &PictureEntry) -> Result<()> {$/;"	f
 update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {$/;"	f
