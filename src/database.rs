@@ -87,7 +87,7 @@ impl Database {
             for x in catalog_difference.clone() {
                 println!("{x}");
             }
-            println!("insert image data for these pictures in the database ?");
+            println!("insert image data for these {} pictures in the database ?", catalog_difference.clone().count());
             let mut response = String::new();
             let stdin = io::stdin();
             stdin.read_line(&mut response).expect("can't read from stdin");
