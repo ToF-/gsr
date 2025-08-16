@@ -105,7 +105,7 @@ impl Database {
                 Some(_)| None => {},
             }
         }
-        println!("{} pictures in the database that are not in this selection:", database_set.difference(&catalog_set).count());
+        println!("{} pictures in the database are not in this selection", database_set.difference(&catalog_set).count());
         Ok(())
     }
 
