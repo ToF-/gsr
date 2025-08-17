@@ -1,3 +1,4 @@
+use std::borrow::BorrowMut;
 use std::process::exit;
 use crate::database::Database;
 use anyhow::{anyhow, Result};
@@ -627,7 +628,8 @@ impl Catalog {
     }
 
     pub fn add_tag(&mut self, tag: String) -> Result<()> {
-        println!("at this point tag {} should be added", tag.clone());
+        let entry = &mut self.picture_entries[self.index];
+        entry.add_tag(tag);
         Ok(())
     }
 

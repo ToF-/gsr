@@ -20,9 +20,10 @@ pub struct PictureEntry {
         label: String,
     pub selected: bool,
     pub deleted: bool,
+    pub tags: Vec<String>,
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, tags: Vec<String>) -> PictureEntry {
     PictureEntry {
         file_path: file_path,
         file_size: file_size,
@@ -39,6 +40,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
         },
         selected: selected,
         deleted: selected,
+        tags: tags,
     }
 }
 
@@ -64,7 +66,8 @@ impl PictureEntry {
                             Some(image_data.palette),
                             Some(image_data.label),
                             image_data.selected,
-                            false)),
+                            false,
+                            vec![])),
                     Err(err) => Err(anyhow!(err)),
                 }
             }
@@ -166,6 +169,11 @@ impl PictureEntry {
         }
     }
 
+    pub fn add_tag(&mut self, tag: String) {
+        if tag.len() > 0 && !self.tags.contains(&tag) {
+            self.tags.push(tag)
+        }
+    }
     pub fn set_label(&mut self, label: String) {
         self.label = label
     }
@@ -234,8 +242,16 @@ impl PictureEntry {
         )
 
     }
+
+    pub fn display_tags(tags: Vec<String>) -> String {
+        match tags.len() {
+            0 => String::from(""),
+            _ => format!("| {} |", tags.join(" ")),
+        }
+    }
+
     pub fn title_display(self) -> String {
-        format!("{} {} [{} {} {}] {} {}",
+        format!("{} {} [{} {} {}] {} {} {}",
             self.original_file_name(),
             if self.selected { "△" } else { "" },
             self.file_size,
@@ -246,7 +262,8 @@ impl PictureEntry {
             } else {
                 String::from("")
             },
-            if self.deleted { "🗑" } else { ""})
+            if self.deleted { "🗑" } else { ""},
+            Self::display_tags(self.tags))
     }
 }
 

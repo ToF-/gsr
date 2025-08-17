@@ -185,7 +185,7 @@ impl Database {
                             palette: palette,
                             label: String::from(""),
                         };
-                        let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false);
+                        let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, vec![]);
                         match self.connection.execute(" INSERT INTO Picture 
             (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted, Palette)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
@@ -250,7 +250,8 @@ impl Database {
                         {
                             let result:bool = row.get(7)?;
                             result
-                        }))),
+                        },
+                        vec![]))),
                         Ok(None) => {
                             if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
                                 println!("couldn't find {} in database; insert image data from this file ?", file_path);
