@@ -21,7 +21,7 @@ pub type Coords = (usize, usize);
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum InputKind {
-    SearchInput, SearchLabel, LabelInput, RelabelInput, IndexInput, }
+    AddTagInput, SearchInput, SearchLabel, LabelInput, RelabelInput, IndexInput, }
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -572,6 +572,7 @@ impl Catalog {
             if self.full_size_on { "░" } else { "" },
             if let Some(kind) = self.input_kind.clone() {
                 match kind {
+                    InputKind::AddTagInput => format!("add tag:{}", self.input.as_ref().unwrap()),
                     InputKind::SearchInput => format!("search:{}", self.input.as_ref().unwrap()),
                     InputKind::SearchLabel => format!("lsearch:{}", self.input.as_ref().unwrap()),
                     InputKind::LabelInput => format!("label:{}", self.input.as_ref().unwrap()),
@@ -625,6 +626,11 @@ impl Catalog {
         database.update_image_data(entry)
     }
 
+    pub fn add_tag(&mut self, tag: String) -> Result<()> {
+        println!("at this point tag {} should be added", tag.clone());
+        Ok(())
+    }
+
     pub fn begin_sort_selection(&mut self) {
         if ! self.sample_on() {
             self.previous_order = self.order.clone();
@@ -673,6 +679,11 @@ impl Catalog {
     pub fn confirm_input(&mut self) {
         if let Some(kind) = self.input_kind.clone() {
             match kind {
+                InputKind::AddTagInput => {
+                    let _ = self.add_tag_with_input();
+                    self.input_kind = None;
+                    self.input = None;
+                },
                 InputKind::SearchInput => {
                     if let Some(index) = self.index_input_pattern() {
                         if self.can_move_to_index(index) {
@@ -735,7 +746,7 @@ impl Catalog {
                         _ => false,
                     }
                 },
-                InputKind::LabelInput|InputKind::RelabelInput|InputKind::SearchLabel => {
+                InputKind::AddTagInput|InputKind::LabelInput|InputKind::RelabelInput|InputKind::SearchLabel => {
                     match ch {
                         'a'..='z' => true,
                         '0'..='9' => true,
@@ -815,6 +826,13 @@ impl Catalog {
     pub fn set_label_with_input(&mut self) -> Result<()> {
         match &self.input {
             Some(s) => self.apply_label(s.clone()),
+            None => Ok(()),
+        }
+    }
+
+    pub fn add_tag_with_input(&mut self) -> Result<()> {
+        match &self.input {
+            Some(s) => self.add_tag(s.clone()),
             None => Ok(()),
         }
     }

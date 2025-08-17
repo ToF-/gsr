@@ -12,6 +12,7 @@ const KEY_MAP_FILE: &str = "./gallshkey.json";
 
 #[derive(PartialEq, Copy, Clone, Debug, Deserialize, Serialize)]
 pub enum Command {
+    AddTag,
     Cancel,
     ChooseOrder,
     CopyAndQuit,
@@ -60,6 +61,7 @@ pub type Shortcuts = HashMap<String, Command>;
 
 pub fn default_shortcuts() -> Shortcuts {
     let shortcuts: Shortcuts = HashMap::from([
+        (String::from("at"), Command::AddTag),
         (String::from("Escape"), Command::Cancel),
         (String::from("equal"), Command::ChooseOrder),
         (String::from("Q"), Command::CopyAndQuit),
