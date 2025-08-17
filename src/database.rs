@@ -139,7 +139,7 @@ impl Database {
                 entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
                 entry.rank as i64,
                 palette_to_blob(&entry.palette),
-                &*entry.label,
+                if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
                 entry.selected as i64,
                 entry.selected as i64]) {
                     Ok(size) => {
@@ -161,7 +161,7 @@ impl Database {
         entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
         entry.rank as i64,
         palette_to_blob(&entry.palette),
-        &*entry.label,
+        if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
         entry.selected as i64,
         entry.selected as i64,
         &*entry.file_path]) {
@@ -185,7 +185,7 @@ impl Database {
                             palette: palette,
                             label: String::from(""),
                         };
-                        let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected);
+                        let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false);
                         match self.connection.execute(" INSERT INTO Picture 
             (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted, Palette)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
@@ -195,7 +195,7 @@ impl Database {
             entry.colors as i64,
             entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
             entry.rank as i64,
-            entry.label,
+            entry.label(),
             entry.selected as i64,
             entry.selected as i64,
             palette_to_blob(&entry.palette)]) {
@@ -218,42 +218,46 @@ impl Database {
             Ok(mut statement) => {
                 let mut rows = statement.query([file_path])?;
                 match rows.next() {
-                    Ok(Some(row)) => {
-                        Ok(Some(PictureEntry {
-                            file_path: file_path.to_string(),
-                            file_size: row.get(0)?,
-                            colors: row.get(1)?,
-                            modified_time: UNIX_EPOCH + Duration::new(row.get::<usize, i64>(2)? as u64, 0),
-                            rank: {
-                                let result:i64 = row.get(3)?;
-                                Rank::from(result)
-                            },
-                            palette: {
-                                let blob : Vec<u8> = row.get(4)?;
-                                let mut bytes: [u8;36] = [0;36];
-                                for i in 0..36 {
-                                    bytes[i] = blob[i];
-                                }
-                                blob_to_palette(&bytes)
-                            },
-                            label: row.get(5)?,
-                            selected: {
-                                let result:bool = row.get(6)?;
-                                result
-                            },
-                            deleted: {
-                                let result:bool = row.get(7)?;
-                                result
-                            },
-                        }))
-                    },
-                    Ok(None) => {
-                        if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
-                            println!("couldn't find {} in database; insert image data from this file ?", file_path);
-                            let mut response = String::new();
-                            let stdin = io::stdin();
-                            stdin.read_line(&mut response).expect("can't read from stdin");
-                            match response.chars().next() {
+                    Ok(Some(row)) => Ok(Some(make_picture_entry(
+                        file_path.to_string(),
+                        row.get(0)?,
+                        row.get(1)?,
+                        UNIX_EPOCH + Duration::new(row.get::<usize, i64>(2)? as u64, 0),
+                        {
+                            let result:i64 = row.get(3)?;
+                            Rank::from(result)
+                        },
+                        {
+                            let blob : Vec<u8> = row.get(4)?;
+                            let mut bytes: [u8;36] = [0;36];
+                            for i in 0..36 {
+                                bytes[i] = blob[i];
+                            }
+                            Some(blob_to_palette(&bytes))
+                        },
+                        {
+                            let label:String = row.get(5)?;
+                            if label.trim().len() > 0 {
+                                Some(label.trim().to_string())
+                            } else {
+                                None
+                            }
+                        },
+                        {
+                            let result:bool = row.get(6)?;
+                            result
+                        },
+                        {
+                            let result:bool = row.get(7)?;
+                            result
+                        }))),
+                        Ok(None) => {
+                            if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
+                                println!("couldn't find {} in database; insert image data from this file ?", file_path);
+                                let mut response = String::new();
+                                let stdin = io::stdin();
+                                stdin.read_line(&mut response).expect("can't read from stdin");
+                                match response.chars().next() {
                                 Some(ch) if ch == 'y' || ch == 'Y' => {
                                     match self.insert_image_data(file_path) {
                                         Ok(picture_entry) => Ok(Some(picture_entry)),

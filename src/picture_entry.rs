@@ -17,12 +17,12 @@ pub struct PictureEntry {
     pub modified_time: SystemTime,
     pub rank: Rank,
     pub palette: [u32;9],
-    pub label: String,
+        label: String,
     pub selected: bool,
     pub deleted: bool,
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool) -> PictureEntry {
     PictureEntry {
         file_path: file_path,
         file_size: file_size,
@@ -38,7 +38,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
             None => String::new(),
         },
         selected: selected,
-        deleted: false,
+        deleted: selected,
     }
 }
 
@@ -63,7 +63,8 @@ impl PictureEntry {
                             image_data.rank,
                             Some(image_data.palette),
                             Some(image_data.label),
-                            image_data.selected)),
+                            image_data.selected,
+                            false)),
                     Err(err) => Err(anyhow!(err)),
                 }
             }

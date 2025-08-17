@@ -47,7 +47,6 @@ add_pictures_entries_for_sample	/Users/christophethibaut/Coding/gsr/src/catalog.
 adding_entries_from_a_directory	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn adding_entries_from_a_directory() {$/;"	f
 adding_entries_from_a_directory_with_pattern_option	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn adding_entries_from_a_directory_with_pattern_option() {$/;"	f
 adding_entries_from_a_file_list	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn adding_entries_from_a_file_list() {$/;"	f
-adding_entry_from_a_single_file	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn adding_entry_from_a_single_file() {$/;"	f
 after_adding_entries_length_is_updated	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_adding_entries_length_is_updated() {$/;"	f
 after_moving_next_page_index_depends_on_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn after_moving_next_page_index_depends_on_page_size() {$/;"	f
 append_to_extract_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn append_to_extract_file(name: &str, extract_file_path: &str) -> Result<()> {$/;"	f
@@ -71,6 +70,7 @@ cell_box_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    pub fn cell_box
 cells_per_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cells_per_row(&self) -> usize {$/;"	f
 check_create_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^        pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {$/;"	f
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
+check_is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn check_is_prefix_path() {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
 check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
 check_reading_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {$/;"	f
@@ -157,7 +157,7 @@ insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub 
 interactive_check_label_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {$/;"	f
 interactive_check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {$/;"	f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
-is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_prefix_path(prefix: &Path, path: &Path) -> bool {$/;"	f
+is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_prefix_path(prefix: &str, path: &str) -> bool {$/;"	f
 is_thumbnail	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_thumbnail(file_name: &str) -> bool {$/;"	f
 is_valid_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_valid_directory(dir: &str) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS Picture (
-    File_Path TEXT PRIMARY KEY,
+    File_Path TEXT NOT NULL PRIMARY KEY,
     File_Size INTEGER,
     Colors INTEGER,
     Modified_Time INTEGER,
@@ -8,6 +8,11 @@ CREATE TABLE IF NOT EXISTS Picture (
     Label TEXT,
     Selected BOOLEAN,
     Deleted BOOLEAN);
+
+CREATE TABLE IF NOT EXISTS Tag (
+    File_Path TEXT NOT NULL,
+    Label TEXT NOT NULL,
+    PRIMARY KEY ( File_Path, Label));
 
 
 

@@ -179,12 +179,12 @@ impl Catalog {
                 Rank::OneStar => { one_stars += 1.0 }
                 Rank::NoStar => { no_stars += 1.0 },
             };
-            if entry.label != String::from("") {
+            if entry.label().is_some() {
                 labelled += 1.0;
-                if let Some(number) = labels.get_mut(&entry.label) {
+                if let Some(number) = labels.get_mut(&entry.label().unwrap()) {
                     *number = *number + 1.0
                 } else {
-                    labels.insert(entry.label.clone(), 1.0);
+                    labels.insert(entry.label().unwrap().clone(), 1.0);
                 }
             };
             let parent:String = entry.parent_path();
@@ -791,8 +791,8 @@ impl Catalog {
         for i in 0..self.picture_entries.len() {
             self.index = i;
             let entry = &self.picture_entries[i];
-            if entry.label != String::new() {
-                let stat = tags.entry(entry.label.clone()).or_insert(0);
+            if entry.label().is_some() {
+                let stat = tags.entry(entry.label().unwrap().clone()).or_insert(0);
                 *stat += 1;
             }
         }
