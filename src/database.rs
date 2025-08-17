@@ -1,4 +1,4 @@
-use crate::path::{standard_directory,file_path_directory};
+use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use std::collections::HashSet;
 use std::hash::RandomState;
 use std::collections::hash_set::Difference;
@@ -74,7 +74,7 @@ impl Database {
                         for row in rows {
                             match row {
                                 Ok(file_path) => {
-                                    let _ = database_set.insert(file_path);
+                                        let _ = database_set.insert(file_path);
                                 },
                                 Err(err) => return Err(anyhow!(err)),
                             }
@@ -85,7 +85,7 @@ impl Database {
             },
             Err(err) => return Err(anyhow!(err)),
         };
-        let catalog_difference = catalog_set.difference(&database_set);
+        let catalog_difference = catalog_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
         if catalog_difference.clone().count() > 0 {
             println!("pictures in this selection that are not in the database:");
             for x in catalog_difference.clone() {

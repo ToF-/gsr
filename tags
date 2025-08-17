@@ -157,6 +157,7 @@ insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub 
 interactive_check_label_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {$/;"	f
 interactive_check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {$/;"	f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
+is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_prefix_path(prefix: &Path, path: &Path) -> bool {$/;"	f
 is_thumbnail	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_thumbnail(file_name: &str) -> bool {$/;"	f
 is_valid_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_valid_directory(dir: &str) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
@@ -215,7 +216,7 @@ read_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	
 read_picture_file_info_read_file_size	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn read_picture_file_info_read_file_size() {$/;"	f
 refresh	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn refresh(&mut self) {$/;"	f
 refresh_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_view(gui: &Gui, catalog: &Catalog) {$/;"	f
-retrieve_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn retrieve_or_create_image_data(&self, file_path: &str, confirm_insertion: bool) -> Result<Option<PictureEntry>> {$/;"	f
+retrieve_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
@@ -243,6 +244,7 @@ sort_by	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(
 sort_selection_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sort_selection_on(&self) -> bool {$/;"	f
 sort_selection_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {$/;"	f
 sorting_catalog_by_different_criteria	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn sorting_catalog_by_different_criteria() {$/;"	f
+standard_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn standard_directory() -> String {$/;"	f
 start_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn start_set(&mut self) {$/;"	f
 startup_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn startup_gui(_application: &gtk::Application) {$/;"	f
 state_indicators	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn state_indicators() {$/;"	f

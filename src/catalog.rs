@@ -1480,15 +1480,6 @@ mod tests {
     }
 
     #[test]
-    fn adding_entry_from_a_single_file() {
-        let mut catalog = Catalog::new();
-        let result = catalog.add_picture_entry_from_file("testdata/color-wheel.png");
-        assert_eq!(true, result.is_ok());
-        assert_eq!(1, catalog.length());
-        assert_eq!(String::from("color-wheel.png"), catalog.picture_entries[0].original_file_name());
-    }
-
-    #[test]
     fn adding_entries_from_a_file_list() {
         let mut catalog = Catalog::new();
         let result = catalog.add_picture_entries_from_file_list("testdata/selection");

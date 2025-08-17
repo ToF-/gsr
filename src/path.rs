@@ -153,6 +153,19 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
     }
 }
 
+pub fn is_prefix_path(prefix: &str, path: &str) -> bool {
+    let mut prefix_components = Path::new(prefix).components();
+    let mut path_components = Path::new(path).components();
+    loop {
+        match (prefix_components.next(), path_components.next()) {
+            (Some(p), Some(q)) if p == q => continue,
+            (None, _) => return true,
+            _ => return false,
+        }
+    };
+    return false
+}
+
 pub fn file_path_directory(source: &str) -> String {
     let path = Path::new(source);
     path.parent().expect("can't get file_path parent").display().to_string()
@@ -202,6 +215,10 @@ mod tests {
 
     use super::*;
 
+    #[test]
+    fn check_is_prefix_path() {
+        assert_eq!(true, is_prefix_path("/some/path/prefix", "/some/path/prefix/full"));
+    }
     #[test]
     fn get_all_pictures_including_sub_folders_except_thumbnails() {
         let result = get_picture_file_paths("testdata");
