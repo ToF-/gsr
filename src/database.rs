@@ -214,6 +214,18 @@ impl Database {
     }
 
     pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {
+        let mut labels: Vec<String> = Vec::new();
+        match self.connection.prepare(" SELECT Label FROM Tag WHERE File_Path = ?1;") {
+            Ok(mut statement) => {
+                let mut label_iter = statement.query_map([file_path], |row| row.get(0))?;
+                println!("{}", file_path);
+                for label in label_iter {
+                    println!("   {:?}",label);
+                    labels.push(label?);
+                }
+            },
+            Err(err) => return Err(anyhow!(err)),
+        };
         match self.connection.prepare(" SELECT File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
             Ok(mut statement) => {
                 let mut rows = statement.query([file_path])?;
@@ -236,7 +248,10 @@ impl Database {
                             Some(blob_to_palette(&bytes))
                         },
                         {
-                            let label:String = row.get(5)?;
+                            let label:String = match row.get(5) {
+                                Ok(s) => s,
+                                Err(err) => String::from(""),
+                            };
                             if label.trim().len() > 0 {
                                 Some(label.trim().to_string())
                             } else {
@@ -251,7 +266,7 @@ impl Database {
                             let result:bool = row.get(7)?;
                             result
                         },
-                        vec![]))),
+                        labels))),
                         Ok(None) => {
                             if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
                                 println!("couldn't find {} in database; insert image data from this file ?", file_path);
