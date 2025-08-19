@@ -393,6 +393,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                             catalog.count_selected()
                         },
                         Command::AddTag => catalog.begin_input(InputKind::AddTagInput),
+                        Command::DeleteTag => catalog.begin_input(InputKind::DeleteTagInput),
                         Command::Label => catalog.begin_input(InputKind::LabelInput),
                         Command::Relabel => catalog.begin_input(InputKind::RelabelInput),
                         Command::Right => {

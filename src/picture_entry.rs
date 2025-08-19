@@ -174,6 +174,14 @@ impl PictureEntry {
             self.tags.push(tag)
         }
     }
+    
+    pub fn delete_tag(&mut self, tag : String) {
+        match self.tags.iter().position(|s| s == &tag) {
+            Some(i) => { let _ = self.tags.remove(i); },
+            None => {},
+        }
+    }
+
     pub fn set_label(&mut self, label: String) {
         self.label = label
     }

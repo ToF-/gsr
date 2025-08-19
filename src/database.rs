@@ -154,6 +154,19 @@ impl Database {
         Ok(())
     }
 
+    pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {
+        match self.connection.execute("INSERT INTO Tag VALUES (?1, ?2);", params![&*entry.file_path, label]) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    pub fn delete_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {
+        match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1 AND Label = ?2 );", params![&*entry.file_path, label]) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
     pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {
         match self.connection.execute(" UPDATE Picture SET File_Size = ?1, Colors = ?2, Modified_Time = ?3, Rank = ?4, Palette = ?5, Label = ?6, Selected = ?7, Deleted = ?8 WHERE File_Path = ?9;",
         params![entry.file_size as i64,
