@@ -107,7 +107,10 @@ delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&m
 delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_files(&self) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) {$/;"	f
-delete_tag_with_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete_tag_with_input($mut self) -> Result<()> {$/;"	f
+delete_tag	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete_tag(&mut self, tag: String) -> Result<()> {$/;"	f
+delete_tag	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_tag(&mut self, tag : String) {$/;"	f
+delete_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {$/;"	f
+delete_tag_with_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete_tag_with_input(&mut self) -> Result<()> {$/;"	f
 deleting_en_entry_makes_it_non_selectable	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
 dimension	/Users/christophethibaut/Coding/gsr/src/args.rs	/^fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {$/;"	f
 directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn directory(directory: Option<String>) -> String {$/;"	f

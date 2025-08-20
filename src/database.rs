@@ -162,9 +162,15 @@ impl Database {
     }
 
     pub fn delete_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {
-        match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1 AND Label = ?2 );", params![&*entry.file_path, label]) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(anyhow!(err)),
+        match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1 AND Label = ?2;", params![&*entry.file_path, label]) {
+            Ok(count) => {
+                println!("{} row deleted", count);
+                Ok(())
+            },
+            Err(err) => {
+                eprintln!("{}", err);
+                Err(anyhow!(err))
+            },
         }
     }
     pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {
