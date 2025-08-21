@@ -1,3 +1,4 @@
+use crate::completion::candidates;
 use std::process::exit;
 use crate::database::Database;
 use anyhow::{anyhow, Result};
@@ -801,6 +802,20 @@ impl Catalog {
                     t.push(ch);
                     t
                 });
+            }
+        }
+    }
+
+    pub fn complete_input(&mut self) {
+        if let Some(kind) = self.input_kind.clone(){
+            if [InputKind::AddTagInput,InputKind::DeleteTagInput,InputKind::LabelInput,InputKind::RelabelInput,InputKind::SearchLabel].contains(&kind) {
+                match &self.input {
+                    Some(prefix) => {
+                        let candidates = candidates(prefix, &self.tags);
+                        println!("{:?}", candidates);
+                    },
+                    None => {},
+                }
             }
         }
     }

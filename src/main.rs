@@ -12,6 +12,7 @@ use crate::commands::load_shortcuts;
 use crate::database::Database;
 
 mod args;
+mod completion;
 mod catalog;
 mod database;
 mod commands;

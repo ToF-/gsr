@@ -291,6 +291,7 @@ fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                 refresh = true
             },
             "BackSpace" => catalog.del_input_char(),
+            "Tab" => catalog.complete_input(),
             _ => {
                 if let Some(ch) = key.to_unicode() {
                     catalog.add_input_char(ch)
