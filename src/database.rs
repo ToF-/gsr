@@ -1,14 +1,10 @@
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use std::collections::HashSet;
-use std::hash::RandomState;
-use std::collections::hash_set::Difference;
 use crate::picture_io::read_file_info;
 use crate::picture_io::get_palette_from_picture;
 use crate::image_data::ImageData;
 use crate::picture_entry::make_picture_entry;
 use std::io;
-use rusqlite::DatabaseName;
-use rusqlite::types::Type::Blob;
 use std::time::Duration;
 use crate::picture_entry::PictureEntry;
 use crate::palette::{palette_to_blob,blob_to_palette};
@@ -64,8 +60,8 @@ impl Database {
     pub fn update_database(&self, catalog: &Catalog) -> Result<()> {
         let catalog_set: HashSet<String> = HashSet::from_iter(catalog.entries().iter().map(|e| e.file_path.clone()));
         let mut database_set: HashSet<String> = HashSet::new();
-        let query = "SELECT file_path from Picture";
-        match self.connection.prepare(query) {
+        let query_picture = "SELECT file_path from Picture";
+        match self.connection.prepare(query_picture) {
             Ok(mut statement) => {
                 match statement.query_map([], |row| {
                     Ok(row.get::<usize, String>(0).unwrap())
@@ -112,7 +108,6 @@ impl Database {
         pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {
         println!("checking database {} picture table", self.connection_string);
         let query = "SELECT file_path from Picture";
-        let mut count: i64 = 0;
         match self.connection.prepare(query) {
             Ok(_) => self.update_database(catalog),
             Err(err) => Err(anyhow!(err)),
@@ -192,6 +187,32 @@ impl Database {
         }
     }
 
+    pub fn load_tags(&self) -> Result<Vec<String>> {
+        let mut result: Vec<String> = vec![];
+        let query = "SELECT DISTINCT Label FROM Tag;";
+        match self.connection.prepare(query) {
+            Ok(mut statement) => {
+                match statement.query_map([], |row| {
+                    Ok(row.get::<usize, String>(0).unwrap())
+                }) {
+                    Ok(rows) => {
+                        for row in rows {
+                            match row {
+                                Ok(label) => {
+                                        result.push(label);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        Ok(result)
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }
+            },
+            Err(err) => return Err(anyhow!(err)),
+        }
+    }
+
     pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
         match read_file_info(file_path) {
             Ok((file_size, modified_time)) => {
@@ -236,10 +257,8 @@ impl Database {
         let mut labels: Vec<String> = Vec::new();
         match self.connection.prepare(" SELECT Label FROM Tag WHERE File_Path = ?1;") {
             Ok(mut statement) => {
-                let mut label_iter = statement.query_map([file_path], |row| row.get(0))?;
-                println!("{}", file_path);
+                let label_iter = statement.query_map([file_path], |row| row.get(0))?;
                 for label in label_iter {
-                    println!("   {:?}",label);
                     labels.push(label?);
                 }
             },
@@ -269,7 +288,7 @@ impl Database {
                         {
                             let label:String = match row.get(5) {
                                 Ok(s) => s,
-                                Err(err) => String::from(""),
+                                _ => String::from(""),
                             };
                             if label.trim().len() > 0 {
                                 Some(label.trim().to_string())

@@ -162,8 +162,7 @@ pub fn is_prefix_path(prefix: &str, path: &str) -> bool {
             (None, _) => return true,
             _ => return false,
         }
-    };
-    return false
+    }
 }
 
 pub fn file_path_directory(source: &str) -> String {

@@ -21,7 +21,7 @@ pub fn palette_to_blob(palette: &Palette) -> [u8;36] {
     let mut pos: usize = 0;
     for i in 0..9 {
         let mut value: u32 = palette[i];
-        for j in 0..4 {
+        for _ in 0..4 {
             result[pos] = (value & 255) as u8;
             pos += 1;
             value = value >> 8;

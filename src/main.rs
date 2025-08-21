@@ -1,4 +1,3 @@
-use std::borrow::BorrowMut;
 use clap::Parser;
 use crate::args::Args;
 use crate::catalog::Catalog;

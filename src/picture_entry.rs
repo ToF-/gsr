@@ -39,7 +39,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
             None => String::new(),
         },
         selected: selected,
-        deleted: selected,
+        deleted: deleted,
         tags: tags,
     }
 }

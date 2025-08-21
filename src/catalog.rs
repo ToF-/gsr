@@ -1,4 +1,3 @@
-use std::borrow::BorrowMut;
 use std::process::exit;
 use crate::database::Database;
 use anyhow::{anyhow, Result};
@@ -45,6 +44,7 @@ pub struct Catalog {
     sample_on: bool,
     discarded: Vec<usize>,
     database: Database,
+    pub tags: Vec<String>,
 }
 
 impl Catalog {
@@ -77,7 +77,8 @@ impl Catalog {
                     eprintln!("{}", err);
                     exit(1);
                 }
-            }
+            },
+            tags: vec![],
         }
     }
 
@@ -106,7 +107,27 @@ impl Catalog {
                 return Err(anyhow!(err))
             },
         };
+        match catalog.initialize_tags() {
+            Ok(()) => {
+                println!("{:?}", catalog.tags);
+            },
+            Err(err) => {
+                return Err(anyhow!(err))
+            },
+        };
         Ok(catalog)
+    }
+
+    pub fn initialize_tags(&mut self) -> Result<()> {
+        match self.database.load_tags() {
+            Ok(labels) => {
+                for label in labels {
+                    self.tags.push(label);
+                };
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
     }
 
     fn move_all_labelled_files(&self, target_dir: &str) -> Result<()> {
@@ -693,12 +714,12 @@ impl Catalog {
         if let Some(kind) = self.input_kind.clone() {
             match kind {
                 InputKind::AddTagInput => {
-                    self.add_tag_with_input();
+                    let _ = self.add_tag_with_input();
                     self.input_kind = None;
                     self.input = None;
                 },
                 InputKind::DeleteTagInput => {
-                    self.delete_tag_with_input();
+                    let _ = self.delete_tag_with_input();
                     self.input_kind = None;
                     self.input = None;
                 },
