@@ -46,6 +46,7 @@ pub struct Catalog {
     discarded: Vec<usize>,
     database: Database,
     pub tags: Vec<String>,
+    current_candidates: Vec<String>,
 }
 
 impl Catalog {
@@ -80,6 +81,7 @@ impl Catalog {
                 }
             },
             tags: vec![],
+            current_candidates: vec![],
         }
     }
 
@@ -120,11 +122,14 @@ impl Catalog {
     }
 
     pub fn initialize_tags(&mut self) -> Result<()> {
+        self.tags = vec![];
         match self.database.load_tags() {
             Ok(labels) => {
                 for label in labels {
                     self.tags.push(label);
                 };
+                self.tags.sort();
+                println!("{:?}", self.tags);
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
@@ -515,6 +520,9 @@ impl Catalog {
         self.input.is_some()
     }
 
+    pub fn current_candidates(&self) -> String {
+        format!("{}", self.current_candidates.join(","))
+    }
     pub fn can_move_to_index(&self, index: usize) -> bool {
         index < self.picture_entries.len() && ! self.discarded_index(index)
     }
@@ -595,12 +603,12 @@ impl Catalog {
             if self.full_size_on { "░" } else { "" },
             if let Some(kind) = self.input_kind.clone() {
                 match kind {
-                    InputKind::AddTagInput => format!("add tag:{}", self.input.as_ref().unwrap()),
-                    InputKind::DeleteTagInput => format!("delete tag:{}", self.input.as_ref().unwrap()),
+                    InputKind::AddTagInput => format!("add tag:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
+                    InputKind::DeleteTagInput => format!("delete tag:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
                     InputKind::SearchInput => format!("search:{}", self.input.as_ref().unwrap()),
-                    InputKind::SearchLabel => format!("lsearch:{}", self.input.as_ref().unwrap()),
-                    InputKind::LabelInput => format!("label:{}", self.input.as_ref().unwrap()),
-                    InputKind::RelabelInput => format!("relabel:{}", self.input.as_ref().unwrap()),
+                    InputKind::SearchLabel => format!("lsearch:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
+                    InputKind::LabelInput => format!("label:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
+                    InputKind::RelabelInput => format!("relabel:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
                     InputKind::IndexInput => format!("index:{}", self.input.as_ref().unwrap()),
                 }
             } else {
@@ -653,7 +661,9 @@ impl Catalog {
     pub fn add_tag(&mut self, tag: String) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
         entry.add_tag(tag.clone());
-        self.database.insert_tag_label(entry, tag)
+        self.database.insert_tag_label(entry, tag);
+        self.initialize_tags()
+
     }
 
     pub fn delete_tag(&mut self, tag: String) -> Result<()> {
@@ -778,6 +788,7 @@ impl Catalog {
     }
 
     pub fn add_input_char(&mut self, ch: char) {
+        self.current_candidates = vec![];
         if let Some(kind) = self.input_kind.clone() {
             let ch_is_ok: bool = match kind {
                 InputKind::IndexInput => {
@@ -812,6 +823,14 @@ impl Catalog {
                 match &self.input {
                     Some(prefix) => {
                         let candidates = candidates(prefix, &self.tags);
+                        match candidates.len() {
+                            0 => { self.current_candidates = vec![] } ,
+                            1 => {
+                                self.input = Some(candidates[0].clone());
+                                self.current_candidates = vec![];
+                            },
+                            _ => { self.current_candidates = candidates.clone() },
+                        }
                         println!("{:?}", candidates);
                     },
                     None => {},

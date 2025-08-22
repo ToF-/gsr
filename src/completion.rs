@@ -1,47 +1,6 @@
-use compare::{Compare, natural};
-use std::cmp::Ordering::{Less, Equal, Greater};
 
 pub fn candidates(prefix: &String, labels: &Vec<String>) -> Vec<String> {
-    let mut bottom: usize;
-    let mut top: usize;
-    let mut middle: usize;
-    let mut start: usize = 0;
-    let mut end: usize = 0;
-    bottom = 0;
-    top = labels.len();
-    while bottom <= top {
-        let cmp = natural();
-        middle = (bottom + top) / 2;
-        println!("{} {} {} {}", bottom, top, middle, labels[middle]);
-        match cmp.compare(prefix, &labels[middle]) {
-            Greater => {
-                bottom = middle + 1;
-            },
-            Equal => {
-                start = middle;
-                while labels[middle].starts_with(prefix) && middle < labels.len() {
-                    middle += 1;
-                }
-                end = middle - 1;
-                return labels[start..end].to_vec()
-            },
-            Less => {
-                top = middle - 1;
-            }
-        }
-        println!("{} {} {} {}", bottom, top, middle, labels[middle]);
-        if middle < labels.len() && labels[middle].starts_with(prefix) {
-            while labels[middle].starts_with(prefix) && middle < labels.len() {
-                middle += 1;
-            }
-            end = middle - 1;
-            return labels[start..end].to_vec()
-        }
-        else {
-            return vec![];
-        }
-    }
-    vec![]
+    labels.into_iter().filter(|label| label.starts_with(prefix)).map(|s| s.clone()).collect()
 }
 
 #[cfg(test)]
@@ -50,8 +9,15 @@ mod tests {
 
     #[test]
     fn check_one_candidate() {
-        let mut labels: Vec<String> = vec!["car".into(), "caring".into(), "capital".into(), "barge".into()];
+        let mut labels: Vec<String> = vec!["facile".into(), "facio".into(), "factum".into(),"fidens".into(),"fideis".into(),"forte".into()];
         labels.sort();
-        assert_eq!(vec![String::from("capital")], candidates(&"capi".into(), &labels));
+        let empty: Vec<String> = vec![];
+        assert_eq!(empty, candidates(&"enea".into(), &labels));
+        let expected_f:Vec<String> = vec!["facile".into(), "facio".into(), "factum".into(), "fideis".into(), "fidens".into(), "forte".into()];
+        assert_eq!(expected_f, candidates(&"f".into(), &labels));
+        let expected_fa:Vec<String> = vec!["facile".into(), "facio".into(), "factum".into()];
+        assert_eq!(expected_fa, candidates(&"fa".into(), &labels));
+        let expected_fact:Vec<String> = vec!["factum".into()];
+        assert_eq!(expected_fact, candidates(&"fact".into(), &labels));
     }
 }
