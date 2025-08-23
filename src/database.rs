@@ -213,6 +213,32 @@ impl Database {
         }
     }
 
+    pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {
+        let mut result: Vec<String> = vec![];
+        let query = "SELECT DISTINCT Label FROM Tag WHERE File_Path = ?1;";
+        match self.connection.prepare(query) {
+            Ok(mut statement) => {
+                match statement.query_map([file_path], |row| {
+                    Ok(row.get::<usize, String>(0).unwrap())
+                }) {
+                    Ok(rows) => {
+                        for row in rows {
+                            match row {
+                                Ok(label) => {
+                                        result.push(label);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        Ok(result)
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }
+            },
+            Err(err) => return Err(anyhow!(err)),
+        }
+    }
+
     pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
         match read_file_info(file_path) {
             Ok((file_size, modified_time)) => {

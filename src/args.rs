@@ -13,7 +13,6 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 #[command(infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
 pub struct Args {
-    
     /// copy representative pictures of each subfolders in CATALOG_DIR
     #[arg(long, value_name = "CATALOG_DIR")]
     pub catalog: Option<String>,

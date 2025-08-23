@@ -1,3 +1,5 @@
+use std::cmp::Ordering::{Less, Greater, Equal};
+use crate::path::standard_directory;
 use crate::completion::candidates;
 use std::process::exit;
 use crate::database::Database;
@@ -26,7 +28,7 @@ pub enum InputKind {
 
 #[derive(Debug)]
 pub struct Catalog {
-    // a flag telling if gsr is called from a database perspective or from a directory perspective
+    db_centric: bool,
     picture_entries: Vec<PictureEntry>,
     index: usize,
     page_size: usize,
@@ -56,6 +58,7 @@ impl Catalog {
 
     pub fn new() -> Self {
         Catalog {
+            db_centric: false,
             picture_entries : Vec::new(),
             index: 0,
             page_size: 1,
@@ -112,9 +115,7 @@ impl Catalog {
             },
         };
         match catalog.initialize_tags() {
-            Ok(()) => {
-                println!("{:?}", catalog.tags);
-            },
+            Ok(()) => { },
             Err(err) => {
                 return Err(anyhow!(err))
             },
@@ -130,7 +131,6 @@ impl Catalog {
                     self.tags.push(label);
                 };
                 self.tags.sort();
-                println!("{:?}", self.tags);
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
@@ -266,10 +266,13 @@ impl Catalog {
     }
     fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {
         if let Some(file) = &args.file {
+            self.db_centric = false;
             self.add_picture_entry_from_file(&file)
         } else if let Some(list) = &args.reading {
+            self.db_centric = false;
             self.add_picture_entries_from_file_list(&list)
         } else if let Some(dir) = &args.directory {
+            self.db_centric = standard_directory() != "" && dir == &standard_directory();
             self.add_picture_entries_from_dir(&dir, args.pattern.clone())
         } else {
             Ok(())
@@ -584,7 +587,12 @@ impl Catalog {
     pub fn title_display(&self) -> String {
         let entry_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
         let file_path = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).file_path;
-        let display= format!("{} S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
+        let display= format!("{}{} S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
+            if self.db_centric {
+                String::from("◯")
+            } else {
+                String::from("▻")
+            },
             if self.sample_on() {
                 file_path_directory(file_path)
             } else {
@@ -880,10 +888,29 @@ impl Catalog {
                 let stat = tags.entry(entry.label().unwrap().clone()).or_insert(0);
                 *stat += 1;
             }
-        }
+            match self.database.entry_tags(&entry.file_path) {
+                Ok(labels) => {
+                    for label in labels {
+                        let stat = tags.entry(label.to_string()).or_insert(0);
+                        *stat += 1;
+                    }
+                },
+                Err(err) => return Err(anyhow!(err)),
+            }
+        };
+        let mut stats:Vec<(usize,String)> = vec![];
         for (tag,stat) in tags {
+            stats.push((stat,tag.clone()));
+        };
+        stats.sort_by(|a, b| {
+            match (a.0).cmp(&b.0) {
+                Greater => Less,
+                Less => Greater,
+                Equal => (a.1).cmp(&b.1),
+                }});
+        for (stat,tag) in stats {
             println!("{tag}:{stat}");
-        }
+        };
         Ok(())
     }
 
