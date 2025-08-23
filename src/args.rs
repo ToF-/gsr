@@ -88,6 +88,10 @@ pub struct Args {
     #[arg(short, long, value_name="N")]
     pub seconds: Option<u64>,
 
+    /// select pictures having tags in the given list
+    #[arg(long, value_name="TAG_LIST")]
+    pub select: Option<Vec<String>>,
+
     /// list all the tags attached to pictures
     #[arg(long, default_value_t = false)]
     pub tags: bool,
@@ -231,6 +235,20 @@ impl Args {
             },
 
             seconds: self.seconds,
+
+            select: match self.select.clone() {
+                Some(list) => if list.len() > 0 {
+                    let tags:Vec<String> = list[0].split(' ').map(|s| s.into()).filter(|s:&String| s.len() > 0).collect();
+                    if tags.len() > 0 {
+                        Some(tags)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                },
+                    None => None,
+            },
 
             tags: self.tags,
 

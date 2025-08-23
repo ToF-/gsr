@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::cmp::Ordering::{Less, Greater, Equal};
 use crate::path::standard_directory;
 use crate::completion::candidates;
@@ -92,6 +93,7 @@ impl Catalog {
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
+        println!("{:?}", args.select);
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
             catalog.set_page_size(args.sample.unwrap());
@@ -273,7 +275,7 @@ impl Catalog {
             self.add_picture_entries_from_file_list(&list)
         } else if let Some(dir) = &args.directory {
             self.db_centric = standard_directory() != "" && dir == &standard_directory();
-            self.add_picture_entries_from_dir(&dir, args.pattern.clone())
+            self.add_picture_entries_from_dir(&dir, args.pattern.clone(), args.select.clone())
         } else {
             Ok(())
         }
@@ -351,7 +353,7 @@ impl Catalog {
         self.picture_entries.append(picture_entries)
     }
 
-    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>) -> Result<()> {
+    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>) -> Result<()> {
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
                 let mut error: bool = false;
@@ -368,7 +370,20 @@ impl Catalog {
                             }
                         },
                     };
-                    if matches_pattern {
+                    let matches_select = match select_opt {
+                        None => true,
+                        Some(ref tag_list) => {
+                            let tag_set:HashSet<String> = HashSet::from_iter(tag_list.iter().cloned());
+                            match self.database.entry_tags(&file_path) {
+                                Ok(tags) => {
+                                    let entry_tags = HashSet::from_iter(tags.iter().cloned());
+                                    entry_tags.intersection(&tag_set).count() > 0
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        },
+                    };
+                    if matches_pattern && matches_select {
                         match PictureEntry::from_file_or_database(&file_path, &self.database) {
                             Ok(picture_entry) => self.picture_entries.push(picture_entry),
                             Err(err) => {
