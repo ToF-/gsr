@@ -26,6 +26,7 @@ pub enum InputKind {
 
 #[derive(Debug)]
 pub struct Catalog {
+    // a flag telling if gsr is called from a database perspective or from a directory perspective
     picture_entries: Vec<PictureEntry>,
     index: usize,
     page_size: usize,
