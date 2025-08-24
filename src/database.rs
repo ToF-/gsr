@@ -1,5 +1,6 @@
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use std::collections::HashSet;
+use std::collections::HashMap;
 use crate::picture_io::read_file_info;
 use crate::picture_io::get_palette_from_picture;
 use crate::image_data::ImageData;
@@ -216,8 +217,8 @@ impl Database {
         }
     }
 
-    pub fn load_directories(&self) -> Result<Vec<String>> {
-        let mut dir_set: HashSet<String> = HashSet::new();
+    pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {
+        let mut dir_map: HashMap<String,usize> = HashMap::new();
         let query = "SELECT File_Path from Picture;";
         match self.connection.prepare(query) {
             Ok(mut statement) => {
@@ -229,12 +230,12 @@ impl Database {
                             match row {
                                 Ok(file_path) => {
                                     let directory =file_path_directory(&file_path);
-                                    let _ = dir_set.insert(directory);
+                                    dir_map.entry(directory).and_modify(|files| *files += 1).or_insert(1);
                                 },
                                 Err(err) => return Err(anyhow!(err)),
                             }
                         };
-                        let mut result:Vec<String> = dir_set.into_iter().collect();
+                        let mut result:Vec<(String,usize)> = Vec::from_iter(dir_map.iter().map(|pair| (pair.0.clone(), pair.1.clone())));
                         result.sort();
                         Ok(result)
                     },

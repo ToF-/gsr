@@ -951,7 +951,7 @@ impl Catalog {
         match self.database.load_directories() {
             Ok(directories) => {
                 for directory in directories {
-                    println!("{}", directory)
+                    println!("{}:{:6}", directory.0, directory.1)
                 };
                 Ok(())
             },
