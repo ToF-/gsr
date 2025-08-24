@@ -101,7 +101,10 @@ impl Database {
                 Some(_)| None => {},
             }
         }
-        println!("{} pictures in the database are not in this selection", database_set.difference(&catalog_set).count());
+        let in_db_not_in_select = database_set.difference(&catalog_set).count();
+        if in_db_not_in_select > 0 {
+            println!("{} pictures in the database are not in this selection", in_db_not_in_select)
+        } else {} ;
         Ok(())
     }
 

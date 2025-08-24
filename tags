@@ -39,7 +39,7 @@ VALID_EXTENSIONS	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const VALID_E
 WIDTH_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";$/;"	c
 add_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_input_char(&mut self, ch: char) {$/;"	f
 add_picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {$/;"	f
-add_picture_entries_from_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>) -> Result<()> {$/;"	f
+add_picture_entries_from_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {$/;"	f
 add_picture_entries_from_file_list	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {$/;"	f
 add_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {$/;"	f
 add_picture_entry_from_file	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {$/;"	f
@@ -68,12 +68,14 @@ can_move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn
 cancel_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_input(&mut self) {$/;"	f
 cancel_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_set(&mut self) {$/;"	f
 cancel_sort_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cancel_sort_selection(&mut self) {$/;"	f
+candidates	/Users/christophethibaut/Coding/gsr/src/completion.rs	/^pub fn candidates(prefix: &String, labels: &Vec<String>) -> Vec<String> {$/;"	f
 cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn cannot_move_beyond_length() {$/;"	f
 cell_box_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {$/;"	f
 cells_per_row	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cells_per_row(&self) -> usize {$/;"	f
 check_create_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^        pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {$/;"	f
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
 check_is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn check_is_prefix_path() {$/;"	f
+check_one_candidate	/Users/christophethibaut/Coding/gsr/src/completion.rs	/^    fn check_one_candidate() {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
 check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
 check_reading_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {$/;"	f
@@ -99,6 +101,7 @@ copy_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_
 copy_to_current_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_to_current_dir(&self) -> Result<()> {$/;"	f
 count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn count_selected(&mut self) {$/;"	f
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
+current_candidates	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_candidates(&self) -> String {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
 deduplicate_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {$/;"	f
 default_extract_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn default_extract_list_file() -> Result<String> {$/;"	f
@@ -126,6 +129,7 @@ end_set_select	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn e
 end_unlabel	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_unlabel(&mut self) -> Result<()> {$/;"	f
 entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn entries(&self) -> &Vec<PictureEntry> {$/;"	f
 entry_at_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn entry_at_index(&self, index: usize) -> Option<&PictureEntry> {$/;"	f
+entry_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {$/;"	f
 equal_content	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn equal_content(&self, other:&PictureEntry) -> Result<bool> {$/;"	f
 expand_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn expand_on(&self) -> bool {$/;"	f
 export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {$/;"	f

@@ -93,7 +93,6 @@ impl Catalog {
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
-        println!("{:?}", args.select);
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
             catalog.set_page_size(args.sample.unwrap());
@@ -275,7 +274,7 @@ impl Catalog {
             self.add_picture_entries_from_file_list(&list)
         } else if let Some(dir) = &args.directory {
             self.db_centric = standard_directory() != "" && dir == &standard_directory();
-            self.add_picture_entries_from_dir(&dir, args.pattern.clone(), args.select.clone())
+            self.add_picture_entries_from_dir(&dir, args.pattern.clone(), args.select.clone(), args.include.clone())
         } else {
             Ok(())
         }
@@ -353,7 +352,16 @@ impl Catalog {
         self.picture_entries.append(picture_entries)
     }
 
-    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>) -> Result<()> {
+    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {
+        let mut tag_select_set:HashSet<String> = match select_opt {
+            Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+            None => HashSet::new(),
+        };
+        let mut tag_include_set:HashSet<String> = match include_opt {
+            Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+            None => HashSet::new(),
+        };
+        println!("select={:?} include={:?}", tag_select_set, tag_include_set);
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
                 let mut error: bool = false;
@@ -370,22 +378,31 @@ impl Catalog {
                             }
                         },
                     };
-                    let matches_select = match select_opt {
-                        None => true,
-                        Some(ref tag_list) => {
-                            let tag_set:HashSet<String> = HashSet::from_iter(tag_list.iter().cloned());
-                            match self.database.entry_tags(&file_path) {
+                    let matches_select = match tag_select_set.len() {
+                        0 => true,
+                        _ => match self.database.entry_tags(&file_path) {
                                 Ok(tags) => {
                                     let entry_tags = HashSet::from_iter(tags.iter().cloned());
-                                    entry_tags.intersection(&tag_set).count() > 0
+                                    entry_tags.intersection(&tag_select_set).count() > 0
                                 },
                                 Err(err) => return Err(anyhow!(err)),
-                            }
-                        },
+                            },
                     };
-                    if matches_pattern && matches_select {
+                    let matches_include = match tag_include_set.len() {
+                        0 => true,
+                        _ => match self.database.entry_tags(&file_path) {
+                                Ok(tags) => {
+                                    let entry_tags = HashSet::from_iter(tags.iter().cloned());
+                                    tag_include_set.is_subset(&entry_tags)
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            },
+                    };
+                    if matches_pattern && matches_select && matches_include {
                         match PictureEntry::from_file_or_database(&file_path, &self.database) {
-                            Ok(picture_entry) => self.picture_entries.push(picture_entry),
+                            Ok(picture_entry) => {
+                                self.picture_entries.push(picture_entry)
+                            },
                             Err(err) => {
                                     eprintln!("{}", err);
                                     error = true;

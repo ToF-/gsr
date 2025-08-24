@@ -52,6 +52,10 @@ pub struct Args {
     #[arg(long, value_name="N")]
     pub height: Option<i32>,
 
+    /// select pictures having all the tags in the given list
+    #[arg(long, value_name="TAG_LIST")]
+    pub include: Option<Vec<String>>,
+
     /// show information about this folder
     #[arg(long)]
     pub info: bool,
@@ -193,6 +197,21 @@ impl Args {
             },
 
             height: Some(dimension(self.height, HEIGHT_ENV_VAR, "height", DEFAULT_HEIGHT)),
+
+            include: match self.include.clone() {
+                Some(list) => if list.len() > 0 {
+                    let tags:Vec<String> = list[0].split(' ').map(|s| s.into()).filter(|s:&String| s.len() > 0).collect();
+                    if tags.len() > 0 {
+                        Some(tags)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                },
+                    None => None,
+            },
+
 
             info: self.info,
 
