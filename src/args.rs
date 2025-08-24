@@ -36,6 +36,10 @@ pub struct Args {
     #[arg(short, long, default_value_t = false)]
     pub date: bool,
 
+    /// list all directories of pictures in the database
+    #[arg(long, default_value_t = false)]
+    pub directories: bool,
+
     /// extract list
     #[arg(short, long, value_name="FILE_NAME")]
     pub extract: Option<String>,
@@ -164,6 +168,8 @@ impl Args {
                     Err(err) => return Err(err),
                 }
             },
+
+            directories: self.directories,
 
             extract: match &self.extract {
                 None => {

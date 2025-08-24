@@ -216,6 +216,34 @@ impl Database {
         }
     }
 
+    pub fn load_directories(&self) -> Result<Vec<String>> {
+        let mut dir_set: HashSet<String> = HashSet::new();
+        let query = "SELECT File_Path from Picture;";
+        match self.connection.prepare(query) {
+            Ok(mut statement) => {
+                match statement.query_map([], |row| {
+                    Ok(row.get::<usize, String>(0).unwrap())
+                }) {
+                    Ok(rows) => {
+                        for row in rows {
+                            match row {
+                                Ok(file_path) => {
+                                    let directory =file_path_directory(&file_path);
+                                    let _ = dir_set.insert(directory);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        let mut result:Vec<String> = dir_set.into_iter().collect();
+                        result.sort();
+                        Ok(result)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
     pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {
         let mut result: Vec<String> = vec![];
         let query = "SELECT DISTINCT Label FROM Tag WHERE File_Path = ?1;";

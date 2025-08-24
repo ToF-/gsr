@@ -947,6 +947,18 @@ impl Catalog {
         Ok(())
     }
 
+    pub fn print_directories_all(mut self) -> Result<()> {
+        match self.database.load_directories() {
+            Ok(directories) => {
+                for directory in directories {
+                    println!("{}", directory)
+                };
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
     pub fn set_rank(&mut self, rank: Rank) -> Result<()> {
         if let Some(index) = self.index() {
             let entry = &mut self.picture_entries[index];

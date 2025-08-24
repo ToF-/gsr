@@ -75,6 +75,15 @@ fn main() {
                             },
                         }
                     }
+                    if args.directories {
+                        match catalog.print_directories_all() {
+                            Ok(()) => exit(0),
+                            Err(err) => {
+                                eprintln!("{}", err);
+                                exit(1);
+                            },
+                        }
+                    }
                     if args.info {
                         catalog.info();
                         exit(0);
