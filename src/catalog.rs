@@ -353,11 +353,11 @@ impl Catalog {
     }
 
     pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {
-        let mut tag_select_set:HashSet<String> = match select_opt {
+        let tag_select_set:HashSet<String> = match select_opt {
             Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
             None => HashSet::new(),
         };
-        let mut tag_include_set:HashSet<String> = match include_opt {
+        let tag_include_set:HashSet<String> = match include_opt {
             Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
             None => HashSet::new(),
         };
@@ -702,9 +702,10 @@ impl Catalog {
     pub fn add_tag(&mut self, tag: String) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
         entry.add_tag(tag.clone());
-        self.database.insert_tag_label(entry, tag);
-        self.initialize_tags()
-
+        match self.database.insert_tag_label(entry, tag) {
+            Ok(()) => self.initialize_tags(),
+            Err(err) => Err(anyhow!(err)),
+        }
     }
 
     pub fn delete_tag(&mut self, tag: String) -> Result<()> {
@@ -1622,7 +1623,7 @@ mod tests {
     #[test] 
     fn adding_entries_from_a_directory() {
         let mut catalog = Catalog::new();
-        let result = catalog.add_picture_entries_from_dir("testdata", None);
+        let result = catalog.add_picture_entries_from_dir("testdata", None, None, None);
         assert_eq!(true, result.is_ok());
         assert_eq!(10, catalog.length())
     }
@@ -1630,7 +1631,7 @@ mod tests {
     #[test] 
     fn adding_entries_from_a_directory_with_pattern_option() {
         let mut catalog = Catalog::new();
-        let result = catalog.add_picture_entries_from_dir("testdata", Some(String::from("or")));
+        let result = catalog.add_picture_entries_from_dir("testdata", Some(String::from("or")), None, None);
         assert_eq!(true, result.is_ok());
         assert_eq!(2, catalog.length());
         assert_eq!(String::from("labrador.jpg"), catalog.picture_entries[0].original_file_name());
