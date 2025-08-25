@@ -29,6 +29,7 @@ pub enum Command {
     Info,
     Jump,
     Label,
+    LabelTag,
     LastPosition,
     Left,
     Next,
@@ -63,6 +64,7 @@ pub type Shortcuts = HashMap<String, Command>;
 pub fn default_shortcuts() -> Shortcuts {
     let shortcuts: Shortcuts = HashMap::from([
         (String::from("at"), Command::AddTag),
+        (String::from("ampersand"), Command::LabelTag),
         (String::from("percent"), Command::DeleteTag),
         (String::from("Escape"), Command::Cancel),
         (String::from("equal"), Command::ChooseOrder),

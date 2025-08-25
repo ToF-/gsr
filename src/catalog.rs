@@ -1087,6 +1087,13 @@ impl Catalog {
         }
     }
 
+    pub fn label_tag(&mut self) -> Result<()> {
+        match &self.label {
+            Some(s) => self.add_tag(s.to_string()),
+            None => Ok(()),
+        }
+    }
+
     pub fn end_set_label(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {

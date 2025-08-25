@@ -381,6 +381,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::Cancel => catalog.cancel_set(),
                         Command::PasteLabel => result = catalog.end_set_label(),
                         Command::Unlabel => result = catalog.end_unlabel(),
+                        Command::LabelTag => result = catalog.label_tag(),
                         Command::ToggleSingleView => if catalog.page_size() > 1 {
                             if gui.single_view_mode() {
                                 gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
