@@ -1,3 +1,4 @@
+use rusqlite::Row;
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use std::collections::HashSet;
 use std::collections::HashMap;
@@ -191,6 +192,47 @@ impl Database {
         }
     }
 
+    fn sql_to_picture_entry(row: &Row) -> Result<PictureEntry> {
+        Ok(make_picture_entry(
+                row.get(0)?,
+                row.get(1)?,
+                row.get(2)?,
+                {
+                    let mt:i64 = row.get(3)?;
+                    UNIX_EPOCH + Duration::new(mt as u64, 0)
+                },
+                {
+                    let r:i64 = row.get(4)?;
+                    Rank::from(r)
+                },
+                {
+                    let blob: Vec<u8> = row.get(5)?;
+                    let mut bytes: [u8;36] = [0;36];
+                    for i in 0..36 { bytes[i] = blob[i] };
+                    Some(blob_to_palette(&bytes))
+                },
+                {
+                    let label:String = match row.get(6) {
+                        Ok(s) => s,
+                        _ => String::from(""),
+                    };
+                    if label.trim().len() > 0 {
+                        Some(label.trim().to_string())
+                    } else {
+                        None
+                    }
+                },
+                {
+                    let result:bool = row.get(7)?;
+                    result
+                },
+                {
+                    let result:bool = row.get(8)?;
+                    result
+                },
+                vec![],))
+    }
+
     pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {
         match self.connection.prepare(&("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted FROM Picture WHERE ".to_owned() + &query + ";")) {
             Ok(mut statement) => {
@@ -198,45 +240,13 @@ impl Database {
                     Ok(mut rows) => {
                         let mut result: Vec<PictureEntry> = vec![];
                         while let Some(row) = rows.next()? {
-                            result.push(make_picture_entry(
-                                    row.get(0)?,
-                                    row.get(1)?,
-                                    row.get(2)?,
-                                    {
-                                        let mt:i64 = row.get(3)?;
-                                        UNIX_EPOCH + Duration::new(mt as u64, 0)
-                                    },
-                                    {
-                                        let r:i64 = row.get(4)?;
-                                        Rank::from(r)
-                                    },
-                                    {
-                                        let blob: Vec<u8> = row.get(5)?;
-                                        let mut bytes: [u8;36] = [0;36];
-                                        for i in 0..36 { bytes[i] = blob[i] };
-                                        Some(blob_to_palette(&bytes))
-                                    },
-                                    {
-                                        let label:String = match row.get(6) {
-                                            Ok(s) => s,
-                                            _ => String::from(""),
-                                        };
-                                        if label.trim().len() > 0 {
-                                            Some(label.trim().to_string())
-                                        } else {
-                                            None
-                                        }
-                                    },
-                                    {
-                                        let result:bool = row.get(7)?;
-                                        result
-                                    },
-                                    {
-                                        let result:bool = row.get(8)?;
-                                        result
-                                    },
-                                    vec![],));
-                        }
+                            match Self::sql_to_picture_entry(row) {
+                                Ok(entry) => {
+                                    result.push(entry);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
                         return Ok(result)
                     },
                     Err(err) => Err(anyhow!(err)),
@@ -367,64 +377,26 @@ pub fn load_all_tags(&self) -> Result<Vec<String>> {
     }
 
     pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {
-        let mut labels: Vec<String> = Vec::new();
-        match self.connection.prepare(" SELECT Label FROM Tag WHERE File_Path = ?1;") {
-            Ok(mut statement) => {
-                let label_iter = statement.query_map([file_path], |row| row.get(0))?;
-                for label in label_iter {
-                    labels.push(label?);
-                }
-            },
-            Err(err) => return Err(anyhow!(err)),
-        };
-        match self.connection.prepare(" SELECT File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
-            Ok(mut statement) => {
-                let mut rows = statement.query([file_path])?;
-                match rows.next() {
-                    Ok(Some(row)) => Ok(Some(make_picture_entry(
-                        file_path.to_string(),
-                        row.get(0)?,
-                        row.get(1)?,
-                        UNIX_EPOCH + Duration::new(row.get::<usize, i64>(2)? as u64, 0),
-                        {
-                            let result:i64 = row.get(3)?;
-                            Rank::from(result)
+        match self.connection.prepare(" SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
+            Ok(mut statement) => match statement.query([file_path]) {
+                Ok(mut rows) => match rows.next() {
+                    Ok(Some(row)) => match Self::sql_to_picture_entry(row) {
+                        Ok(mut entry) => match self.entry_tags(&entry.file_path) {
+                            Ok(labels) => {
+                                entry.tags = labels;
+                                Ok(Some(entry))
+                            },
+                            Err(err) => Err(anyhow!(err)),
                         },
-                        {
-                            let blob : Vec<u8> = row.get(4)?;
-                            let mut bytes: [u8;36] = [0;36];
-                            for i in 0..36 {
-                                bytes[i] = blob[i];
-                            }
-                            Some(blob_to_palette(&bytes))
-                        },
-                        {
-                            let label:String = match row.get(5) {
-                                Ok(s) => s,
-                                _ => String::from(""),
-                            };
-                            if label.trim().len() > 0 {
-                                Some(label.trim().to_string())
-                            } else {
-                                None
-                            }
-                        },
-                        {
-                            let result:bool = row.get(6)?;
-                            result
-                        },
-                        {
-                            let result:bool = row.get(7)?;
-                            result
-                        },
-                        labels))),
-                        Ok(None) => {
-                            if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
-                                println!("couldn't find {} in database; insert image data from this file ?", file_path);
-                                let mut response = String::new();
-                                let stdin = io::stdin();
-                                stdin.read_line(&mut response).expect("can't read from stdin");
-                                match response.chars().next() {
+                        Err(err) => Err(anyhow!(err)),
+                    },
+                    Ok(None) => {
+                        if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
+                            println!("couldn't find {} in database; insert image data from this file ?", file_path);
+                            let mut response = String::new();
+                            let stdin = io::stdin();
+                            stdin.read_line(&mut response).expect("can't read from stdin");
+                            match response.chars().next() {
                                 Some(ch) if ch == 'y' || ch == 'Y' => {
                                     match self.insert_image_data(file_path) {
                                         Ok(picture_entry) => Ok(Some(picture_entry)),
@@ -439,11 +411,11 @@ pub fn load_all_tags(&self) -> Result<Vec<String>> {
                         }
                     },
                     Err(err) => Err(anyhow!(err)),
-                }
+                },
+                Err(err) => Err(anyhow!(err)),
             },
             Err(err) => Err(anyhow!(err)),
         }
     }
-
 }
 
