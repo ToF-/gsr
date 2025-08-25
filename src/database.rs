@@ -256,6 +256,30 @@ impl Database {
         }
     }
 
+    pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {
+        let tag_labels: String = select.into_iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(",");
+        match self.connection.prepare(&("SELECT DISTINCT(Picture.File_Path), File_Size, Colors, Modified_Time, Rank, Palette, Picture.Label, Selected, Deleted FROM Picture INNER JOIN Tag ON Tag.File_Path = Picture.File_Path WHERE Tag.Label IN (".to_owned() + &tag_labels + ");")) {
+            Ok(mut statement) => {
+                match statement.query([]) {
+                    Ok(mut rows) => {
+                        let mut result: Vec<PictureEntry> = vec![];
+                        while let Some(row) = rows.next()? {
+                            match Self::sql_to_picture_entry(row) {
+                                Ok(entry) => {
+                                    result.push(entry);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        return Ok(result)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
 pub fn load_all_tags(&self) -> Result<Vec<String>> {
     let mut result: Vec<String> = vec![];
     let query = "SELECT DISTINCT Label FROM Tag;";

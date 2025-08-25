@@ -184,9 +184,9 @@ label_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn label_for_en
 last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn last(&self) -> usize {$/;"	f
 left_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn left_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
+load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_all_tags(&self) -> Result<Vec<String>> {$/;"	f
 load_directories	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {$/;"	f
 load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load_shortcuts() -> Result<Shortcuts> {$/;"	f
-load_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_tags(&self) -> Result<Vec<String>> {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
 make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, tags: Vec<String>) -> PictureEntry {$/;"	f
 make_picture_entry_from_file_and_image_data_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn make_picture_entry_from_file_and_image_data_file() {$/;"	f
@@ -242,6 +242,7 @@ sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn samp
 sample_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sample_on(&self) -> bool {$/;"	f
 select_and_unselect_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
 select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {$/;"	f
+select_pictures_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures_with_tag_selection(&self, query: String, select:Vec<String>) -> Result<Vec<PictureEntry>> {$/;"	f
 set_all_pictures_for_multiple_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_label(&mut self) -> Result<()> {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
@@ -263,6 +264,7 @@ sort_by	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sort_by(
 sort_selection_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sort_selection_on(&self) -> bool {$/;"	f
 sort_selection_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {$/;"	f
 sorting_catalog_by_different_criteria	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn sorting_catalog_by_different_criteria() {$/;"	f
+sql_to_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn sql_to_picture_entry(row: &Row) -> Result<PictureEntry> {$/;"	f
 standard_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn standard_directory() -> String {$/;"	f
 start_set	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn start_set(&mut self) {$/;"	f
 startup_gui	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^pub fn startup_gui(_application: &gtk::Application) {$/;"	f

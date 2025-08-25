@@ -278,7 +278,11 @@ impl Catalog {
             self.add_picture_entries_from_file_list(&list)
         } else if let Some(dir) = &args.directory {
             self.db_centric = standard_directory() != "" && dir == &standard_directory();
-            self.add_picture_entries_from_dir(&dir, args.pattern.clone(), args.select.clone(), args.include.clone())
+            if self.db_centric {
+                self.add_picture_entries_from_db_with_tag_selection(args.select.clone())
+            } else {
+                self.add_picture_entries_from_dir(&dir, args.pattern.clone(), args.select.clone(), args.include.clone())
+            }
         } else {
             Ok(())
         }
@@ -373,6 +377,29 @@ impl Catalog {
         };
         Ok(())
     }
+    pub fn add_picture_entries_from_db_with_tag_selection(&mut self, select_opt: Option<Vec<String>>) -> Result<()> {
+        match select_opt {
+            Some(labels) => {
+                self.picture_entries = match self.database.select_pictures_with_tag_selection(labels) {
+                    Ok(mut entries) => {
+                        for entry in &mut entries {
+                            match self.database.entry_tags(&entry.file_path) {
+                                Ok(labels) => {
+                                    entry.tags = labels
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        entries
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                };
+                Ok(())
+                },
+            None => self.add_picture_entries_from_db("true".to_string()),
+        }
+    }
+
     pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
