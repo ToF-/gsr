@@ -246,7 +246,7 @@ impl Database {
         }
     }
 
-pub fn load_tags(&self) -> Result<Vec<String>> {
+pub fn load_all_tags(&self) -> Result<Vec<String>> {
     let mut result: Vec<String> = vec![];
     let query = "SELECT DISTINCT Label FROM Tag;";
     match self.connection.prepare(query) {

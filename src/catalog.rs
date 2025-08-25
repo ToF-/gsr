@@ -130,7 +130,7 @@ impl Catalog {
 
     pub fn initialize_tags(&mut self) -> Result<()> {
         self.tags = vec![];
-        match self.database.load_tags() {
+        match self.database.load_all_tags() {
             Ok(labels) => {
                 for label in labels {
                     self.tags.push(label);
@@ -360,7 +360,7 @@ impl Catalog {
         self.picture_entries = match self.database.select_pictures(query) {
             Ok(mut entries) => {
                 for entry in &mut entries {
-                    match self.database.load_tags() {
+                    match self.database.entry_tags(&entry.file_path) {
                         Ok(labels) => {
                             entry.tags = labels
                         },
