@@ -367,6 +367,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                             result = catalog.file_operations();
                             gui.application_window.close()
                         },
+                        Command::Repeat => result = catalog.end_repeat_last_action(),
                         Command::Search => catalog.begin_input(InputKind::SearchInput),
                         Command::UnSelectPage => result = catalog.unselect_page(),
                         Command::UnselectAll => result = catalog.unselect_all(),

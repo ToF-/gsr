@@ -4,6 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+Action	/Users/christophethibaut/Coding/gsr/src/actions.rs	/^pub enum Action {$/;"	g
 Args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub struct Args {$/;"	s
 COLOR_MAX	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    const COLOR_MAX: f64 = 9.0;$/;"	c
 Catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^pub struct Catalog {$/;"	s
@@ -113,6 +114,7 @@ delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&m
 delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_files(&self) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) {$/;"	f
+delete_picture	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_picture(&self, file_path: String) -> Result<()> {$/;"	f
 delete_tag	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete_tag(&mut self, tag: String) -> Result<()> {$/;"	f
 delete_tag	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_tag(&mut self, tag : String) {$/;"	f
 delete_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {$/;"	f
@@ -237,6 +239,7 @@ read_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	
 read_picture_file_info_read_file_size	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn read_picture_file_info_read_file_size() {$/;"	f
 refresh	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn refresh(&mut self) {$/;"	f
 refresh_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_view(gui: &Gui, catalog: &Catalog) {$/;"	f
+repeat_last_action	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn repeat_last_action(&mut self) -> Result<()> {$/;"	f
 retrieve_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f

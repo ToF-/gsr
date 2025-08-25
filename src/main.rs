@@ -16,6 +16,7 @@ mod completion;
 mod catalog;
 mod database;
 mod commands;
+mod actions;
 mod direction;
 mod gui;
 mod image_data;

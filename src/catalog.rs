@@ -1,3 +1,4 @@
+use crate::actions::Action;
 use std::collections::HashSet;
 use std::cmp::Ordering::{Less, Greater, Equal};
 use crate::path::standard_directory;
@@ -36,6 +37,7 @@ pub struct Catalog {
     page_limit_on: bool,
     input: Option<String>,
     label: Option<String>,
+    last_action: Option<Action>,
     palette_on: bool,
     full_size_on: bool,
     expand_on: bool,
@@ -66,6 +68,7 @@ impl Catalog {
             page_limit_on: false,
             input: None,
             label: None,
+            last_action: None,
             palette_on: false,
             full_size_on: false,
             expand_on: false,
@@ -752,6 +755,7 @@ impl Catalog {
     pub fn add_tag(&mut self, tag: String) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
         entry.add_tag(tag.clone());
+        self.last_action = Some(Action::AddTag { label: tag.clone() });
         match self.database.insert_tag_label(entry, tag) {
             Ok(()) => self.initialize_tags(),
             Err(err) => Err(anyhow!(err)),
@@ -760,6 +764,7 @@ impl Catalog {
 
     pub fn delete_tag(&mut self, tag: String) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
+        self.last_action = Some(Action::DeleteTag { label: tag.clone() });
         if entry.tags.contains(&tag) {
             entry.delete_tag(tag.clone());
             self.database.delete_tag_label(entry, tag)
@@ -787,7 +792,8 @@ impl Catalog {
     pub fn delete(&mut self) {
         if let Some(index) = self.index() {
             self.picture_entries[index].deleted = !self.picture_entries[index].deleted;
-            self.page_changed = true
+            self.page_changed = true;
+            self.last_action = Some(Action::Delete)
         }
     }
     pub fn refresh(&mut self) {
@@ -943,7 +949,8 @@ impl Catalog {
         if let Some(index) = self.index() {
             self.label = Some(label.clone());
             let entry = &mut self.picture_entries[index];
-            entry.set_label(label);
+            entry.set_label(label.clone());
+            self.last_action = Some(Action::Label { label: label.clone() });
             Self::update_image_data(&self.database, &entry.clone())
         } else {
             Ok(())
@@ -953,6 +960,7 @@ impl Catalog {
     pub fn apply_label_all(&mut self, label:String) -> Result<()> {
         for i in 0..self.picture_entries.len() {
             self.index = i;
+            self.last_action = Some(Action::Label { label: label.clone() });
             match self.apply_label(label.clone()) {
                 Ok(()) => {},
                 Err(err) => return Err(err),
@@ -1009,10 +1017,24 @@ impl Catalog {
         }
     }
 
+    pub fn repeat_last_action(&mut self) -> Result<()> {
+        match &self.last_action {
+            None => Ok(()),
+            Some(Action::Label { label: l }) => self.apply_label(l.to_string()),
+            Some(Action::Unlabel) => self.unlabel(),
+            Some(Action::AddTag { label: l}) => self.add_tag(l.to_string()),
+            Some(Action::DeleteTag { label: l}) => self.delete_tag(l.to_string()),
+            Some(Action::Rank { rank: r }) => self.set_rank(*r),
+            Some(Action::Select) => self.toggle_select(),
+            Some(Action::Delete) => Ok(self.delete()),
+        }
+    }
+
     pub fn set_rank(&mut self, rank: Rank) -> Result<()> {
         if let Some(index) = self.index() {
             let entry = &mut self.picture_entries[index];
             entry.set_rank(rank);
+            self.last_action = Some(Action::Rank { rank: rank });
             Self::update_image_data(&self.database, entry)
         } else {
             Ok(())
@@ -1085,6 +1107,7 @@ impl Catalog {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 entry.unlabel();
+                self.last_action = Some(Action::Unlabel);
                 Self::update_image_data(&self.database, entry)
             },
             None => Ok(()),
@@ -1163,6 +1186,35 @@ impl Catalog {
                             match Self::update_image_data(&self.database, entry) {
                                 Ok(()) => {},
                                 Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        self.start_index = None;
+                        Ok(())
+                    },
+                }
+            },
+            None => Err(anyhow!("empty catalog")),
+        }
+    }
+
+    pub fn end_repeat_last_action(&mut self) -> Result<()> {
+        match self.index() {
+            Some(index) => {
+                match self.start_index {
+                    None => self.repeat_last_action(),
+                    Some(other) => {
+                        let (start,end) = if other <= index { (other,index) } else { (index,other) };
+                        for i in start..end+1 {
+                            let entry: &mut PictureEntry = &mut self.picture_entries[i];
+                            match &self.last_action {
+                                None => {},
+                                Some(Action::Label { label: l }) => entry.set_label(l.to_string()),
+                                Some(Action::Unlabel) => entry.unlabel(),
+                                Some(Action::AddTag { label: l}) => entry.add_tag(l.to_string()),
+                                Some(Action::DeleteTag { label: l}) => entry.delete_tag(l.to_string()),
+                                Some(Action::Rank { rank: r }) => entry.set_rank(*r),
+                                Some(Action::Select) => {},
+                                Some(Action::Delete) => {},
                             }
                         };
                         self.start_index = None;
