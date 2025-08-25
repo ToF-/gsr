@@ -84,6 +84,10 @@ pub struct Args {
     #[arg(short, long, value_name="REGEXP")]
     pub pattern: Option<String>,
 
+    /// display files that match the query QUERY
+    #[arg(short, long, value_name="QUERY")]
+    pub query: Option<String>,
+
     /// display the files in FILE_LIST
     #[arg(short, long, value_name="FILE_LIST")]
     pub reading: Option<String>,
@@ -244,6 +248,8 @@ impl Args {
             },
 
             pattern: self.pattern.clone(),
+
+            query: self.query.clone(),
 
             reading: match &self.reading {
                 None => None,

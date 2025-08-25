@@ -100,7 +100,11 @@ impl Catalog {
             catalog.add_pictures_entries_for_sample(args)
         } else {
             catalog.set_page_size(args.grid.unwrap());
-            catalog.add_picture_entries_from_source(args)
+            if args.query.is_some() {
+                catalog.add_picture_entries_from_db(args.query.clone().unwrap())
+            } else {
+                catalog.add_picture_entries_from_source(args)
+            }
         };
         if let Err(err) = add_result {
             return Err(err)
@@ -352,6 +356,13 @@ impl Catalog {
         self.picture_entries.append(picture_entries)
     }
 
+    pub fn add_picture_entries_from_db(&mut self, query: String) -> Result<()> {
+        self.picture_entries = match self.database.select_pictures(query) {
+            Ok(entries) => entries,
+            Err(err) => return Err(anyhow!(err)),
+        };
+        Ok(())
+    }
     pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {

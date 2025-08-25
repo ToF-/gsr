@@ -191,13 +191,68 @@ impl Database {
         }
     }
 
-    pub fn load_tags(&self) -> Result<Vec<String>> {
-        let mut result: Vec<String> = vec![];
-        let query = "SELECT DISTINCT Label FROM Tag;";
-        match self.connection.prepare(query) {
+    pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {
+        match self.connection.prepare(&("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted FROM Picture WHERE ".to_owned() + &query + ";")) {
             Ok(mut statement) => {
-                match statement.query_map([], |row| {
-                    Ok(row.get::<usize, String>(0).unwrap())
+                match statement.query([]) {
+                    Ok(mut rows) => {
+                        let mut result: Vec<PictureEntry> = vec![];
+                        while let Some(row) = rows.next()? {
+                            result.push(make_picture_entry(
+                                    row.get(0)?,
+                                    row.get(1)?,
+                                    row.get(2)?,
+                                    {
+                                        let mt:i64 = row.get(3)?;
+                                        UNIX_EPOCH + Duration::new(mt as u64, 0)
+                                    },
+                                    {
+                                        let r:i64 = row.get(4)?;
+                                        Rank::from(r)
+                                    },
+                                    {
+                                        let blob: Vec<u8> = row.get(5)?;
+                                        let mut bytes: [u8;36] = [0;36];
+                                        for i in 0..36 { bytes[i] = blob[i] };
+                                        Some(blob_to_palette(&bytes))
+                                    },
+                                    {
+                                        let label:String = match row.get(6) {
+                                            Ok(s) => s,
+                                            _ => String::from(""),
+                                        };
+                                        if label.trim().len() > 0 {
+                                            Some(label.trim().to_string())
+                                        } else {
+                                            None
+                                        }
+                                    },
+                                    {
+                                        let result:bool = row.get(7)?;
+                                        result
+                                    },
+                                    {
+                                        let result:bool = row.get(8)?;
+                                        result
+                                    },
+                                    vec![],));
+                        }
+                        return Ok(result)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+pub fn load_tags(&self) -> Result<Vec<String>> {
+    let mut result: Vec<String> = vec![];
+    let query = "SELECT DISTINCT Label FROM Tag;";
+    match self.connection.prepare(query) {
+        Ok(mut statement) => {
+            match statement.query_map([], |row| {
+                Ok(row.get::<usize, String>(0).unwrap())
                 }) {
                     Ok(rows) => {
                         for row in rows {
