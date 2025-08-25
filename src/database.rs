@@ -233,6 +233,22 @@ impl Database {
                 vec![],))
     }
 
+    pub fn delete_picture(&self, file_path: String) -> Result<()> {
+        match self.connection.execute("DELETE FROM Picture WHERE File_Path = ?1;", params![file_path.clone()]) {
+            Ok(count) => {
+                println!("{} picture deleted", count);
+                match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1;", params![file_path.clone()]) {
+                    Ok(count) => {
+                        println!("{} tags deleted", count);
+                        Ok(())
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
     pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {
         match self.connection.prepare(&("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted FROM Picture WHERE ".to_owned() + &query + ";")) {
             Ok(mut statement) => {

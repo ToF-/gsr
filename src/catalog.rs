@@ -265,10 +265,14 @@ impl Catalog {
     fn delete_files(&self) {
         let selection: Vec<&PictureEntry> = self.picture_entries.iter().filter(|e| e.deleted).collect();
         for entry in selection {
-            entry.delete_files()
+            match self.database.delete_picture(entry.file_path.clone()) {
+                Ok(()) => {},
+                Err(err) => eprintln!("{}", err),
+            };
+            entry.delete_files();
         };
-
     }
+
     fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {
         if let Some(file) = &args.file {
             self.db_centric = false;
