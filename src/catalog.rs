@@ -353,15 +353,6 @@ impl Catalog {
     }
 
     pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {
-        let tag_select_set:HashSet<String> = match select_opt {
-            Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
-            None => HashSet::new(),
-        };
-        let tag_include_set:HashSet<String> = match include_opt {
-            Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
-            None => HashSet::new(),
-        };
-        println!("select={:?} include={:?}", tag_select_set, tag_include_set);
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
                 let mut error: bool = false;
@@ -378,25 +369,32 @@ impl Catalog {
                             }
                         },
                     };
+                    let tag_select_set:HashSet<String> = match select_opt {
+                        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+                        None => HashSet::new(),
+                    };
+                    let tag_include_set:HashSet<String> = match include_opt {
+                        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+                        None => HashSet::new(),
+                    };
+                    let entry_tags: HashSet<String>;
+                    if tag_select_set.len() > 0 || tag_include_set.len() > 0 {
+                        match self.database.entry_tags(&file_path) {
+                            Ok(tags) => {
+                                entry_tags = HashSet::from_iter(tags.iter().cloned())
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    } else {
+                        entry_tags = HashSet::new()
+                    }
                     let matches_select = match tag_select_set.len() {
                         0 => true,
-                        _ => match self.database.entry_tags(&file_path) {
-                                Ok(tags) => {
-                                    let entry_tags = HashSet::from_iter(tags.iter().cloned());
-                                    entry_tags.intersection(&tag_select_set).count() > 0
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            },
+                        _ => entry_tags.intersection(&tag_select_set).count() > 0,
                     };
                     let matches_include = match tag_include_set.len() {
                         0 => true,
-                        _ => match self.database.entry_tags(&file_path) {
-                                Ok(tags) => {
-                                    let entry_tags = HashSet::from_iter(tags.iter().cloned());
-                                    tag_include_set.is_subset(&entry_tags)
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            },
+                        _ => tag_include_set.is_subset(&entry_tags) ,
                     };
                     if matches_pattern && matches_select && matches_include {
                         match PictureEntry::from_file_or_database(&file_path, &self.database) {
@@ -947,7 +945,7 @@ impl Catalog {
         Ok(())
     }
 
-    pub fn print_directories_all(mut self) -> Result<()> {
+    pub fn print_directories_all(self) -> Result<()> {
         match self.database.load_directories() {
             Ok(directories) => {
                 for directory in directories {
