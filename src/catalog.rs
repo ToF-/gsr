@@ -358,7 +358,17 @@ impl Catalog {
 
     pub fn add_picture_entries_from_db(&mut self, query: String) -> Result<()> {
         self.picture_entries = match self.database.select_pictures(query) {
-            Ok(entries) => entries,
+            Ok(mut entries) => {
+                for entry in &mut entries {
+                    match self.database.load_tags() {
+                        Ok(labels) => {
+                            entry.tags = labels
+                        },
+                        Err(err) => return Err(anyhow!(err)),
+                    }
+                };
+                entries
+            },
             Err(err) => return Err(anyhow!(err)),
         };
         Ok(())
