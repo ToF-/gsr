@@ -17,6 +17,10 @@ pub struct Args {
     #[arg(long, value_name = "CATALOG_DIR")]
     pub catalog: Option<String>,
 
+    /// checks default directory for new pictures
+    #[arg(long, default_value_t = false)]
+    pub check: bool,
+
      /// Directory to search (default is set with variable GALLSHDIR)
     pub directory: Option<String>,
 
@@ -136,6 +140,7 @@ impl Args {
                     Err(err) => return Err(err),
                 },
             },
+            check: self.check,
 
             all_move: match &self.all_move {
                 None => None,

@@ -1,3 +1,4 @@
+use crate::path::get_picture_file_paths;
 use rusqlite::Row;
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use std::collections::HashSet;
@@ -59,99 +60,97 @@ impl Database {
 
 
 
-    pub fn update_database(&self, catalog: &Catalog) -> Result<()> {
-        let catalog_set: HashSet<String> = HashSet::from_iter(catalog.entries().iter().map(|e| e.file_path.clone()));
-        let mut database_set: HashSet<String> = HashSet::new();
-        let query_picture = "SELECT file_path from Picture";
-        match self.connection.prepare(query_picture) {
-            Ok(mut statement) => {
-                match statement.query_map([], |row| {
-                    Ok(row.get::<usize, String>(0).unwrap())
-                }) {
-                    Ok(rows) => {
-                        for row in rows {
-                            match row {
-                                Ok(file_path) => {
-                                        let _ = database_set.insert(file_path);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
+    pub fn update_database(&self, catalog: &mut Catalog, directory: Option<String>) -> Result<()> {
+        match directory {
+            Some(dir) => {
+                println!("updating database vis à vis directory {}", dir);
+                let mut database_set: HashSet<String> = HashSet::new();
+                let query_picture = "SELECT file_path from Picture";
+                match self.connection.prepare(query_picture) {
+                    Ok(mut statement) => {
+                        match statement.query_map([], |row| {
+                            Ok(row.get::<usize, String>(0).unwrap())
+                        }) {
+                            Ok(rows) => {
+                                for row in rows {
+                                    match row {
+                                        Ok(file_path) => {
+                                            let _ = database_set.insert(file_path);
+                                        },
+                                        Err(err) => return Err(anyhow!(err)),
+                                    }
+                                };
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                };
+                match get_picture_file_paths(&dir) {
+                    Ok(entries) => {
+                        let directory_set: HashSet<String> = HashSet::from_iter(entries.iter().map(|e| e.clone()));
+                        let directory_difference = directory_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
+                        if directory_difference.clone().count() > 0 {
+                            println!("pictures in this selection that are not in the database:");
+                            for x in directory_difference.clone() {
+                                println!("{x}");
                             }
-                        };
+                            println!("insert image data for these {} pictures in the database ?", directory_difference.clone().count());
+                            let mut response = String::new();
+                            let stdin = io::stdin();
+                            stdin.read_line(&mut response).expect("can't read from stdin");
+                            match response.chars().next() {
+                                Some(ch) if ch == 'y' || ch == 'Y' => {
+                                    match self.populate(catalog, Some(HashSet::from_iter(directory_difference.into_iter()))) {
+                                        Ok(()) => Ok(()),
+                                        Err(err) => return Err(anyhow!(err)),
+                                    }
+                                },
+                                Some(_)| None => Ok(()),
+                            }
+                        } else {
+                            Ok(())
+                        }
                     },
                     Err(err) => return Err(anyhow!(err)),
                 }
-            },
-            Err(err) => return Err(anyhow!(err)),
-        };
-        let catalog_difference = catalog_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
-        if catalog_difference.clone().count() > 0 {
-            println!("pictures in this selection that are not in the database:");
-            for x in catalog_difference.clone() {
-                println!("{x}");
             }
-            println!("insert image data for these {} pictures in the database ?", catalog_difference.clone().count());
-            let mut response = String::new();
-            let stdin = io::stdin();
-            stdin.read_line(&mut response).expect("can't read from stdin");
-            match response.chars().next() {
-                Some(ch) if ch == 'y' || ch == 'Y' => {
-                    match self.populate(catalog, Some(HashSet::from_iter(catalog_difference.into_iter()))) {
-                        Ok(()) => {},
-                        Err(err) => return Err(anyhow!(err)),
-                    }
-                },
-                Some(_)| None => {},
-            }
+            None => Ok(())
         }
-        let in_db_not_in_select = database_set.difference(&catalog_set).count();
-        if in_db_not_in_select > 0 {
-            println!("{} pictures in the database are not in this selection", in_db_not_in_select)
-        } else {} ;
-        Ok(())
     }
 
-        pub fn check_create_schema(&self, catalog: &Catalog) -> Result<()> {
+    pub fn check_create_schema(&self) -> Result<()> {
         println!("checking database {} picture table", self.connection_string);
         let query = "SELECT file_path from Picture";
         match self.connection.prepare(query) {
-            Ok(_) => self.update_database(catalog),
+            Ok(_) => Ok(()),
             Err(err) => Err(anyhow!(err)),
         }
     }
 
-    fn populate(&self, catalog: &Catalog, difference_opt: Option<HashSet<&String>>) -> Result<()> {
+    fn populate(&self, mut catalog: &mut Catalog, difference_opt: Option<HashSet<&String>>) -> Result<()> {
         let mut count: usize = 0;
         let total = match difference_opt {
             Some(ref difference) => difference.len(),
             None => catalog.length(),
         };
-        for entry in catalog.entries() {
-            let insertion:bool = match difference_opt {
-                Some(ref set) => set.contains(&entry.file_path),
-                None => false,
-            };
-            if insertion {
-                println!("inserting {}", entry.file_path);
-                match self.connection.execute("INSERT INTO Picture VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
-                params![&*entry.file_path,
-                entry.file_size as i64,
-                entry.colors as i64,
-                entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-                entry.rank as i64,
-                palette_to_blob(&entry.palette),
-                if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
-                entry.selected as i64,
-                entry.selected as i64]) {
-                    Ok(size) => {
-                        println!("{}", size);
-                    },
-                    Err(err) => return Err(anyhow!(err)),
+        if total > 0 {
+            for file_path in difference_opt.unwrap() {
+                let entry = PictureEntry::from_file(file_path);
+                    match self.insert_image_data(file_path) {
+                        Ok(picture_entry) => match catalog.add_picture_entry_from_file(file_path) {
+                            Ok(()) => {},
+                            Err(err) => return Err(anyhow!(err)),
+                        },
+                        Err(err) => return Err(anyhow!(err)),
+                    }; 
+                    count += 1;
+                    println!("{}/{}", count, total);
                 };
-                println!("{}/{}", count, total);
-                count += 1;
-            }
-        };
-        Ok(())
+                Ok(())
+            } else {
+            Ok(())
+        }
     }
 
     pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {

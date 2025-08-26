@@ -116,7 +116,7 @@ impl Catalog {
         if catalog.length() == 0 {
             return Err(anyhow!("no picture to show"))
         };
-        match catalog.database.check_create_schema(&catalog) {
+        match catalog.database.check_create_schema() {
             Ok(()) => {},
             Err(err) => {
                 return Err(anyhow!(err))
@@ -286,7 +286,15 @@ impl Catalog {
         } else if let Some(dir) = &args.directory {
             self.db_centric = standard_directory() != "" && dir == &standard_directory();
             if self.db_centric {
-                self.add_picture_entries_from_db_with_tag_selection(args.select.clone())
+                match self.add_picture_entries_from_db_with_tag_selection(args.select.clone()) {
+                    Ok(()) => {}
+                    Err(err) => return Err(anyhow!(err))
+                };
+                if args.check {
+                    self.database.update_database(self, args.directory.clone())
+                } else {
+                       Ok(())
+                }
             } else {
                 self.add_picture_entries_from_dir(&dir, args.pattern.clone(), args.select.clone(), args.include.clone())
             }
@@ -385,6 +393,7 @@ impl Catalog {
         Ok(())
     }
     pub fn add_picture_entries_from_db_with_tag_selection(&mut self, select_opt: Option<Vec<String>>) -> Result<()> {
+        println!("loading picture data from database");
         match select_opt {
             Some(labels) => {
                 self.picture_entries = match self.database.select_pictures_with_tag_selection(labels) {
@@ -408,6 +417,7 @@ impl Catalog {
     }
 
     pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {
+        println!("loading picture data from directory {}", directory);
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
                 let mut error: bool = false;
