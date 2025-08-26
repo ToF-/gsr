@@ -1120,7 +1120,7 @@ impl Catalog {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 match entry.label() {
                     Some(s) => self.add_tag(s.to_string()),
-                    None => Ok(()),
+                    None => Ok(())
                 }
             },
             None => Ok(()),
