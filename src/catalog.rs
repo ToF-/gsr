@@ -1115,8 +1115,14 @@ impl Catalog {
     }
 
     pub fn label_tag(&mut self) -> Result<()> {
-        match &self.label {
-            Some(s) => self.add_tag(s.to_string()),
+        match self.index() {
+            Some(index) => {
+                let entry: &mut PictureEntry = &mut self.picture_entries[index];
+                match entry.label() {
+                    Some(s) => self.add_tag(s.to_string()),
+                    None => Ok(()),
+                }
+            },
             None => Ok(()),
         }
     }
