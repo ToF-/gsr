@@ -104,11 +104,14 @@ count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn c
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
 current_candidates	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_candidates(&self) -> String {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
+decimate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn decimate(&self, file_paths_set: HashSet<String>) -> Result<()> {$/;"	f
 deduplicate_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {$/;"	f
 default_extract_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn default_extract_list_file() -> Result<String> {$/;"	f
 default_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn default_shortcuts() -> Shortcuts {$/;"	f
 del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&mut self) {$/;"	f
+delete_broken_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_broken_entries_from_db(&mut self) -> Result<()> {$/;"	f
+delete_difference_from_file_system	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_difference_from_file_system(&mut self) -> Result<()> {$/;"	f
 delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_files(&self) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) {$/;"	f
@@ -171,6 +174,8 @@ initialize	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn init
 initialize_tags	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn initialize_tags(&mut self) -> Result<()> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
+insert_difference_from_dir	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {$/;"	f
+insert_entries_from_dir_to_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn insert_entries_from_dir_to_db(&mut self, directory: &String) -> Result<()> {$/;"	f
 insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {$/;"	f
 interactive_check_label_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {$/;"	f
@@ -228,7 +233,7 @@ palette_to_blob	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn pale
 parent_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn parent_path(&self) -> String {$/;"	f
 parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn parent_path_is_the_file_path_without_file_name() {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
-populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, mut catalog: &mut Catalog, difference_opt: Option<HashSet<&String>>) -> Result<()> {$/;"	f
+populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<Vec<PictureEntry>> {$/;"	f
 position_from_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f
 print_directories_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_directories_all(self) -> Result<()> {$/;"	f
 print_info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_info(&self) {$/;"	f
@@ -291,7 +296,6 @@ unlabel	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unlabel(
 unlabel	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn unlabel(&mut self) {$/;"	f
 unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_all(&mut self) -> Result<()> {$/;"	f
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
-update_database	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn update_database(&self, catalog: &mut Catalog, directory: Option<String>) -> Result<()> {$/;"	f
 update_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn update_files(&self) -> Result<()> {$/;"	f
 update_image_data	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn update_image_data(database: &Database, entry: &PictureEntry) -> Result<()> {$/;"	f
 update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {$/;"	f

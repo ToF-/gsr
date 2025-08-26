@@ -88,6 +88,9 @@ pub struct Args {
     #[arg(short, long, value_name="REGEXP")]
     pub pattern: Option<String>,
 
+    /// remove entries from the database when file no longer exits
+    #[arg(long, default_value_t = false)]
+    pub purge: bool,
     /// display files that match the query QUERY
     #[arg(short, long, value_name="QUERY")]
     pub query: Option<String>,
@@ -253,6 +256,8 @@ impl Args {
             },
 
             pattern: self.pattern.clone(),
+
+            purge: self.purge,
 
             query: self.query.clone(),
 

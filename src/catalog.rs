@@ -294,13 +294,37 @@ impl Catalog {
                 if args.check {
                     self.insert_entries_from_dir_to_db(&dir)
                 } else {
+                    if args.purge {
+                        self.delete_broken_entries_from_db()
+                    } else {
                        Ok(())
+                    }
                 }
             } else {
                 self.add_picture_entries_from_dir(&dir)
             }
         } else {
             Ok(())
+        }
+    }
+
+    fn delete_broken_entries_from_db(&mut self) -> Result<()> {
+        match self.database.delete_difference_from_file_system() {
+            Ok(file_paths) => {
+                if self.picture_entries.len() > 0 {
+                    let mut picture_entries: Vec<PictureEntry> = vec![];
+                    let mut i = 0;
+                    while i < self.picture_entries.len() {
+                        if !file_paths.contains(&self.picture_entries[i].file_path) {
+                            picture_entries.push(self.picture_entries[i].clone());
+                        }
+                        i+= 1;
+                    };
+                    self.picture_entries = picture_entries;
+                };
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
         }
     }
 

@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use crate::path::get_picture_file_paths;
 use rusqlite::Row;
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
@@ -44,9 +45,9 @@ impl Database {
     pub fn check_schema(&self) -> Result<()> {
         match self.connection.prepare("SELECT * FROM Picture WHERE rowid = 1;") {
             Ok(_) => match self.connection.prepare("SELECT * FROM Tag WHERE rowid = 1;") {
-                    Ok(_) => Ok(()),
-                    Err(err) => Err(anyhow!(err)),
-                },
+                Ok(_) => Ok(()),
+                Err(err) => Err(anyhow!(err)),
+            },
             Err(err) => Err(anyhow!(err)),
         }
     }
@@ -60,6 +61,23 @@ impl Database {
         }
     }
 
+    fn decimate(&self, file_paths_set: HashSet<String>) -> Result<HashSet<String>> {
+        let mut total_tags: usize = 0;
+        let mut total_pics: usize = 0;
+        for file_path in file_paths_set.iter() {
+            match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1;", params![file_path]) {
+                Ok(count) => { total_tags += count; },
+                Err(err) => return Err(anyhow!(err)),
+            };
+            match self.connection.execute("DELETE FROM Picture WHERE File_Path = ?1", params![file_path]) {
+                Ok(count) => { total_pics += count; },
+                Err(err) => return Err(anyhow!(err)),
+            };
+        };
+        println!("{} pictures, {} tags deleted", total_pics, total_tags);
+        Ok(file_paths_set)
+    }
+
     fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<Vec<PictureEntry>> {
         let mut count: usize = 0;
         let total = match difference_opt {
@@ -69,19 +87,18 @@ impl Database {
         if total > 0 {
             let mut picture_entries: Vec<PictureEntry> = vec![];
             for file_path in difference_opt.unwrap() {
-                let entry = PictureEntry::from_file(file_path);
-                    match self.insert_image_data(file_path) {
-                        Ok(entry) => {
-                            picture_entries.push(entry)
-                        },
-                        Err(err) => return Err(anyhow!(err)),
-                    }; 
-                    count += 1;
-                    println!("{}/{}", count, total);
-                };
-                Ok(picture_entries)
-            } else {
-                Ok(vec![])
+                match self.insert_image_data(file_path) {
+                    Ok(entry) => {
+                        picture_entries.push(entry)
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }; 
+                count += 1;
+                println!("{}/{}", count, total);
+            };
+            Ok(picture_entries)
+        } else {
+            Ok(vec![])
         }
     }
 
@@ -106,21 +123,21 @@ impl Database {
     }
     pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {
         match self.connection.execute(" UPDATE Picture SET File_Size = ?1, Colors = ?2, Modified_Time = ?3, Rank = ?4, Palette = ?5, Label = ?6, Selected = ?7, Deleted = ?8 WHERE File_Path = ?9;",
-        params![entry.file_size as i64,
-        entry.colors as i64,
-        entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-        entry.rank as i64,
-        palette_to_blob(&entry.palette),
-        if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
-        entry.selected as i64,
-        entry.selected as i64,
-        &*entry.file_path]) {
+            params![entry.file_size as i64,
+            entry.colors as i64,
+            entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+            entry.rank as i64,
+            palette_to_blob(&entry.palette),
+            if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
+            entry.selected as i64,
+            entry.selected as i64,
+            &*entry.file_path]) {
             Ok(updated) => {
                 println!("{} row updated", updated);
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
-        }
+            }
     }
 
     fn sql_to_picture_entry(row: &Row) -> Result<PictureEntry> {
@@ -203,78 +220,117 @@ impl Database {
         }
     }
 
-    pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {
-        match get_picture_file_paths(directory) {
-            Ok(file_paths) => {
-                let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
-                let mut database_set: HashSet<String> = HashSet::new();
-                let query = "SELECT file_path from Picture;";
-                match self.connection.prepare(query) {
-                    Ok(mut statement) => match statement.query_map([], |row| Ok(row.get(0).unwrap())) {
-                        Ok(rows) => {
-                            for row in rows {
-                                match row {
-                                    Ok(file_path) => {
-                                        let _ = database_set.insert(file_path);
-                                    },
-                                    Err(err) => return Err(anyhow!(err)),
-                                }
-                            };
-                            let difference = directory_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
-                            if difference.clone().count() > 0 {
-                                println!("pictures in this selection that are not in the database:");
-                                for x in difference.clone() {
-                                    println!("{x}");
-                                }
-                                println!("insert image data for these {} pictures in the database ?", difference.clone().count());
-                                let mut response = String::new();
-                                let stdin = io::stdin();
-                                stdin.read_line(&mut response).expect("can't read from stdin");
-                                match response.chars().next() {
-                                    Some(ch) if ch == 'y' || ch == 'Y' => {
-                                        match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
-                                            Ok(picture_entries) => Ok(picture_entries),
-                                            Err(err) => return Err(anyhow!(err)),
-                                        }
-                                    },
-                                    Some(_)| None => Ok(vec![]),
-                                }
-                            } else {
-                                Ok(vec![])
-                            }
-                        },
-                        Err(err) => return Err(anyhow!(err)),
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
+    pub fn delete_difference_from_file_system(&mut self) -> Result<HashSet<String>> {
+        match self.connection.prepare("SELECT file_path from Picture;") {
+            Ok(mut statement) => match statement.query_map([], |row| Ok(row.get::<usize,String>(0).unwrap())) {
+                Ok(rows) => {
+                    let mut difference: HashSet<String> = HashSet::new();
+                    for row in rows {
+                        match row {
+                            Ok(file_path) => {
+                                let path = PathBuf::from(file_path.clone());
+                                if ! path.exists() { let _ = difference.insert(file_path); } else { };
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    };
+                    if difference.len() > 0 {
+                        println!("this pictures from the database are no longer in the file system:");
+                        for x in difference.clone() {
+                            println!("{x}");
+                        }
+                        println!("delete image data for these {} pictures from the database ?", difference.len());
+                        let mut response = String::new();
+                        let stdin = io::stdin();
+                        stdin.read_line(&mut response).expect("can't read from stdin");
+                        match response.chars().next() {
+                            Some(ch) if ch == 'y' || ch == 'Y' => {
+                                self.decimate(difference)
+                            },
+                            Some(_)| None => Ok(HashSet::new()),
+                        }
+                    } else { 
+                        Ok(HashSet::new())
+                    }
+                },
+                Err(err) => Err(anyhow!(err)),
             },
             Err(err) => Err(anyhow!(err)),
         }
     }
 
-    pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {
-        let tag_labels: String = select.into_iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(",");
-        match self.connection.prepare(&("SELECT DISTINCT(Picture.File_Path), File_Size, Colors, Modified_Time, Rank, Palette, Picture.Label, Selected, Deleted FROM Picture INNER JOIN Tag ON Tag.File_Path = Picture.File_Path WHERE Tag.Label IN (".to_owned() + &tag_labels + ");")) {
-            Ok(mut statement) => {
-                match statement.query([]) {
-                    Ok(mut rows) => {
-                        let mut result: Vec<PictureEntry> = vec![];
-                        while let Some(row) = rows.next()? {
-                            match Self::sql_to_picture_entry(row) {
-                                Ok(entry) => {
-                                    result.push(entry);
+pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {
+    match get_picture_file_paths(directory) {
+        Ok(file_paths) => {
+            let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
+            let mut database_set: HashSet<String> = HashSet::new();
+            let query = "SELECT file_path from Picture;";
+            match self.connection.prepare(query) {
+                Ok(mut statement) => match statement.query_map([], |row| Ok(row.get(0).unwrap())) {
+                    Ok(rows) => {
+                        for row in rows {
+                            match row {
+                                Ok(file_path) => {
+                                    let _ = database_set.insert(file_path);
                                 },
                                 Err(err) => return Err(anyhow!(err)),
                             }
                         };
-                        return Ok(result)
+                        let difference = directory_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
+                        if difference.clone().count() > 0 {
+                            println!("pictures in this selection that are not in the database:");
+                            for x in difference.clone() {
+                                println!("{x}");
+                            }
+                            println!("insert image data for these {} pictures in the database ?", difference.clone().count());
+                            let mut response = String::new();
+                            let stdin = io::stdin();
+                            stdin.read_line(&mut response).expect("can't read from stdin");
+                            match response.chars().next() {
+                                Some(ch) if ch == 'y' || ch == 'Y' => {
+                                    match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
+                                        Ok(picture_entries) => Ok(picture_entries),
+                                        Err(err) => return Err(anyhow!(err)),
+                                    }
+                                },
+                                Some(_)| None => Ok(vec![]),
+                            }
+                        } else {
+                            Ok(vec![])
+                        }
                     },
-                    Err(err) => Err(anyhow!(err)),
-                }
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
+                    Err(err) => return Err(anyhow!(err)),
+                },
+                Err(err) => return Err(anyhow!(err)),
+            }
+        },
+        Err(err) => Err(anyhow!(err)),
     }
+}
+
+pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {
+    let tag_labels: String = select.into_iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(",");
+    match self.connection.prepare(&("SELECT DISTINCT(Picture.File_Path), File_Size, Colors, Modified_Time, Rank, Palette, Picture.Label, Selected, Deleted FROM Picture INNER JOIN Tag ON Tag.File_Path = Picture.File_Path WHERE Tag.Label IN (".to_owned() + &tag_labels + ");")) {
+        Ok(mut statement) => {
+            match statement.query([]) {
+                Ok(mut rows) => {
+                    let mut result: Vec<PictureEntry> = vec![];
+                    while let Some(row) = rows.next()? {
+                        match Self::sql_to_picture_entry(row) {
+                            Ok(entry) => {
+                                result.push(entry);
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    };
+                    return Ok(result)
+                },
+                Err(err) => Err(anyhow!(err)),
+            }
+        },
+        Err(err) => Err(anyhow!(err)),
+    }
+}
 
 pub fn load_all_tags(&self) -> Result<Vec<String>> {
     let mut result: Vec<String> = vec![];
@@ -283,93 +339,93 @@ pub fn load_all_tags(&self) -> Result<Vec<String>> {
         Ok(mut statement) => {
             match statement.query_map([], |row| {
                 Ok(row.get::<usize, String>(0).unwrap())
-                }) {
-                    Ok(rows) => {
-                        for row in rows {
-                            match row {
-                                Ok(label) => {
-                                        result.push(label);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        Ok(result)
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
-            },
-            Err(err) => return Err(anyhow!(err)),
-        }
+            }) {
+                Ok(rows) => {
+                    for row in rows {
+                        match row {
+                            Ok(label) => {
+                                result.push(label);
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    };
+                    Ok(result)
+                },
+                Err(err) => return Err(anyhow!(err)),
+            }
+        },
+        Err(err) => return Err(anyhow!(err)),
     }
+}
 
-    pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {
-        let mut dir_map: HashMap<String,usize> = HashMap::new();
-        let query = "SELECT File_Path from Picture;";
-        match self.connection.prepare(query) {
-            Ok(mut statement) => {
-                match statement.query_map([], |row| {
-                    Ok(row.get::<usize, String>(0).unwrap())
-                }) {
-                    Ok(rows) => {
-                        for row in rows {
-                            match row {
-                                Ok(file_path) => {
-                                    let directory =file_path_directory(&file_path);
-                                    dir_map.entry(directory).and_modify(|files| *files += 1).or_insert(1);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        let mut result:Vec<(String,usize)> = Vec::from_iter(dir_map.iter().map(|pair| (pair.0.clone(), pair.1.clone())));
-                        result.sort();
-                        Ok(result)
-                    },
-                    Err(err) => Err(anyhow!(err)),
-                }
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
+pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {
+    let mut dir_map: HashMap<String,usize> = HashMap::new();
+    let query = "SELECT File_Path from Picture;";
+    match self.connection.prepare(query) {
+        Ok(mut statement) => {
+            match statement.query_map([], |row| {
+                Ok(row.get::<usize, String>(0).unwrap())
+            }) {
+                Ok(rows) => {
+                    for row in rows {
+                        match row {
+                            Ok(file_path) => {
+                                let directory =file_path_directory(&file_path);
+                                dir_map.entry(directory).and_modify(|files| *files += 1).or_insert(1);
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    };
+                    let mut result:Vec<(String,usize)> = Vec::from_iter(dir_map.iter().map(|pair| (pair.0.clone(), pair.1.clone())));
+                    result.sort();
+                    Ok(result)
+                },
+                Err(err) => Err(anyhow!(err)),
+            }
+        },
+        Err(err) => Err(anyhow!(err)),
     }
-    pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {
-        let mut result: Vec<String> = vec![];
-        let query = "SELECT DISTINCT Label FROM Tag WHERE File_Path = ?1;";
-        match self.connection.prepare(query) {
-            Ok(mut statement) => {
-                match statement.query_map([file_path], |row| {
-                    Ok(row.get::<usize, String>(0).unwrap())
-                }) {
-                    Ok(rows) => {
-                        for row in rows {
-                            match row {
-                                Ok(label) => {
-                                        result.push(label);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        Ok(result)
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
-            },
-            Err(err) => return Err(anyhow!(err)),
-        }
+}
+pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {
+    let mut result: Vec<String> = vec![];
+    let query = "SELECT DISTINCT Label FROM Tag WHERE File_Path = ?1;";
+    match self.connection.prepare(query) {
+        Ok(mut statement) => {
+            match statement.query_map([file_path], |row| {
+                Ok(row.get::<usize, String>(0).unwrap())
+            }) {
+                Ok(rows) => {
+                    for row in rows {
+                        match row {
+                            Ok(label) => {
+                                result.push(label);
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    };
+                    Ok(result)
+                },
+                Err(err) => return Err(anyhow!(err)),
+            }
+        },
+        Err(err) => return Err(anyhow!(err)),
     }
+}
 
-    pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
-        match read_file_info(file_path) {
-            Ok((file_size, modified_time)) => {
-                match get_palette_from_picture(file_path) {
-                    Ok((palette, colors)) => {
-                        let image_data = ImageData{
-                            colors: colors,
-                            rank: Rank::NoStar,
-                            selected: false,
-                            palette: palette,
-                            label: String::from(""),
-                        };
-                        let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, vec![]);
-                        match self.connection.execute(" INSERT INTO Picture 
+pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
+    match read_file_info(file_path) {
+        Ok((file_size, modified_time)) => {
+            match get_palette_from_picture(file_path) {
+                Ok((palette, colors)) => {
+                    let image_data = ImageData{
+                        colors: colors,
+                        rank: Rank::NoStar,
+                        selected: false,
+                        palette: palette,
+                        label: String::from(""),
+                    };
+                    let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, vec![]);
+                    match self.connection.execute(" INSERT INTO Picture 
             (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted, Palette)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
             params![
@@ -382,60 +438,60 @@ pub fn load_all_tags(&self) -> Result<Vec<String>> {
             entry.selected as i64,
             entry.selected as i64,
             palette_to_blob(&entry.palette)]) {
-                            Ok(inserted) => {
-                                println!("{} row inserted", inserted);
-                                return Ok(entry)
-                            },
-                            Err(err) => return Err(anyhow!(err)),
-                        }
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
+                        Ok(inserted) => {
+                            println!("{} row inserted", inserted);
+                            return Ok(entry)
+                        },
+                        Err(err) => return Err(anyhow!(err)),
+                    }
+                },
+                Err(err) => return Err(anyhow!(err)),
+            }
+        },
+        Err(err) => Err(anyhow!(err)),
     }
+}
 
-    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {
-        match self.connection.prepare(" SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
-            Ok(mut statement) => match statement.query([file_path]) {
-                Ok(mut rows) => match rows.next() {
-                    Ok(Some(row)) => match Self::sql_to_picture_entry(row) {
-                        Ok(mut entry) => match self.entry_tags(&entry.file_path) {
-                            Ok(labels) => {
-                                entry.tags = labels;
-                                Ok(Some(entry))
-                            },
-                            Err(err) => Err(anyhow!(err)),
+pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {
+    match self.connection.prepare(" SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
+        Ok(mut statement) => match statement.query([file_path]) {
+            Ok(mut rows) => match rows.next() {
+                Ok(Some(row)) => match Self::sql_to_picture_entry(row) {
+                    Ok(mut entry) => match self.entry_tags(&entry.file_path) {
+                        Ok(labels) => {
+                            entry.tags = labels;
+                            Ok(Some(entry))
                         },
                         Err(err) => Err(anyhow!(err)),
                     },
-                    Ok(None) => {
-                        if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
-                            println!("couldn't find {} in database; insert image data from this file ?", file_path);
-                            let mut response = String::new();
-                            let stdin = io::stdin();
-                            stdin.read_line(&mut response).expect("can't read from stdin");
-                            match response.chars().next() {
-                                Some(ch) if ch == 'y' || ch == 'Y' => {
-                                    match self.insert_image_data(file_path) {
-                                        Ok(picture_entry) => Ok(Some(picture_entry)),
-                                        Err(err) => return Err(anyhow!(err)),
-                                    }
-                                },
-                                Some(_)|
-                                    None => Ok(None),
-                            }
-                        } else {
-                            Ok(None)
-                        }
-                    },
                     Err(err) => Err(anyhow!(err)),
+                },
+                Ok(None) => {
+                    if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
+                        println!("couldn't find {} in database; insert image data from this file ?", file_path);
+                        let mut response = String::new();
+                        let stdin = io::stdin();
+                        stdin.read_line(&mut response).expect("can't read from stdin");
+                        match response.chars().next() {
+                            Some(ch) if ch == 'y' || ch == 'Y' => {
+                                match self.insert_image_data(file_path) {
+                                    Ok(picture_entry) => Ok(Some(picture_entry)),
+                                    Err(err) => return Err(anyhow!(err)),
+                                }
+                            },
+                            Some(_)|
+                                None => Ok(None),
+                        }
+                    } else {
+                        Ok(None)
+                    }
                 },
                 Err(err) => Err(anyhow!(err)),
             },
             Err(err) => Err(anyhow!(err)),
-        }
+        },
+        Err(err) => Err(anyhow!(err)),
     }
+}
 }
 
