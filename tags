@@ -39,9 +39,9 @@ TMP_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const TMP_ENV_
 VALID_EXTENSIONS	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];$/;"	c
 WIDTH_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";$/;"	c
 add_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_input_char(&mut self, ch: char) {$/;"	f
-add_picture_entries_from_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {$/;"	f
+add_picture_entries_from_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {$/;"	f
 add_picture_entries_from_file_list	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {$/;"	f
-add_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {$/;"	f
+add_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn add_picture_entries_from_source(&mut self) -> Result<()> {$/;"	f
 add_picture_entry_from_file	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {$/;"	f
 add_pictures_entries_for_sample	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_pictures_entries_for_sample(&mut self) -> Result<()> {$/;"	f
 add_tag	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_tag(&mut self, tag: String) -> Result<()> {$/;"	f
@@ -191,7 +191,7 @@ length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&s
 load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_all_tags(&self) -> Result<Vec<String>> {$/;"	f
 load_directories	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {$/;"	f
 load_picture_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db(&mut self) -> Result<()> {$/;"	f
-load_picture_entries_from_db_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db_with_tag_selection(&mut self, select_opt: Option<Vec<String>>) -> Result<()> {$/;"	f
+load_picture_entries_from_db_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db_with_tag_selection(&mut self) -> Result<()> {$/;"	f
 load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load_shortcuts() -> Result<Shortcuts> {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
 make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, tags: Vec<String>) -> PictureEntry {$/;"	f

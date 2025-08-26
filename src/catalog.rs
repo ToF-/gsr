@@ -292,8 +292,7 @@ impl Catalog {
                     Err(err) => return Err(anyhow!(err))
                 };
                 if args.check {
-                    Ok(())
-                    // self.database.update_database(self, args.directory.clone())
+                    self.insert_entries_from_dir_to_db(&dir)
                 } else {
                        Ok(())
                 }
@@ -302,6 +301,16 @@ impl Catalog {
             }
         } else {
             Ok(())
+        }
+    }
+
+    fn insert_entries_from_dir_to_db(&mut self, directory: &String) -> Result<()> {
+        match self.database.insert_difference_from_dir(directory) {
+            Ok(mut picture_entries) => {
+                self.picture_entries.append(&mut picture_entries);
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
         }
     }
 

@@ -13,10 +13,8 @@ use crate::picture_entry::PictureEntry;
 use crate::palette::{palette_to_blob,blob_to_palette};
 use rusqlite::{params, Connection};
 use std::time::UNIX_EPOCH;
-use std::path::Path;
 use anyhow::{anyhow, Result};
 use std::env;
-use crate::Catalog;
 use crate::rank::Rank;
 
 const DATABASE_CONNECTION: &str = "GALLSHDB";
@@ -52,73 +50,6 @@ impl Database {
             Err(err) => Err(anyhow!(err)),
         }
     }
-    // database population policy: if the list of pictures currently in the catalog differs from the
-    // list of pictures in the database, one should be asked if any update is in order
-    // on confirmation, adding those pictures that are in the catalog, into the database
-    // on confirmation, removing those pictures that are in the database and not in the catalog
-    // these actions should also be available on command line argument
-    //
-
-
-
-    pub fn update_database(&self, catalog: &mut Catalog, directory: Option<String>) -> Result<()> {
-        match directory {
-            Some(dir) => {
-                println!("updating database vis à vis directory {}", dir);
-                let mut database_set: HashSet<String> = HashSet::new();
-                let query_picture = "SELECT file_path from Picture";
-                match self.connection.prepare(query_picture) {
-                    Ok(mut statement) => {
-                        match statement.query_map([], |row| {
-                            Ok(row.get::<usize, String>(0).unwrap())
-                        }) {
-                            Ok(rows) => {
-                                for row in rows {
-                                    match row {
-                                        Ok(file_path) => {
-                                            let _ = database_set.insert(file_path);
-                                        },
-                                        Err(err) => return Err(anyhow!(err)),
-                                    }
-                                };
-                            },
-                            Err(err) => return Err(anyhow!(err)),
-                        }
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                };
-                match get_picture_file_paths(&dir) {
-                    Ok(entries) => {
-                        let directory_set: HashSet<String> = HashSet::from_iter(entries.iter().map(|e| e.clone()));
-                        let directory_difference = directory_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
-                        if directory_difference.clone().count() > 0 {
-                            println!("pictures in this selection that are not in the database:");
-                            for x in directory_difference.clone() {
-                                println!("{x}");
-                            }
-                            println!("insert image data for these {} pictures in the database ?", directory_difference.clone().count());
-                            let mut response = String::new();
-                            let stdin = io::stdin();
-                            stdin.read_line(&mut response).expect("can't read from stdin");
-                            match response.chars().next() {
-                                Some(ch) if ch == 'y' || ch == 'Y' => {
-                                    match self.populate(catalog, Some(HashSet::from_iter(directory_difference.into_iter()))) {
-                                        Ok(()) => Ok(()),
-                                        Err(err) => return Err(anyhow!(err)),
-                                    }
-                                },
-                                Some(_)| None => Ok(()),
-                            }
-                        } else {
-                            Ok(())
-                        }
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
-            }
-            None => Ok(())
-        }
-    }
 
     pub fn check_create_schema(&self) -> Result<()> {
         println!("checking database {} picture table", self.connection_string);
@@ -129,28 +60,28 @@ impl Database {
         }
     }
 
-    fn populate(&self, mut catalog: &mut Catalog, difference_opt: Option<HashSet<&String>>) -> Result<()> {
+    fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<Vec<PictureEntry>> {
         let mut count: usize = 0;
         let total = match difference_opt {
             Some(ref difference) => difference.len(),
-            None => catalog.length(),
+            None => 0,
         };
         if total > 0 {
+            let mut picture_entries: Vec<PictureEntry> = vec![];
             for file_path in difference_opt.unwrap() {
                 let entry = PictureEntry::from_file(file_path);
                     match self.insert_image_data(file_path) {
-                        Ok(picture_entry) => match catalog.add_picture_entry_from_file(file_path) {
-                            Ok(()) => {},
-                            Err(err) => return Err(anyhow!(err)),
+                        Ok(entry) => {
+                            picture_entries.push(entry)
                         },
                         Err(err) => return Err(anyhow!(err)),
                     }; 
                     count += 1;
                     println!("{}/{}", count, total);
                 };
-                Ok(())
+                Ok(picture_entries)
             } else {
-            Ok(())
+                Ok(vec![])
         }
     }
 
@@ -266,6 +197,55 @@ impl Database {
                         return Ok(result)
                     },
                     Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {
+        match get_picture_file_paths(directory) {
+            Ok(file_paths) => {
+                let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
+                let mut database_set: HashSet<String> = HashSet::new();
+                let query = "SELECT file_path from Picture;";
+                match self.connection.prepare(query) {
+                    Ok(mut statement) => match statement.query_map([], |row| Ok(row.get(0).unwrap())) {
+                        Ok(rows) => {
+                            for row in rows {
+                                match row {
+                                    Ok(file_path) => {
+                                        let _ = database_set.insert(file_path);
+                                    },
+                                    Err(err) => return Err(anyhow!(err)),
+                                }
+                            };
+                            let difference = directory_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
+                            if difference.clone().count() > 0 {
+                                println!("pictures in this selection that are not in the database:");
+                                for x in difference.clone() {
+                                    println!("{x}");
+                                }
+                                println!("insert image data for these {} pictures in the database ?", difference.clone().count());
+                                let mut response = String::new();
+                                let stdin = io::stdin();
+                                stdin.read_line(&mut response).expect("can't read from stdin");
+                                match response.chars().next() {
+                                    Some(ch) if ch == 'y' || ch == 'Y' => {
+                                        match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
+                                            Ok(picture_entries) => Ok(picture_entries),
+                                            Err(err) => return Err(anyhow!(err)),
+                                        }
+                                    },
+                                    Some(_)| None => Ok(vec![]),
+                                }
+                            } else {
+                                Ok(vec![])
+                            }
+                        },
+                        Err(err) => return Err(anyhow!(err)),
+                    },
+                    Err(err) => return Err(anyhow!(err)),
                 }
             },
             Err(err) => Err(anyhow!(err)),
