@@ -29,28 +29,29 @@ pub struct Database {
 
 impl Database {
 
-    pub fn initialize() -> Result<Self> {
-        if let Ok(connection_string) = &env::var(DATABASE_CONNECTION) {
-            let path = Path::new(connection_string);
-            if path.exists() {
-                match Connection::open(connection_string) {
-                    Ok(connection) => {
-                        println!("opening {}", connection_string);
-                        return Ok(Database {
-                            connection_string: connection_string.to_string(),
-                            connection: connection,
-                        })
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
-            } else {
-                Err(anyhow!("the database file {} can't be opened", connection_string))
-            }
-        } else {
-            Err(anyhow!("the database connection string can't be read. Did you define GALLSHDB?"))
+    pub fn from_path(connection_string: String) -> Result<Self> {
+        match Connection::open(connection_string.clone()) {
+            Ok(connection) => Ok(Database { connection_string: connection_string.to_string(), connection: connection, }),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 
+    pub fn initialize() -> Result<Self> {
+        match env::var(DATABASE_CONNECTION) {
+            Ok(connection_string) => Self::from_path(connection_string.to_string()),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    pub fn check_schema(&self) -> Result<()> {
+        match self.connection.prepare("SELECT * FROM Picture WHERE rowid = 1;") {
+            Ok(_) => match self.connection.prepare("SELECT * FROM Tag WHERE rowid = 1;") {
+                    Ok(_) => Ok(()),
+                    Err(err) => Err(anyhow!(err)),
+                },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
     // database population policy: if the list of pictures currently in the catalog differs from the
     // list of pictures in the database, one should be asked if any update is in order
     // on confirmation, adding those pictures that are in the catalog, into the database

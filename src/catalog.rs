@@ -96,17 +96,23 @@ impl Catalog {
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
+        match catalog.database.check_schema() {
+            Ok(()) => {},
+            Err(err) => {
+                return Err(anyhow!(err))
+            },
+        };
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
             catalog.set_page_size(args.sample.unwrap());
             catalog.sample_on = true;
-            catalog.add_pictures_entries_for_sample(args)
+            catalog.add_pictures_entries_for_sample()
         } else {
-            catalog.set_page_size(args.grid.unwrap());
+            catalog.set_page_size(catalog.args.clone().unwrap().grid.unwrap());
             if args.query.is_some() {
-                catalog.add_picture_entries_from_db(args.query.clone().unwrap())
+                catalog.load_picture_entries_from_db()
             } else {
-                catalog.add_picture_entries_from_source(args)
+                catalog.add_picture_entries_from_source()
             }
         };
         if let Err(err) = add_result {
@@ -115,12 +121,6 @@ impl Catalog {
         catalog.count_selected();
         if catalog.length() == 0 {
             return Err(anyhow!("no picture to show"))
-        };
-        match catalog.database.check_create_schema() {
-            Ok(()) => {},
-            Err(err) => {
-                return Err(anyhow!(err))
-            },
         };
         match catalog.initialize_tags() {
             Ok(()) => { },
@@ -276,7 +276,8 @@ impl Catalog {
         };
     }
 
-    fn add_picture_entries_from_source(&mut self, args: &Args) -> Result<()> {
+    fn add_picture_entries_from_source(&mut self) -> Result<()> {
+        let args = &self.args.clone().unwrap();
         if let Some(file) = &args.file {
             self.db_centric = false;
             self.add_picture_entry_from_file(&file)
@@ -284,26 +285,28 @@ impl Catalog {
             self.db_centric = false;
             self.add_picture_entries_from_file_list(&list)
         } else if let Some(dir) = &args.directory {
-            self.db_centric = standard_directory() != "" && dir == &standard_directory();
+            self.db_centric = standard_directory() != "" && *dir == standard_directory();
             if self.db_centric {
-                match self.add_picture_entries_from_db_with_tag_selection(args.select.clone()) {
+                match self.load_picture_entries_from_db_with_tag_selection() {
                     Ok(()) => {}
                     Err(err) => return Err(anyhow!(err))
                 };
                 if args.check {
-                    self.database.update_database(self, args.directory.clone())
+                    Ok(())
+                    // self.database.update_database(self, args.directory.clone())
                 } else {
                        Ok(())
                 }
             } else {
-                self.add_picture_entries_from_dir(&dir, args.pattern.clone(), args.select.clone(), args.include.clone())
+                self.add_picture_entries_from_dir(&dir)
             }
         } else {
             Ok(())
         }
     }
 
-    pub fn add_pictures_entries_for_sample(&mut self, args: &Args) -> Result<()> {
+    pub fn add_pictures_entries_for_sample(&mut self) -> Result<()> {
+        let args = self.args.clone().expect("catalog args not properly set");
         let mut picture_entries: Vec<PictureEntry> = Vec::new();
         if let Some(directory) = &args.directory {
             let cells_per_row = args.sample.unwrap();
@@ -370,13 +373,12 @@ impl Catalog {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn add_picture_entries(&mut self, picture_entries: &mut Vec<PictureEntry>) {
-        self.picture_entries.append(picture_entries)
-    }
-
-    pub fn add_picture_entries_from_db(&mut self, query: String) -> Result<()> {
-        self.picture_entries = match self.database.select_pictures(query) {
+    pub fn load_picture_entries_from_db(&mut self) -> Result<()> {
+        let restriction: String = match self.args.clone().unwrap().query.clone() {
+            Some(s) => s,
+            None => String::from("true"),
+        };
+        self.picture_entries = match self.database.select_pictures(restriction) {
             Ok(mut entries) => {
                 for entry in &mut entries {
                     match self.database.entry_tags(&entry.file_path) {
@@ -392,11 +394,13 @@ impl Catalog {
         };
         Ok(())
     }
-    pub fn add_picture_entries_from_db_with_tag_selection(&mut self, select_opt: Option<Vec<String>>) -> Result<()> {
+
+    pub fn load_picture_entries_from_db_with_tag_selection(&mut self) -> Result<()> {
         println!("loading picture data from database");
-        match select_opt {
+        let args = &self.args.clone().unwrap();
+        match &args.select {
             Some(labels) => {
-                self.picture_entries = match self.database.select_pictures_with_tag_selection(labels) {
+                self.picture_entries = match self.database.select_pictures_with_tag_selection(labels.to_vec()) {
                     Ok(mut entries) => {
                         for entry in &mut entries {
                             match self.database.entry_tags(&entry.file_path) {
@@ -412,17 +416,18 @@ impl Catalog {
                 };
                 Ok(())
                 },
-            None => self.add_picture_entries_from_db("true".to_string()),
+            None => self.load_picture_entries_from_db(),
         }
     }
 
-    pub fn add_picture_entries_from_dir(&mut self, directory: &str, pattern_opt: Option<String>, select_opt: Option<Vec<String>>, include_opt: Option<Vec<String>>) -> Result<()> {
+    pub fn add_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {
         println!("loading picture data from directory {}", directory);
+        let args = &self.args.clone().unwrap();
         match get_picture_file_paths(directory) {
             Ok(file_paths) => {
                 let mut error: bool = false;
                 for file_path in file_paths {
-                    let matches_pattern = match pattern_opt {
+                    let matches_pattern = match args.pattern {
                         None => true,
                         Some(ref pattern) => {
                             match Regex::new(&pattern) {
@@ -434,11 +439,11 @@ impl Catalog {
                             }
                         },
                     };
-                    let tag_select_set:HashSet<String> = match select_opt {
+                    let tag_select_set:HashSet<String> = match args.select {
                         Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
                         None => HashSet::new(),
                     };
-                    let tag_include_set:HashSet<String> = match include_opt {
+                    let tag_include_set:HashSet<String> = match args.include {
                         Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
                         None => HashSet::new(),
                     };
