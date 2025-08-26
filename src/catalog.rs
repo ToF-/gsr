@@ -1215,6 +1215,10 @@ impl Catalog {
                                 Some(Action::Rank { rank: r }) => entry.set_rank(*r),
                                 Some(Action::Select) => {},
                                 Some(Action::Delete) => {},
+                            };
+                            match Self::update_image_data(&self.database, &entry.clone()) {
+                                Ok(()) => {},
+                                Err(err) => return Err(anyhow!(err)),
                             }
                         };
                         self.start_index = None;
