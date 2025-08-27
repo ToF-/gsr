@@ -37,7 +37,13 @@ impl Database {
 
     pub fn initialize() -> Result<Self> {
         match env::var(DATABASE_CONNECTION) {
-            Ok(connection_string) => Self::from_path(connection_string.to_string()),
+            Ok(connection_string) => match Self::from_path(connection_string.to_string()) {
+                Ok(database) => match database.check_schema() {
+                    Ok(()) => Ok(database),
+                    Err(err) => Err(anyhow!(err)),
+                }
+                Err(err) => Err(anyhow!(err)),
+            },
             Err(err) => Err(anyhow!(err)),
         }
     }

@@ -96,12 +96,6 @@ impl Catalog {
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         let mut catalog = Self::new();
-        match catalog.database.check_schema() {
-            Ok(()) => {},
-            Err(err) => {
-                return Err(anyhow!(err))
-            },
-        };
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
             catalog.set_page_size(args.sample.unwrap());

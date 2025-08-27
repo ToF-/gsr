@@ -104,14 +104,14 @@ count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn c
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
 current_candidates	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_candidates(&self) -> String {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
-decimate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn decimate(&self, file_paths_set: HashSet<String>) -> Result<()> {$/;"	f
+decimate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn decimate(&self, file_paths_set: HashSet<String>) -> Result<HashSet<String>> {$/;"	f
 deduplicate_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {$/;"	f
 default_extract_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn default_extract_list_file() -> Result<String> {$/;"	f
 default_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn default_shortcuts() -> Shortcuts {$/;"	f
 del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&mut self) {$/;"	f
 delete_broken_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_broken_entries_from_db(&mut self) -> Result<()> {$/;"	f
-delete_difference_from_file_system	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_difference_from_file_system(&mut self) -> Result<()> {$/;"	f
+delete_difference_from_file_system	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_difference_from_file_system(&mut self) -> Result<HashSet<String>> {$/;"	f
 delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_files(&self) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) {$/;"	f
@@ -135,7 +135,7 @@ end_set_select	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn e
 end_unlabel	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn end_unlabel(&mut self) -> Result<()> {$/;"	f
 entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn entries(&self) -> &Vec<PictureEntry> {$/;"	f
 entry_at_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn entry_at_index(&self, index: usize) -> Option<&PictureEntry> {$/;"	f
-entry_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {$/;"	f
+entry_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {$/;"	f
 equal_content	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn equal_content(&self, other:&PictureEntry) -> Result<bool> {$/;"	f
 expand_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn expand_on(&self) -> bool {$/;"	f
 export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {$/;"	f
@@ -174,9 +174,9 @@ initialize	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn init
 initialize_tags	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn initialize_tags(&mut self) -> Result<()> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
-insert_difference_from_dir	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {$/;"	f
+insert_difference_from_dir	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {$/;"	f
 insert_entries_from_dir_to_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn insert_entries_from_dir_to_db(&mut self, directory: &String) -> Result<()> {$/;"	f
-insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
+insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {$/;"	f
 interactive_check_label_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {$/;"	f
 interactive_check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_path(dir: &str) -> Result<PathBuf> {$/;"	f
@@ -194,7 +194,7 @@ last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn last(&self)
 left_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn left_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
 load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_all_tags(&self) -> Result<Vec<String>> {$/;"	f
-load_directories	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {$/;"	f
+load_directories	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {$/;"	f
 load_picture_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db(&mut self) -> Result<()> {$/;"	f
 load_picture_entries_from_db_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db_with_tag_selection(&mut self) -> Result<()> {$/;"	f
 load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load_shortcuts() -> Result<Shortcuts> {$/;"	f
@@ -247,14 +247,14 @@ read_picture_file_info_read_file_size	/Users/christophethibaut/Coding/gsr/src/pi
 refresh	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn refresh(&mut self) {$/;"	f
 refresh_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn refresh_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 repeat_last_action	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn repeat_last_action(&mut self) -> Result<()> {$/;"	f
-retrieve_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {$/;"	f
+retrieve_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 sample_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sample_on(&self) -> bool {$/;"	f
 select_and_unselect_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
 select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {$/;"	f
-select_pictures_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {$/;"	f
+select_pictures_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {$/;"	f
 set_all_pictures_for_multiple_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_label(&mut self) -> Result<()> {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: String) {$/;"	f
