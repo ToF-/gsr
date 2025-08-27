@@ -174,8 +174,8 @@ initialize	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn init
 initialize_tags	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn initialize_tags(&mut self) -> Result<()> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
-insert_difference_from_dir	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {$/;"	f
-insert_entries_from_dir_to_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn insert_entries_from_dir_to_db(&mut self, directory: &String) -> Result<()> {$/;"	f
+insert_difference_from_dir	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_difference_from_dir(&mut self, directory: &String, in_std_dir:bool) -> Result<Vec<PictureEntry>> {$/;"	f
+insert_entries_from_dir_to_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn insert_entries_from_dir_to_db(&mut self, directory: &String, in_std_dir: bool) -> Result<()> {$/;"	f
 insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {$/;"	f
 interactive_check_label_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn interactive_check_label_path(target_parent: &str, label: &str) -> Result<PathBuf> {$/;"	f

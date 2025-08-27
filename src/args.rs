@@ -13,6 +13,10 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 #[command(infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
 pub struct Args {
+    /// add picture data from the pictures in TARGET_DIR to the database
+    #[arg(long, value_name = "TARGET_DIR")]
+    pub add: Option<String>,
+
     /// copy representative pictures of each subfolders in CATALOG_DIR
     #[arg(long, value_name = "CATALOG_DIR")]
     pub catalog: Option<String>,
@@ -136,6 +140,13 @@ impl Args {
 
     pub fn checked_args(&mut self) -> Result<Args> {
         let result: Args = Args {
+            add: match &self.add {
+                None => None,
+                Some(dir) => match check_path(&dir) {
+                    Ok(_) => Some(dir.to_string()),
+                    Err(err) => return Err(err),
+                }
+            },
             catalog: match &self.catalog {
                 None => None,
                 Some(dir) => match check_path(&dir) {

@@ -265,7 +265,7 @@ impl Database {
         }
     }
 
-pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<PictureEntry>> {
+pub fn insert_difference_from_dir(&mut self, directory: &String, in_std_dir:bool) -> Result<Vec<PictureEntry>> {
     match get_picture_file_paths(directory) {
         Ok(file_paths) => {
             let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
@@ -282,7 +282,7 @@ pub fn insert_difference_from_dir(&mut self, directory: &String) -> Result<Vec<P
                                 Err(err) => return Err(anyhow!(err)),
                             }
                         };
-                        let difference = directory_set.difference(&database_set).filter(|s| is_prefix_path(&standard_directory(), &s));
+                        let difference = directory_set.difference(&database_set).filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), &s));
                         if difference.clone().count() > 0 {
                             println!("pictures in this selection that are not in the database:");
                             for x in difference.clone() {

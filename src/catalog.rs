@@ -285,14 +285,15 @@ impl Catalog {
                     Ok(()) => {}
                     Err(err) => return Err(anyhow!(err))
                 };
-                if args.check {
-                    self.insert_entries_from_dir_to_db(&dir)
-                } else {
-                    if args.purge {
+                if args.add.is_some() {
+                    println!("adding from {}", &args.add.clone().unwrap());
+                    self.insert_entries_from_dir_to_db(&args.add.clone().unwrap(), false)
+                } else if args.check {
+                    self.insert_entries_from_dir_to_db(&dir, true)
+                } else if args.purge {
                         self.delete_broken_entries_from_db()
                     } else {
-                       Ok(())
-                    }
+                        Ok(())
                 }
             } else {
                 self.add_picture_entries_from_dir(&dir)
@@ -322,9 +323,10 @@ impl Catalog {
         }
     }
 
-    fn insert_entries_from_dir_to_db(&mut self, directory: &String) -> Result<()> {
-        match self.database.insert_difference_from_dir(directory) {
+    fn insert_entries_from_dir_to_db(&mut self, directory: &String, in_std_dir: bool) -> Result<()> {
+        match self.database.insert_difference_from_dir(directory, in_std_dir) {
             Ok(mut picture_entries) => {
+                println!("appending {:?} to catalog", picture_entries.clone());
                 self.picture_entries.append(&mut picture_entries);
                 Ok(())
             },
