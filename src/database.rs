@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path,PathBuf};
 use crate::path::get_picture_file_paths;
 use rusqlite::Row;
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
@@ -265,54 +265,59 @@ impl Database {
         }
     }
 
-pub fn insert_difference_from_dir(&mut self, directory: &String, in_std_dir:bool) -> Result<Vec<PictureEntry>> {
-    match get_picture_file_paths(directory) {
-        Ok(file_paths) => {
-            let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
-            let mut database_set: HashSet<String> = HashSet::new();
-            let query = "SELECT file_path from Picture;";
-            match self.connection.prepare(query) {
-                Ok(mut statement) => match statement.query_map([], |row| Ok(row.get(0).unwrap())) {
-                    Ok(rows) => {
-                        for row in rows {
-                            match row {
-                                Ok(file_path) => {
-                                    let _ = database_set.insert(file_path);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        let difference = directory_set.difference(&database_set).filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), &s));
-                        if difference.clone().count() > 0 {
-                            println!("pictures in this selection that are not in the database:");
-                            for x in difference.clone() {
-                                println!("{x}");
-                            }
-                            println!("insert image data for these {} pictures in the database ?", difference.clone().count());
-                            let mut response = String::new();
-                            let stdin = io::stdin();
-                            stdin.read_line(&mut response).expect("can't read from stdin");
-                            match response.chars().next() {
-                                Some(ch) if ch == 'y' || ch == 'Y' => {
-                                    match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
-                                        Ok(picture_entries) => Ok(picture_entries),
+    pub fn insert_difference_from_dir(&mut self, directory: &String, in_std_dir:bool) -> Result<Vec<PictureEntry>> {
+        let path = Path::new(directory);
+        if path.has_root() {
+            match get_picture_file_paths(directory) {
+                Ok(file_paths) => {
+                    let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
+                    let mut database_set: HashSet<String> = HashSet::new();
+                    let query = "SELECT file_path from Picture;";
+                    match self.connection.prepare(query) {
+                        Ok(mut statement) => match statement.query_map([], |row| Ok(row.get(0).unwrap())) {
+                            Ok(rows) => {
+                                for row in rows {
+                                    match row {
+                                        Ok(file_path) => {
+                                            let _ = database_set.insert(file_path);
+                                        },
                                         Err(err) => return Err(anyhow!(err)),
                                     }
-                                },
-                                Some(_)| None => Ok(vec![]),
-                            }
-                        } else {
-                            Ok(vec![])
-                        }
-                    },
-                    Err(err) => return Err(anyhow!(err)),
+                                };
+                                let difference = directory_set.difference(&database_set).filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), &s));
+                                if difference.clone().count() > 0 {
+                                    println!("pictures in this selection that are not in the database:");
+                                    for x in difference.clone() {
+                                        println!("{x}");
+                                    }
+                                    println!("insert image data for these {} pictures in the database ?", difference.clone().count());
+                                    let mut response = String::new();
+                                    let stdin = io::stdin();
+                                    stdin.read_line(&mut response).expect("can't read from stdin");
+                                    match response.chars().next() {
+                                        Some(ch) if ch == 'y' || ch == 'Y' => {
+                                            match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
+                                                Ok(picture_entries) => Ok(picture_entries),
+                                                Err(err) => return Err(anyhow!(err)),
+                                            }
+                                        },
+                                        Some(_)| None => Ok(vec![]),
+                                    }
+                                } else {
+                                    Ok(vec![])
+                                }
+                            },
+                            Err(err) => return Err(anyhow!(err)),
+                        },
+                        Err(err) => return Err(anyhow!(err)),
+                    }
                 },
-                Err(err) => return Err(anyhow!(err)),
+                Err(err) => Err(anyhow!(err)),
             }
-        },
-        Err(err) => Err(anyhow!(err)),
+        } else {
+            Err(anyhow!(format!("the path {} is relative and cannot be used as a picture file path", path.display())))
+        }
     }
-}
 
 pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {
     let tag_labels: String = select.into_iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(",");
