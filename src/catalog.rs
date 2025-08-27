@@ -259,24 +259,30 @@ impl Catalog {
         }
     }
 
-    pub fn file_operations(&self) -> Result<()> {
-        self.delete_files();
+    pub fn file_operations(&self, also_fs:bool) -> Result<()> {
+        self.delete_files(also_fs);
         let args = self.args.as_ref().unwrap();
         if let Some(all_move_target_dir) = &args.all_move {
-            self.move_all_labelled_files(&all_move_target_dir)
+            if also_fs {
+                self.move_all_labelled_files(&all_move_target_dir)
+            } else {
+                Ok(())
+            }
         } else {
             Ok(())
         }
     }
 
-    fn delete_files(&self) {
+    fn delete_files(&self, also_fs:bool) {
         let selection: Vec<&PictureEntry> = self.picture_entries.iter().filter(|e| e.deleted).collect();
         for entry in selection {
             match self.database.delete_picture(entry.file_path.clone()) {
                 Ok(()) => {},
                 Err(err) => eprintln!("{}", err),
             };
-            entry.delete_files();
+            if also_fs {
+                entry.delete_files()
+            };
         };
     }
 
@@ -336,7 +342,6 @@ impl Catalog {
     fn insert_entries_from_dir_to_db(&mut self, directory: &String, in_std_dir: bool) -> Result<()> {
         match self.database.insert_difference_from_dir(directory, in_std_dir) {
             Ok(mut picture_entries) => {
-                println!("appending {:?} to catalog", picture_entries.clone());
                 self.picture_entries.append(&mut picture_entries);
                 Ok(())
             },

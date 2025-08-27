@@ -362,9 +362,12 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::NextPage => catalog.move_next_page(),
                         Command::TogglePageLimit => catalog.toggle_page_limit(),
                         Command::PrevPage => catalog.move_prev_page(),
-                        Command::Quit => gui.application_window.close(),
+                        Command::Quit => {
+                            result = catalog.file_operations(false);
+                            gui.application_window.close()
+                        },
                         Command::CopyAndQuit => {
-                            result = catalog.file_operations();
+                            result = catalog.file_operations(true);
                             gui.application_window.close()
                         },
                         Command::Repeat => result = catalog.end_repeat_last_action(),
