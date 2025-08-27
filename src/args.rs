@@ -25,6 +25,9 @@ pub struct Args {
     #[arg(long, default_value_t = false)]
     pub check: bool,
 
+    /// show only cover pictures of each directory
+    #[arg(long, default_value_t = false)]
+    pub covers: bool,
     /// create the schema for the database
     #[arg(long, default_value_t = false)]
     pub create_schema: bool,
@@ -160,6 +163,7 @@ impl Args {
             },
             check: self.check,
 
+            covers: self.covers,
             create_schema: self.create_schema,
 
             all_move: match &self.all_move {

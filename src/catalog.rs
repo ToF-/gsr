@@ -1,3 +1,4 @@
+use crate::path::file_name;
 use crate::actions::Action;
 use std::collections::HashSet;
 use std::cmp::Ordering::{Less, Greater, Equal};
@@ -294,6 +295,9 @@ impl Catalog {
         } else if let Some(list) = &args.reading {
             self.db_centric = false;
             self.add_picture_entries_from_file_list(&list)
+        } else if args.covers {
+            self.db_centric = false;
+            self.add_picture_entries_from_covers()
         } else if let Some(dir) = &args.directory {
             self.db_centric = standard_directory() != "" && *dir == standard_directory();
             if self.db_centric {
@@ -554,6 +558,16 @@ impl Catalog {
         }
     }
 
+    pub fn add_picture_entries_from_covers(&mut self) -> Result<()> {
+        match self.database.select_cover_pictures() {
+            Ok(picture_entries) => {
+                self.picture_entries = picture_entries;
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
     pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
         match check_file(file_path) {
             Ok(_) => match self.database.retrieve_or_create_image_data(file_path) {
@@ -807,6 +821,22 @@ impl Catalog {
         println!("{:?}", self.current_entry().expect("can't access current entry"));
     }
     // update
+
+    pub fn cover(&mut self) -> Result<()> {
+        let entry = self.picture_entries[self.index].clone();
+        let dir_path = file_path_directory(&entry.file_path);
+        let file_name = file_name(&entry.file_path);
+        let rank = entry.rank;
+        println!("cover for {} with image {} and rank {}", dir_path, file_name, rank );
+        match self.database.delete_cover(dir_path.clone(), file_name.clone()) {
+            Ok(()) => match self.database.insert_cover(dir_path, file_name, rank) {
+                Ok(()) => Ok(()),
+                Err(err) => Err(anyhow!(err)),
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
     fn update_image_data(database: &Database, entry: &PictureEntry) -> Result<()> {
         database.update_image_data(entry)
     }

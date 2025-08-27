@@ -12,7 +12,13 @@ CREATE TABLE IF NOT EXISTS Picture (
 CREATE TABLE IF NOT EXISTS Tag (
     File_Path TEXT NOT NULL,
     Label TEXT NOT NULL,
-    PRIMARY KEY ( File_Path, Label));
+    PRIMARY KEY (File_Path, Label));
+
+CREATE TABLE IF NOT EXISTS Cover (
+    Dir_Path TEXT NOT NULL,
+    File_Name TEXT NOT NULL,
+    Rank INTEGER,
+    PRIMARY KEY (Dir_Path, File_Name));
 
 
 

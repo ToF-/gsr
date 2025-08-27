@@ -140,6 +140,28 @@ impl Database {
         }
     }
 
+    pub fn delete_cover(&self, dir_path: String, file_name: String) -> Result<()> {
+        match self.connection.execute("DELETE FROM Cover WHERE Dir_path = ?1 AND File_Name = ?2;",
+            params![dir_path, file_name]) {
+            Ok(deleted) => {
+                println!("{} row deleted", deleted);
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    pub fn insert_cover(&self, dir_path: String, file_name: String, rank: Rank) -> Result<()> {
+        match self.connection.execute("INSERT INTO Cover VALUES (?1, ?2, ?3);", 
+            params![dir_path, file_name, rank as i64]) {
+            Ok(inserted) => {
+                println!("{} row inserted", inserted);
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
     pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {
         match self.connection.execute("INSERT INTO Tag VALUES (?1, ?2);", params![&*entry.file_path, label]) {
             Ok(inserted) => {
@@ -191,6 +213,29 @@ impl Database {
             },
             Err(err) => Err(anyhow!(err)),
             }
+    }
+
+    pub fn select_cover_pictures(&mut self) -> Result<Vec<PictureEntry>> {
+        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, P.Rank, Palette, Label, Selected, Deleted FROM Picture P JOIN Cover C ON P.File_Path = CONCAT(C.Dir_Path, '/', C.File_Name);") {
+            Ok(mut statement) => {
+                match statement.query([]) {
+                    Ok(mut rows) => {
+                        let mut result: Vec<PictureEntry> = vec![];
+                        while let Some(row) = rows.next()? {
+                            match Self::sql_to_picture_entry(row) {
+                                Ok(entry) => {
+                                    result.push(entry);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        return Ok(result)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
     }
 
     fn sql_to_picture_entry(row: &Row) -> Result<PictureEntry> {

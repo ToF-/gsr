@@ -167,7 +167,12 @@ pub fn is_prefix_path(prefix: &str, path: &str) -> bool {
 
 pub fn file_path_directory(source: &str) -> String {
     let path = Path::new(source);
-    path.parent().expect("can't get file_path parent").display().to_string()
+    path.parent().expect(&format!("can't get file_path parent of {}", source)).display().to_string()
+}
+
+pub fn file_name(source: &str) -> String {
+    let path = Path::new(source);
+    path.file_name().expect("can't get file_name").to_str().expect("can't convert to str").to_string()
 }
 
 pub fn image_data_file_path(original_file_path: &str) -> String {
