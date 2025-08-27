@@ -1016,6 +1016,10 @@ impl Catalog {
             self.label = Some(label.clone());
             let entry = &mut self.picture_entries[index];
             entry.set_label(label.clone());
+            if !self.tags.contains(&label) {
+                self.tags.push(label.clone());
+                self.tags.sort()
+            };
             self.last_action = Some(Action::Label { label: label.clone() });
             Self::update_image_data(&self.database, &entry.clone())
         } else {
