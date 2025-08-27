@@ -14,7 +14,7 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 /// Gallery Show
 pub struct Args {
     /// add picture data from the pictures in TARGET_DIR to the database
-    #[arg(long, value_name = "TARGET_DIR")]
+    #[arg(long, num_args(1..2), value_name = "TARGET_DIR")]
     pub add: Option<String>,
 
     /// copy representative pictures of each subfolders in CATALOG_DIR
@@ -24,6 +24,10 @@ pub struct Args {
     /// checks default directory for new pictures
     #[arg(long, default_value_t = false)]
     pub check: bool,
+
+    /// create the schema for the database
+    #[arg(long, default_value_t = false)]
+    pub create_schema: bool,
 
      /// Directory to search (default is set with variable GALLSHDIR)
     pub directory: Option<String>,
@@ -155,6 +159,8 @@ impl Args {
                 },
             },
             check: self.check,
+
+            create_schema: self.create_schema,
 
             all_move: match &self.all_move {
                 None => None,

@@ -35,11 +35,43 @@ impl Database {
         }
     }
 
-    pub fn initialize() -> Result<Self> {
+    pub fn initialize(check_schema: bool) -> Result<Self> {
         match env::var(DATABASE_CONNECTION) {
             Ok(connection_string) => match Self::from_path(connection_string.to_string()) {
-                Ok(database) => match database.check_schema() {
-                    Ok(()) => Ok(database),
+                Ok(database) => if check_schema {
+                    match database.check_schema() {
+                        Ok(()) => Ok(database),
+                        Err(err) => Err(anyhow!(err)),
+                    }
+                } else {
+                    Ok(database)
+                },
+                Err(err) => Err(anyhow!(err)),
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    pub fn create_schema(&self) -> Result<()> {
+        println!("creating database schema");
+        match self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS Picture (\n\
+                File_Path TEXT NOT NULL PRIMARY KEY,\n\
+                File_Size INTEGER,\n\
+                Colors INTEGER,\n\
+                Modified_Time INTEGER,\n\
+                Rank INTEGER,\n\
+                Palette BLOB,\n\
+                Label TEXT,\n\
+                Selected BOOLEAN,\n\
+                Deleted BOOLEAN);", []) {
+            Ok(_) => match self.connection.execute(
+                "CREATE TABLE IF NOT EXISTS Tag (\n\
+                    File_Path TEXT NOT NULL,\n\
+                    Label TEXT NOT NULL,\n\
+                    PRIMARY KEY ( File_Path, Label));", []) {
+                Ok(_) => match self.connection.cache_flush() {
+                    Ok(_) => Ok(()),
                     Err(err) => Err(anyhow!(err)),
                 }
                 Err(err) => Err(anyhow!(err)),

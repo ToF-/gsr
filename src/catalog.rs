@@ -81,7 +81,7 @@ impl Catalog {
             args: None,
             sample_on: false,
             discarded: Vec::new(),
-            database: match Database::initialize() {
+            database: match Database::initialize(true) {
                 Ok(database) => database,
                 Err(err) => {
                     eprintln!("{}", err);
@@ -95,6 +95,16 @@ impl Catalog {
 
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
+        if args.create_schema {
+            match Database::initialize(false) {
+                Ok(database) => match database.create_schema() {
+                    Ok(()) => {
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                },
+                Err(err) => return Err(anyhow!(err)),
+            };
+        };
         let mut catalog = Self::new();
         catalog.args = Some(args.clone());
         let add_result:Result<()> = if args.sample.is_some() {
