@@ -815,8 +815,14 @@ impl Catalog {
         let entry = &mut self.picture_entries[self.index];
         entry.add_tag(tag.clone());
         self.last_action = Some(Action::AddTag { label: tag.clone() });
-        match self.database.insert_tag_label(entry, tag) {
-            Ok(()) => self.initialize_tags(),
+        match self.database.insert_tag_label(entry, tag.clone()) {
+            Ok(()) => {
+                if !self.tags.contains(&tag) {
+                    self.tags.push(tag);
+                    self.tags.sort()
+                };
+                Ok(())
+            },
             Err(err) => Err(anyhow!(err)),
         }
     }
@@ -934,7 +940,8 @@ impl Catalog {
 
     pub fn start_set(&mut self) {
         if self.current_entry().is_some() {
-            self.start_index = Some(self.index)
+            self.start_index = Some(self.index);
+            println!("start set:{}", self.start_index.unwrap());
         }
     }
 
@@ -1265,6 +1272,7 @@ impl Catalog {
     pub fn end_repeat_last_action(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
+                println!("end set: {}", index);
                 match self.start_index {
                     None => self.repeat_last_action(),
                     Some(other) => {

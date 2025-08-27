@@ -142,7 +142,10 @@ impl Database {
 
     pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {
         match self.connection.execute("INSERT INTO Tag VALUES (?1, ?2);", params![&*entry.file_path, label]) {
-            Ok(_) => Ok(()),
+            Ok(inserted) => {
+                println!("{} row inserted", inserted);
+                Ok(())
+            },
             Err(err) => Err(anyhow!(err)),
         }
     }
@@ -171,8 +174,20 @@ impl Database {
             entry.selected as i64,
             &*entry.file_path]) {
             Ok(updated) => {
-                println!("{} row updated", updated);
-                Ok(())
+                println!("{} picture row updated", updated);
+                match self.connection.execute(" DELETE FROM Tag WHERE File_Path = ?1;", params![&*entry.file_path]) {
+                    Ok(deleted) => {
+                        println!("{} tag rows deleted", deleted);
+                        for tag in entry.tags.iter() {
+                            match self.insert_tag_label(entry, tag.to_string()) {
+                                Ok(()) => {},
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        Ok(())
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }
             },
             Err(err) => Err(anyhow!(err)),
             }
