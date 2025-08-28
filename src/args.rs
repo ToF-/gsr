@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::Parser;
 use std::env;
 use crate::order::Order;
-use crate::path::{directory, check_file, check_reading_list_file, check_path, default_extract_list_file};
+use crate::path::{ABSOLUTE_PATH, directory, check_file, check_reading_list_file, check_path, default_extract_list_file};
 
 const DEFAULT_WIDTH: i32   = 1000;
 const DEFAULT_HEIGHT: i32  = 1000;
@@ -14,12 +14,8 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 /// Gallery Show
 pub struct Args {
     /// add picture data from the pictures in TARGET_DIR to the database
-    #[arg(long, num_args(1..2), value_name = "TARGET_DIR")]
+    #[arg(long, value_name = "TARGET_DIR")]
     pub add: Option<String>,
-
-    /// copy representative pictures of each subfolders in CATALOG_DIR
-    #[arg(long, value_name = "CATALOG_DIR")]
-    pub catalog: Option<String>,
 
     /// checks default directory for new pictures
     #[arg(long, default_value_t = false)]
@@ -39,10 +35,6 @@ pub struct Args {
     #[arg(long, value_name = "TARGET_DIR")]
     pub deduplicate: Option<String>,
 
-    /// move all labelled pictures to their matching folder on TARGET_DIR
-    #[arg(short, long, value_name = "TARGET_DIR")]
-    pub all_move: Option<String>,
-
     /// copy selected files to TARGET_DIR
     #[arg(short, long, value_name = "TARGET_DIR")]
     pub copy_selection: Option<String>,
@@ -58,6 +50,10 @@ pub struct Args {
     /// extract list
     #[arg(short, long, value_name="FILE_NAME")]
     pub extract: Option<String>,
+
+    /// import pictures from SOURCE_DIR in TARGET_DIR specified with add
+    #[arg(long, value_name="SOURCE_DIR")]
+    pub from: Option<String>,
 
     /// display only FILE_NAME
     #[arg(short, long, value_name="FILE_NAME")]
@@ -147,36 +143,22 @@ impl Args {
 
     pub fn checked_args(&mut self) -> Result<Args> {
         let result: Args = Args {
+
             add: match &self.add {
                 None => None,
-                Some(dir) => match check_path(&dir) {
+                Some(dir) => match check_path(&dir, ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
                     Err(err) => return Err(err),
                 }
-            },
-            catalog: match &self.catalog {
-                None => None,
-                Some(dir) => match check_path(&dir) {
-                    Ok(_) => Some(dir.to_string()),
-                    Err(err) => return Err(err),
-                },
             },
             check: self.check,
 
             covers: self.covers,
             create_schema: self.create_schema,
 
-            all_move: match &self.all_move {
-                None => None,
-                Some(dir) => match check_path(&dir) {
-                    Ok(_) => Some(dir.to_string()),
-                    Err(err) => return Err(err),
-                },
-            },
-
             copy_selection: match &self.copy_selection {
                 None => None,
-                Some(dir) => match check_path(&dir) {
+                Some(dir) => match check_path(&dir, ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
                     Err(err) => return Err(err),
                 },
@@ -186,7 +168,7 @@ impl Args {
 
             deduplicate: {
                 match self.deduplicate.clone() {
-                    Some(dir) => match check_path(&dir) {
+                    Some(dir) => match check_path(&dir, ! ABSOLUTE_PATH) {
                         Ok(_) => Some(dir.to_string()),
                         Err(err) => return Err(err),
                     },
@@ -196,7 +178,7 @@ impl Args {
 
             directory: {
                 let dir = directory(self.directory.clone());
-                match check_path(&dir) {
+                match check_path(&dir, ! ABSOLUTE_PATH) {
                     Ok(_) => Some(dir),
                     Err(err) => return Err(err),
                 }
@@ -226,6 +208,14 @@ impl Args {
                     Ok(_) => Some(path.to_string()),
                     Err(err) => return Err(err),
                 },
+            },
+
+            from: match &self.from {
+                None => None,
+                Some(dir) => match check_path(&dir, ! ABSOLUTE_PATH) {
+                    Ok(_) => Some(dir.to_string()),
+                    Err(err) => return Err(err),
+                }
             },
 
             grid: match self.grid {
@@ -258,7 +248,7 @@ impl Args {
 
             move_selection: match &self.move_selection {
                 None => None,
-                Some(dir) => match check_path(&dir) {
+                Some(dir) => match check_path(&dir, ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
                     Err(err) => return Err(err),
                 },

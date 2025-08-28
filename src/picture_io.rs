@@ -54,10 +54,13 @@ pub fn read_or_create_image_data(file_path: &str) -> Result<ImageData> {
     }
 }
 
-pub fn delete_file(file_path: &str) {
+pub fn delete_file(file_path: &str) -> Result<()> {
     let path = Path::new(file_path);
     if path.exists() {
         let _ = remove_file(path);
+        Ok(())
+    } else {
+        Err(anyhow!(format!("cannot delete file {}", file_path)))
     }
 }
 

@@ -202,10 +202,14 @@ impl PictureEntry {
         }
     }
 
-    pub fn delete_files(&self) {
-        delete_file(&self.original_file_path());
-        delete_file(&self.thumbnail_file_path());
-        delete_file(&self.image_data_file_path());
+    pub fn delete_files(&self) -> Result<()> {
+        match delete_file(&self.original_file_path()) {
+            Ok(_) => match delete_file(&self.thumbnail_file_path()) {
+                Ok(_) => delete_file(&self.image_data_file_path()),
+                Err(err) => Err(anyhow!(err)),
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
     }
 
     pub fn copy_files(&self, target_dir: &str) -> Result<u64> {

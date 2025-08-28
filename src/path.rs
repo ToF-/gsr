@@ -1,3 +1,4 @@
+use std::fs::copy;
 use anyhow::{anyhow, Result};
 use dirs::home_dir;
 use std::env;
@@ -15,6 +16,7 @@ pub const DIR_ENV_VAR: &str = "GALLSHDIR";
 pub const DEFAULT_TMP_DIR :&str    = ".";
 pub const TMP_ENV_VAR: &str = "GALLSHTMP";
 pub const DEFAULT_EXTRACT_LIST_FILE_NAME: &str = "gsr_extract.txt";
+pub const ABSOLUTE_PATH: bool = true;
 
 pub fn default_extract_list_file() -> Result<String> {
     match home_dir() {
@@ -42,10 +44,12 @@ pub fn is_thumbnail(file_name: &str) -> bool {
    file_name.contains(&THUMB_SUFFIX)
 }
 
-pub fn check_path(source: &str) -> Result<PathBuf> {
+pub fn check_path(source: &str, absolute: bool) -> Result<PathBuf> {
     let path = PathBuf::from(source);
     if !path.exists() {
         Err(anyhow!(format!("directory {} doesn't exist", source)))
+    } else if absolute && !path.has_root() {
+        Err(anyhow!(format!("directory {} is relative", source)))
     } else {
         match fs::metadata(path.clone()) {
             Ok(metadata) => if metadata.is_dir() {
@@ -131,7 +135,7 @@ pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {
 // recursively collect all file paths from pictures in the <source> folder
 // filtering for files with valid extensions (jpeg,jpg,png) and not including "THUMB" in their name 
 pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
-    match check_path(source) {
+    match check_path(source, ! ABSOLUTE_PATH) {
         Ok(directory) => {
             let mut file_paths: Vec<String> = Vec::new();
             for path in WalkDir::new(directory).into_iter().filter_map(|e| e.ok()).map(|e| e.into_path()) {
@@ -150,6 +154,23 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
             Ok(file_paths.clone())
         },
         Err(err) => Err(err),
+    }
+}
+
+pub fn copy_all_picture_files(source: &str, target: &str) -> Result<()> {
+    match get_picture_file_paths(source) {
+        Ok(file_paths) => {
+            for file_path in file_paths {
+                let target_file_path = target.to_owned() + "/" + &file_name(&file_path);
+                println!("copy {} to {}", file_path, target_file_path);
+                match copy(file_path, target_file_path) {
+                    Ok(_) => {},
+                    Err(err) => return Err(anyhow!(err)),
+                }
+            };
+            Ok(())
+        },
+        Err(err) => Err(anyhow!(err)),
     }
 }
 

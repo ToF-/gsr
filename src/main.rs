@@ -1,3 +1,4 @@
+use crate::path::copy_all_picture_files;
 use clap::Parser;
 use crate::args::Args;
 use crate::catalog::Catalog;
@@ -89,6 +90,20 @@ fn main() {
                         catalog.info();
                         exit(0);
                     }
+                    if args.from.is_some() {
+                        if args.add.is_none() {
+                            eprintln!("option --from <SOURCE_DIR> must be used with option --add <TARGET_DIR>");
+                            exit(1)
+                        } else {
+                            match copy_all_picture_files(&args.from.clone().unwrap(), &args.add.clone().unwrap()) {
+                                Ok(()) => {},
+                                Err(err) => {
+                                    eprintln!("{}", err);
+                                    exit(1);
+                                }
+                            }
+                        }
+                    };
                     if args.deduplicate.is_some() {
                         match catalog.deduplicate_files(&args.deduplicate.unwrap()) {
                             Ok(()) => exit(0),

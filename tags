@@ -4,6 +4,7 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+ABSOLUTE_PATH	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const ABSOLUTE_PATH: bool = true;$/;"	c
 Action	/Users/christophethibaut/Coding/gsr/src/actions.rs	/^pub enum Action {$/;"	g
 Args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub struct Args {$/;"	s
 COLOR_MAX	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    const COLOR_MAX: f64 = 9.0;$/;"	c
@@ -39,6 +40,7 @@ TMP_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const TMP_ENV_
 VALID_EXTENSIONS	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];$/;"	c
 WIDTH_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";$/;"	c
 add_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_input_char(&mut self, ch: char) {$/;"	f
+add_picture_entries_from_covers	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_covers(&mut self) -> Result<()> {$/;"	f
 add_picture_entries_from_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {$/;"	f
 add_picture_entries_from_file_list	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {$/;"	f
 add_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn add_picture_entries_from_source(&mut self) -> Result<()> {$/;"	f
@@ -77,7 +79,7 @@ check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(s
 check_is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn check_is_prefix_path() {$/;"	f
 check_one_candidate	/Users/christophethibaut/Coding/gsr/src/completion.rs	/^    fn check_one_candidate() {$/;"	f
 check_or_create_thumbnail_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_path: &str) -> Result<()> {$/;"	f
-check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str) -> Result<PathBuf> {$/;"	f
+check_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_path(source: &str, absolute: bool) -> Result<PathBuf> {$/;"	f
 check_reading_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_reading_list_file(source: &str) -> Result<PathBuf> {$/;"	f
 check_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn check_schema(&self) -> Result<()> {$/;"	f
 checked_args	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    pub fn checked_args(&mut self) -> Result<Args> {$/;"	f
@@ -101,6 +103,7 @@ copy_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn
 copy_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_label(&mut self) {$/;"	f
 copy_to_current_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_to_current_dir(&self) -> Result<()> {$/;"	f
 count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn count_selected(&mut self) {$/;"	f
+cover	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cover(&mut self) -> Result<()> {$/;"	f
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
 create_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn create_schema(&self) -> Result<()> {$/;"	f
 current_candidates	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_candidates(&self) -> String {$/;"	f
@@ -112,6 +115,7 @@ default_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn d
 del_input_char	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn del_input_char(&mut self) {$/;"	f
 delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&mut self) {$/;"	f
 delete_broken_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_broken_entries_from_db(&mut self) -> Result<()> {$/;"	f
+delete_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_cover(&self, dir_path: String, file_name: String) -> Result<()> {$/;"	f
 delete_difference_from_file_system	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_difference_from_file_system(&mut self) -> Result<HashSet<String>> {$/;"	f
 delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_files(&self, also_fs:bool) {$/;"	f
@@ -141,6 +145,7 @@ equal_content	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub
 expand_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn expand_on(&self) -> bool {$/;"	f
 export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {$/;"	f
 extract	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn extract(&self) {$/;"	f
+file_name	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_name(source: &str) -> String {$/;"	f
 file_operations	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn file_operations(&self, also_fs:bool) -> Result<()> {$/;"	f
 file_path_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_path_directory(source: &str) -> String {$/;"	f
 finding_a_picture_entry_by_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn finding_a_picture_entry_by_input_pattern() {$/;"	f
@@ -175,6 +180,7 @@ initialize	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn init
 initialize_tags	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn initialize_tags(&mut self) -> Result<()> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 input_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn input_on(&self) -> bool {$/;"	f
+insert_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_cover(&self, dir_path: String, file_name: String, rank: Rank) -> Result<()> {$/;"	f
 insert_difference_from_dir	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_dir(&mut self, directory: &String, in_std_dir:bool) -> Result<Vec<PictureEntry>> {$/;"	f
 insert_entries_from_dir_to_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn insert_entries_from_dir_to_db(&mut self, directory: &String, in_std_dir: bool) -> Result<()> {$/;"	f
 insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
@@ -254,6 +260,7 @@ right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 sample_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn sample_on(&self) -> bool {$/;"	f
 select_and_unselect_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
+select_cover_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_cover_pictures(&mut self) -> Result<Vec<PictureEntry>> {$/;"	f
 select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {$/;"	f
 select_pictures_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {$/;"	f
 set_all_pictures_for_multiple_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f

@@ -261,20 +261,10 @@ impl Catalog {
     }
 
     pub fn file_operations(&self, also_fs:bool) -> Result<()> {
-        self.delete_files(also_fs);
-        let args = self.args.as_ref().unwrap();
-        if let Some(all_move_target_dir) = &args.all_move {
-            if also_fs {
-                self.move_all_labelled_files(&all_move_target_dir)
-            } else {
-                Ok(())
-            }
-        } else {
-            Ok(())
-        }
+        self.delete_files(also_fs)
     }
 
-    fn delete_files(&self, also_fs:bool) {
+    fn delete_files(&self, also_fs:bool) -> Result<()> {
         let selection: Vec<&PictureEntry> = self.picture_entries.iter().filter(|e| e.deleted).collect();
         for entry in selection {
             match self.database.delete_picture(entry.file_path.clone()) {
@@ -282,9 +272,13 @@ impl Catalog {
                 Err(err) => eprintln!("{}", err),
             };
             if also_fs {
-                entry.delete_files()
+                match entry.delete_files() {
+                    Ok(()) => {},
+                    Err(err) => eprintln!("{}", err),
+                }
             };
-        };
+        }
+        Ok(())
     }
 
     fn add_picture_entries_from_source(&mut self) -> Result<()> {
@@ -306,7 +300,7 @@ impl Catalog {
                     Err(err) => return Err(anyhow!(err))
                 };
                 if args.add.is_some() {
-                    println!("adding from {}", &args.add.clone().unwrap());
+                    println!("adding new pictures from {}", &args.add.clone().unwrap());
                     self.insert_entries_from_dir_to_db(&args.add.clone().unwrap(), false)
                 } else if args.check {
                     self.insert_entries_from_dir_to_db(&dir, true)
