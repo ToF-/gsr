@@ -180,14 +180,18 @@ impl Catalog {
                 match entry.equal_content(&prev) {
                     Ok(true) => {
                         println!("removing duplicate entry {}, same as {}", prev.original_file_path(), entry.original_file_path());
-                        if prev.copy_files(target_dir).is_ok() {
-                            prev.delete_files();
+                        match prev.copy_files(target_dir) {
+                            Ok(_) => match prev.delete_files() {
+                                Ok(()) => {},
+                                Err(err) => return Err(anyhow!(err)),
+                            },
+                            Err(err) => return Err(anyhow!(err)),
                         }
                     },
                     Ok(false) => {} ,
                     Err(err) => return Err(anyhow!(err)),
-                };
-            }
+                }
+            };
             prev_entry = Some(entry.clone());
         };
         Ok(())
@@ -265,8 +269,7 @@ impl Catalog {
     }
 
     fn delete_files(&self, also_fs:bool) -> Result<()> {
-        let selection: Vec<&PictureEntry> = self.picture_entries.iter().filter(|e| e.deleted).collect();
-        for entry in selection {
+        for entry in self.picture_entries.iter().filter(|e| e.deleted) {
             match self.database.delete_picture(entry.file_path.clone()) {
                 Ok(()) => {},
                 Err(err) => eprintln!("{}", err),
@@ -793,9 +796,9 @@ impl Catalog {
         display
     }
 
-    pub fn copy_to_current_dir(&self) -> Result<()> {
+    pub fn copy_picture_file_to_temp(&self) -> Result<()> {
         let entry = self.current_entry().unwrap();
-        match entry.copy_file_to_current_dir() {
+        match entry.copy_picture_file_to_temp() {
             Ok(_) => Ok(()),
             Err(err) => Err(anyhow!(err)),
         }

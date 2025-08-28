@@ -349,7 +349,7 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::FirstPosition => refresh = left_click_command_view_mode(0,0, gui, catalog),
                         Command::LastPosition => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
                         Command::CopyLabel => catalog.copy_label(),
-                        Command::CopyTemp => result = catalog.copy_to_current_dir(),
+                        Command::CopyTemp => result = catalog.copy_picture_file_to_temp(),
                         Command::Delete => catalog.delete(),
                         Command::ToggleExpand => catalog.toggle_expand(),
                         Command::ToggleFullSize => if gui.single_view_mode() {
