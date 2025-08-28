@@ -281,6 +281,14 @@ impl Catalog {
         Ok(())
     }
 
+    // todo : this function is way too complicated → study the different cases
+    // 1) showing the pictures in the standard directory and database
+    // 2) showing the pictures in the standard directory and database, with a selection
+    // 3) showing the pictures in a specific directory (not in database)
+    // 4) showing the picture in a specific file (not in database)
+    // 5) showing the pictures in a specific file list
+
+    // the issue of importing new pictures, or removing pictures is another matter
     fn add_picture_entries_from_source(&mut self) -> Result<()> {
         let args = &self.args.clone().unwrap();
         if let Some(file) = &args.file {
