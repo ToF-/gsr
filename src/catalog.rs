@@ -292,6 +292,12 @@ impl Catalog {
         } else if args.covers {
             self.db_centric = false;
             self.add_picture_entries_from_covers()
+        } else if args.directory.is_some() && args.add.clone().is_some() && args.from.is_some() {
+            let dir = args.directory.clone().unwrap();
+            match self.insert_entries_from_dir_to_db(&args.clone().add.unwrap(), true) {
+                Ok(()) => self.add_picture_entries_from_dir(&dir),
+                Err(err) => Err(anyhow!(err)),
+            }
         } else if let Some(dir) = &args.directory {
             self.db_centric = standard_directory() != "" && *dir == standard_directory();
             if self.db_centric {
