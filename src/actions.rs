@@ -1,6 +1,6 @@
 use crate::rank::Rank;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum Action {
     Label { label: String },
     Unlabel,

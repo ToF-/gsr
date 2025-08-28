@@ -1,5 +1,6 @@
+use std::collections::HashSet;
 
-pub fn candidates(prefix: &String, labels: &Vec<String>) -> Vec<String> {
+pub fn candidates(prefix: &String, labels: &HashSet<String>) -> Vec<String> {
     labels.into_iter().filter(|label| label.starts_with(prefix)).map(|s| s.clone()).collect()
 }
 

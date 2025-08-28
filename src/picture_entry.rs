@@ -1,3 +1,5 @@
+use itertools::Itertools;
+use std::collections::HashSet;
 use crate::Database;
 use std::path::PathBuf;
 use anyhow::{anyhow, Result};
@@ -19,10 +21,10 @@ pub struct PictureEntry {
         label: String,
     pub selected: bool,
     pub deleted: bool,
-    pub tags: Vec<String>,
+    pub tags: HashSet<String>,
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, tags: Vec<String>) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, tags: HashSet<String>) -> PictureEntry {
     PictureEntry {
         file_path: file_path,
         file_size: file_size,
@@ -66,7 +68,7 @@ impl PictureEntry {
                             Some(image_data.label),
                             image_data.selected,
                             false,
-                            vec![])),
+                            HashSet::new())),
                     Err(err) => Err(anyhow!(err)),
                 }
             }
@@ -168,21 +170,18 @@ impl PictureEntry {
         }
     }
 
-    pub fn add_tag(&mut self, tag: String) {
-        if tag.len() > 0 && !self.tags.contains(&tag) {
-            self.tags.push(tag)
+    pub fn add_tag(&mut self, tag: &str) {
+        if tag.len() > 0 {
+            self.tags.insert(tag.to_string());
         }
     }
     
-    pub fn delete_tag(&mut self, tag : String) {
-        match self.tags.iter().position(|s| s == &tag) {
-            Some(i) => { let _ = self.tags.remove(i); },
-            None => {},
-        }
+    pub fn delete_tag(&mut self, tag : &str) {
+        self.tags.remove(tag);
     }
 
-    pub fn set_label(&mut self, label: String) {
-        self.label = label
+    pub fn set_label(&mut self, label: &str) {
+        self.label = label.to_string()
     }
 
     pub fn unlabel(&mut self) {
@@ -242,10 +241,10 @@ impl PictureEntry {
 
     }
 
-    pub fn display_tags(tags: Vec<String>) -> String {
+    pub fn display_tags(tags: HashSet<String>) -> String {
         match tags.len() {
             0 => String::from(""),
-            _ => format!("| {} |", tags.join(" ")),
+            _ => format!("| {} |", tags.iter().join(" ")),
         }
     }
 

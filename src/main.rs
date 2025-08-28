@@ -50,7 +50,7 @@ fn main() {
                 },
                 Ok(mut catalog) => {
                     if let Some(ref label) = args.label {
-                        match catalog.apply_label_all(label.clone()) {
+                        match catalog.apply_label_all(label) {
                             Ok(()) => {},
                             Err(err) => {
                                 eprintln!("{}", err);

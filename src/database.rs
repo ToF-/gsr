@@ -22,22 +22,21 @@ const DATABASE_CONNECTION: &str = "GALLSHDB";
 
 #[derive(Debug)]
 pub struct Database {
-    pub connection_string: String,
     connection: Connection,
 }
 
 impl Database {
 
-    pub fn from_path(connection_string: String) -> Result<Self> {
-        match Connection::open(connection_string.clone()) {
-            Ok(connection) => Ok(Database { connection_string: connection_string.to_string(), connection: connection, }),
+    pub fn from_path(connection_string: &str) -> Result<Self> {
+        match Connection::open(connection_string) {
+            Ok(connection) => Ok(Database { connection: connection, }),
             Err(err) => Err(anyhow!(err)),
         }
     }
 
     pub fn initialize(check_schema: bool) -> Result<Self> {
         match env::var(DATABASE_CONNECTION) {
-            Ok(connection_string) => match Self::from_path(connection_string.to_string()) {
+            Ok(connection_string) => match Self::from_path(&connection_string) {
                 Ok(database) => if check_schema {
                     match database.check_schema() {
                         Ok(()) => Ok(database),
@@ -90,15 +89,6 @@ impl Database {
         }
     }
 
-    pub fn check_create_schema(&self) -> Result<()> {
-        println!("checking database {} picture table", self.connection_string);
-        let query = "SELECT file_path from Picture";
-        match self.connection.prepare(query) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
     fn decimate(&self, file_paths_set: HashSet<String>) -> Result<HashSet<String>> {
         let mut total_tags: usize = 0;
         let mut total_pics: usize = 0;
@@ -140,7 +130,7 @@ impl Database {
         }
     }
 
-    pub fn delete_cover(&self, dir_path: String, file_name: String) -> Result<()> {
+    pub fn delete_cover(&self, dir_path: &str, file_name: &str) -> Result<()> {
         match self.connection.execute("DELETE FROM Cover WHERE Dir_path = ?1 AND File_Name = ?2;",
             params![dir_path, file_name]) {
             Ok(deleted) => {
@@ -151,7 +141,7 @@ impl Database {
         }
     }
 
-    pub fn insert_cover(&self, dir_path: String, file_name: String, rank: Rank) -> Result<()> {
+    pub fn insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {
         match self.connection.execute("INSERT INTO Cover VALUES (?1, ?2, ?3);", 
             params![dir_path, file_name, rank as i64]) {
             Ok(inserted) => {
@@ -162,7 +152,7 @@ impl Database {
         }
     }
 
-    pub fn insert_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {
+    pub fn insert_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {
         match self.connection.execute("INSERT INTO Tag VALUES (?1, ?2);", params![&*entry.file_path, label]) {
             Ok(inserted) => {
                 println!("{} row inserted", inserted);
@@ -172,7 +162,7 @@ impl Database {
         }
     }
 
-    pub fn delete_tag_label(&self, entry: &PictureEntry, label: String) -> Result<()> {
+    pub fn delete_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {
         match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1 AND Label = ?2;", params![&*entry.file_path, label]) {
             Ok(count) => {
                 println!("{} row deleted", count);
@@ -201,7 +191,7 @@ impl Database {
                     Ok(deleted) => {
                         println!("{} tag rows deleted", deleted);
                         for tag in entry.tags.iter() {
-                            match self.insert_tag_label(entry, tag.to_string()) {
+                            match self.insert_tag_label(entry, tag) {
                                 Ok(()) => {},
                                 Err(err) => return Err(anyhow!(err)),
                             }
@@ -276,7 +266,7 @@ impl Database {
                     let result:bool = row.get(8)?;
                     result
                 },
-                vec![],))
+                HashSet::new(),))
     }
 
     pub fn delete_picture(&self, file_path: String) -> Result<()> {
@@ -489,8 +479,8 @@ pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {
         Err(err) => Err(anyhow!(err)),
     }
 }
-pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {
-    let mut result: Vec<String> = vec![];
+pub fn entry_tags(&self, file_path: &str) -> Result<HashSet<String>> {
+    let mut result: HashSet<String> = HashSet::new();
     let query = "SELECT DISTINCT Label FROM Tag WHERE File_Path = ?1;";
     match self.connection.prepare(query) {
         Ok(mut statement) => {
@@ -501,7 +491,7 @@ pub fn entry_tags(&self, file_path: &str) -> Result<Vec<String>> {
                     for row in rows {
                         match row {
                             Ok(label) => {
-                                result.push(label);
+                                result.insert(label);
                             },
                             Err(err) => return Err(anyhow!(err)),
                         }
@@ -527,7 +517,7 @@ pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
                         palette: palette,
                         label: String::from(""),
                     };
-                    let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, vec![]);
+                    let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, HashSet::new());
                     match self.connection.execute(" INSERT INTO Picture 
             (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted, Palette)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",

@@ -11,7 +11,7 @@ use core::cmp::Ordering;
 use crate::args::Args;
 use crate::direction::Direction;
 use crate::order::Order;
-use crate::path::{get_picture_file_paths, file_path_directory, interactive_check_label_path, check_file, is_thumbnail};
+use crate::path::{get_picture_file_paths, file_path_directory, check_file, is_thumbnail};
 use crate::picture_entry::{PictureEntry};
 use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
@@ -52,7 +52,7 @@ pub struct Catalog {
     sample_on: bool,
     discarded: Vec<usize>,
     database: Database,
-    pub tags: Vec<String>,
+    pub tags: HashSet<String>,
     current_candidates: Vec<String>,
 }
 
@@ -89,7 +89,7 @@ impl Catalog {
                     exit(1);
                 }
             },
-            tags: vec![],
+            tags: HashSet::new(),
             current_candidates: vec![],
         }
     }
@@ -137,39 +137,16 @@ impl Catalog {
     }
 
     pub fn initialize_tags(&mut self) -> Result<()> {
-        self.tags = vec![];
+        self.tags = HashSet::new();
         match self.database.load_all_tags() {
             Ok(labels) => {
                 for label in labels {
-                    self.tags.push(label);
+                    self.tags.insert(label);
                 };
-                self.tags.sort();
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
         }
-    }
-
-    fn move_all_labelled_files(&self, target_dir: &str) -> Result<()> {
-        let mut result: Result<()> = Ok(());
-        self.picture_entries.clone().into_iter().filter(|entry| entry.label().is_some()).for_each(|entry| {
-            if result.is_ok() {
-                let label = entry.label().unwrap();
-                let check = match interactive_check_label_path(target_dir, &label) {
-                    Ok(path) => {
-                        if entry.copy_files(path.to_str().unwrap()).is_ok() {
-                            entry.delete_files();
-                        }
-                        Ok(())
-                    },
-                    Err(err) => Err(err),
-                };
-                if check.is_err() {
-                    result = check;
-                }
-            }
-        });
-        result
     }
 
     pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {
@@ -181,7 +158,10 @@ impl Catalog {
                     Ok(true) => {
                         println!("removing duplicate entry {}, same as {}", prev.original_file_path(), entry.original_file_path());
                         if prev.copy_files(target_dir).is_ok() {
-                            prev.delete_files();
+                            match prev.delete_files() {
+                                Ok(_) => {},
+                                Err(err) => return Err(anyhow!(err)),
+                            }
                         }
                     },
                     Ok(false) => {} ,
@@ -438,8 +418,8 @@ impl Catalog {
             Ok(mut entries) => {
                 for entry in &mut entries {
                     match self.database.entry_tags(&entry.file_path) {
-                        Ok(labels) => {
-                            entry.tags = labels
+                        Ok(lags) => {
+                            entry.tags = lags
                         },
                         Err(err) => return Err(anyhow!(err)),
                     }
@@ -589,9 +569,6 @@ impl Catalog {
 
     // queries
     
-    pub fn entries(&self) -> &Vec<PictureEntry> {
-        &self.picture_entries
-    }
     pub fn discarded(&self) -> &Vec<usize> {
         &self.discarded
     }
@@ -836,8 +813,8 @@ impl Catalog {
         let file_name = file_name(&entry.file_path);
         let rank = entry.rank;
         println!("cover for {} with image {} and rank {}", dir_path, file_name, rank );
-        match self.database.delete_cover(dir_path.clone(), file_name.clone()) {
-            Ok(()) => match self.database.insert_cover(dir_path, file_name, rank) {
+        match self.database.delete_cover(&dir_path, &file_name) {
+            Ok(()) => match self.database.insert_cover(&dir_path, &file_name, rank) {
                 Ok(()) => Ok(()),
                 Err(err) => Err(anyhow!(err)),
             },
@@ -849,15 +826,14 @@ impl Catalog {
         database.update_image_data(entry)
     }
 
-    pub fn add_tag(&mut self, tag: String) -> Result<()> {
+    pub fn add_tag(&mut self, tag: &str) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
-        entry.add_tag(tag.clone());
-        self.last_action = Some(Action::AddTag { label: tag.clone() });
-        match self.database.insert_tag_label(entry, tag.clone()) {
+        entry.add_tag(tag);
+        self.last_action = Some(Action::AddTag { label: tag.to_string() });
+        match self.database.insert_tag_label(entry, tag) {
             Ok(()) => {
-                if !self.tags.contains(&tag) {
-                    self.tags.push(tag);
-                    self.tags.sort()
+                if !self.tags.contains(tag) {
+                    self.tags.insert(tag.to_string());
                 };
                 Ok(())
             },
@@ -865,11 +841,11 @@ impl Catalog {
         }
     }
 
-    pub fn delete_tag(&mut self, tag: String) -> Result<()> {
+    pub fn delete_tag(&mut self, tag: &str) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
-        self.last_action = Some(Action::DeleteTag { label: tag.clone() });
-        if entry.tags.contains(&tag) {
-            entry.delete_tag(tag.clone());
+        self.last_action = Some(Action::DeleteTag { label: tag.to_string() });
+        if entry.tags.contains(tag) {
+            entry.delete_tag(tag);
             self.database.delete_tag_label(entry, tag)
         } else {
             println!("tag not found: {}", tag);
@@ -1049,27 +1025,26 @@ impl Catalog {
         })
     }
 
-    fn apply_label(&mut self, label: String) -> Result<()> {
+    fn apply_label(&mut self, label: &str) -> Result<()> {
         if let Some(index) = self.index() {
-            self.label = Some(label.clone());
+            self.label = Some(label.to_string());
             let entry = &mut self.picture_entries[index];
-            entry.set_label(label.clone());
-            if !self.tags.contains(&label) {
-                self.tags.push(label.clone());
-                self.tags.sort()
+            entry.set_label(label);
+            if !self.tags.contains(label) {
+                self.tags.insert(label.to_string());
             };
-            self.last_action = Some(Action::Label { label: label.clone() });
+            self.last_action = Some(Action::Label { label: label.to_string() });
             Self::update_image_data(&self.database, &entry.clone())
         } else {
             Ok(())
         }
     }
 
-    pub fn apply_label_all(&mut self, label:String) -> Result<()> {
+    pub fn apply_label_all(&mut self, label:&str) -> Result<()> {
         for i in 0..self.picture_entries.len() {
             self.index = i;
-            self.last_action = Some(Action::Label { label: label.clone() });
-            match self.apply_label(label.clone()) {
+            self.last_action = Some(Action::Label { label: label.to_string() });
+            match self.apply_label(label) {
                 Ok(()) => {},
                 Err(err) => return Err(err),
             }
@@ -1126,13 +1101,13 @@ impl Catalog {
     }
 
     pub fn repeat_last_action(&mut self) -> Result<()> {
-        match &self.last_action {
+        match self.last_action.clone() {
             None => Ok(()),
-            Some(Action::Label { label: l }) => self.apply_label(l.to_string()),
+            Some(Action::Label { label }) => self.apply_label(&label),
             Some(Action::Unlabel) => self.unlabel(),
-            Some(Action::AddTag { label: l}) => self.add_tag(l.to_string()),
-            Some(Action::DeleteTag { label: l}) => self.delete_tag(l.to_string()),
-            Some(Action::Rank { rank: r }) => self.set_rank(*r),
+            Some(Action::AddTag { label}) => self.add_tag(&label),
+            Some(Action::DeleteTag { label}) => self.delete_tag(&label),
+            Some(Action::Rank { rank }) => self.set_rank(rank),
             Some(Action::Select) => self.toggle_select(),
             Some(Action::Delete) => Ok(self.delete()),
         }
@@ -1150,22 +1125,22 @@ impl Catalog {
     }
 
     pub fn set_label_with_input(&mut self) -> Result<()> {
-        match &self.input {
-            Some(s) => self.apply_label(s.clone()),
+        match &self.input.clone() {
+            Some(s) => self.apply_label(s),
             None => Ok(()),
         }
     }
 
     pub fn add_tag_with_input(&mut self) -> Result<()> {
-        match &self.input {
-            Some(s) => self.add_tag(s.clone()),
+        match &self.input.clone() {
+            Some(s) => self.add_tag(s),
             None => Ok(()),
         }
     }
 
     pub fn delete_tag_with_input(&mut self) -> Result<()> {
-        match &self.input {
-            Some(s) => self.delete_tag(s.clone()),
+        match &self.input.clone() {
+            Some(s) => self.delete_tag(s),
             None => Ok(()),
         }
     }
@@ -1176,7 +1151,7 @@ impl Catalog {
                 for index in 0..self.picture_entries.len() {
                     let entry = &mut self.picture_entries[index];
                     if entry.selected {
-                        entry.set_label(label.to_string());
+                        entry.set_label(label);
                         match Self::update_image_data(&self.database, entry) {
                             Ok(()) => {},
                             Err(err) => return Err(anyhow!(err)),
@@ -1190,8 +1165,8 @@ impl Catalog {
     }
 
     pub fn set_label(&mut self) -> Result<()> {
-        match &self.label {
-            Some(s) => self.apply_label(s.clone()),
+        match &self.label.clone() {
+            Some(s) => self.apply_label(s),
             None => Ok(()),
         }
     }
@@ -1227,7 +1202,7 @@ impl Catalog {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 match entry.label() {
-                    Some(s) => self.add_tag(s.to_string()),
+                    Some(s) => self.add_tag(&s),
                     None => Ok(())
                 }
             },
@@ -1245,7 +1220,7 @@ impl Catalog {
                             let (start,end) = if other <= index { (other,index) } else { (index,other) };
                             for i in start..end+1 {
                                 let entry: &mut PictureEntry = &mut self.picture_entries[i];
-                                entry.set_label(label.to_string());
+                                entry.set_label(label);
                                 match Self::update_image_data(&self.database, entry) {
                                         Ok(()) => {},
                                         Err(err) => return Err(anyhow!(err)),
@@ -1323,11 +1298,11 @@ impl Catalog {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
                             match &self.last_action {
                                 None => {},
-                                Some(Action::Label { label: l }) => entry.set_label(l.to_string()),
+                                Some(Action::Label { label }) => entry.set_label(&label),
                                 Some(Action::Unlabel) => entry.unlabel(),
-                                Some(Action::AddTag { label: l}) => entry.add_tag(l.to_string()),
-                                Some(Action::DeleteTag { label: l}) => entry.delete_tag(l.to_string()),
-                                Some(Action::Rank { rank: r }) => entry.set_rank(*r),
+                                Some(Action::AddTag { label}) => entry.add_tag(&label),
+                                Some(Action::DeleteTag { label}) => entry.delete_tag(&label),
+                                Some(Action::Rank { rank }) => entry.set_rank(*rank),
                                 Some(Action::Select) => {},
                                 Some(Action::Delete) => {},
                             };
@@ -1350,6 +1325,7 @@ impl Catalog {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 if !entry.deleted {
                     entry.selected = !entry.selected;
+                    self.last_action = Some(Action::Select);
                     Self::update_image_data(&self.database, entry)
                 } else {
                     Ok(())
