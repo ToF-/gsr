@@ -97,11 +97,12 @@ cmp_rank	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn c
 complete_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn complete_input(&mut self) {$/;"	f
 confirm_input	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn confirm_input(&mut self) {$/;"	f
 convert_to_blob_and_vice_versa	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^    fn convert_to_blob_and_vice_versa() {$/;"	f
-copy_file_to_current_dir	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn copy_file_to_current_dir(&self) -> Result<u64> {$/;"	f
+copy_all_picture_files	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn copy_all_picture_files(source: &str, target: &str) -> Result<()> {$/;"	f
 copy_file_to_target_directory	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn copy_file_to_target_directory(source_file_path_str: &str, target_directory_name: &str) -> Result<u64> {$/;"	f
 copy_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn copy_files(&self, target_dir: &str) -> Result<u64> {$/;"	f
 copy_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_label(&mut self) {$/;"	f
-copy_to_current_dir	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_to_current_dir(&self) -> Result<()> {$/;"	f
+copy_picture_file_to_temp	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_picture_file_to_temp(&self) -> Result<()> {$/;"	f
+copy_picture_file_to_temp	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn copy_picture_file_to_temp(&self) -> Result<u64> {$/;"	f
 count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn count_selected(&mut self) {$/;"	f
 cover	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cover(&mut self) -> Result<()> {$/;"	f
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
@@ -117,9 +118,9 @@ delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&m
 delete_broken_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_broken_entries_from_db(&mut self) -> Result<()> {$/;"	f
 delete_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_cover(&self, dir_path: String, file_name: String) -> Result<()> {$/;"	f
 delete_difference_from_file_system	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_difference_from_file_system(&mut self) -> Result<HashSet<String>> {$/;"	f
-delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) {$/;"	f
-delete_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_files(&self, also_fs:bool) {$/;"	f
-delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) {$/;"	f
+delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) -> Result<()> {$/;"	f
+delete_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn delete_files(&self, also_fs:bool) -> Result<()> {$/;"	f
+delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) -> Result<()> {$/;"	f
 delete_picture	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_picture(&self, file_path: String) -> Result<()> {$/;"	f
 delete_tag	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete_tag(&mut self, tag: String) -> Result<()> {$/;"	f
 delete_tag	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_tag(&mut self, tag : String) {$/;"	f

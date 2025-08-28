@@ -224,7 +224,7 @@ impl PictureEntry {
             })
     }
 
-    pub fn copy_file_to_current_dir(&self) -> Result<u64> {
+    pub fn copy_picture_file_to_temp(&self) -> Result<u64> {
         copy_file_to_target_directory(&self.original_file_path(), &temp_directory())
     }
 
