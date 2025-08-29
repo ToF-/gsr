@@ -10,7 +10,7 @@ use crate::image_data::ImageData;
 use crate::picture_entry::make_picture_entry;
 use std::io;
 use std::time::Duration;
-use crate::picture_entry::PictureEntry;
+use crate::picture_entry::{PictureEntry, PictureEntries};
 use crate::palette::{palette_to_blob,blob_to_palette};
 use rusqlite::{params, Connection};
 use std::time::UNIX_EPOCH;
@@ -106,14 +106,14 @@ impl Database {
         Ok(file_paths_set)
     }
 
-    fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<Vec<PictureEntry>> {
+    fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<PictureEntries> {
         let mut count: usize = 0;
         let total = match difference_opt {
             Some(ref difference) => difference.len(),
             None => 0,
         };
         if total > 0 {
-            let mut picture_entries: Vec<PictureEntry> = vec![];
+            let mut picture_entries: PictureEntries = vec![];
             for file_path in difference_opt.unwrap() {
                 match self.insert_image_data(file_path) {
                     Ok(entry) => {
@@ -205,12 +205,12 @@ impl Database {
             }
     }
 
-    pub fn select_cover_pictures(&mut self) -> Result<Vec<PictureEntry>> {
+    pub fn select_cover_pictures(&mut self) -> Result<PictureEntries> {
         match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, P.Rank, Palette, Label, Selected, Deleted FROM Picture P JOIN Cover C ON P.File_Path = CONCAT(C.Dir_Path, '/', C.File_Name);") {
             Ok(mut statement) => {
                 match statement.query([]) {
                     Ok(mut rows) => {
-                        let mut result: Vec<PictureEntry> = vec![];
+                        let mut result: PictureEntries = vec![];
                         while let Some(row) = rows.next()? {
                             match Self::sql_to_picture_entry(row) {
                                 Ok(entry) => {
@@ -285,12 +285,12 @@ impl Database {
         }
     }
 
-    pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {
+    pub fn select_pictures(&self, query: String) -> Result<PictureEntries> {
         match self.connection.prepare(&("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted FROM Picture WHERE ".to_owned() + &query + ";")) {
             Ok(mut statement) => {
                 match statement.query([]) {
                     Ok(mut rows) => {
-                        let mut result: Vec<PictureEntry> = vec![];
+                        let mut result: PictureEntries = vec![];
                         while let Some(row) = rows.next()? {
                             match Self::sql_to_picture_entry(row) {
                                 Ok(entry) => {
@@ -347,7 +347,7 @@ impl Database {
         }
     }
 
-    pub fn insert_difference_from_dir(&mut self, directory: &String, in_std_dir:bool) -> Result<Vec<PictureEntry>> {
+    pub fn insert_difference_from_directory(&mut self, directory: &str, in_std_dir:bool) -> Result<PictureEntries> {
         let path = Path::new(directory);
         if path.has_root() {
             match get_picture_file_paths(directory) {
@@ -401,13 +401,13 @@ impl Database {
         }
     }
 
-pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {
+pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<PictureEntries> {
     let tag_labels: String = select.into_iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(",");
     match self.connection.prepare(&("SELECT DISTINCT(Picture.File_Path), File_Size, Colors, Modified_Time, Rank, Palette, Picture.Label, Selected, Deleted FROM Picture INNER JOIN Tag ON Tag.File_Path = Picture.File_Path WHERE Tag.Label IN (".to_owned() + &tag_labels + ");")) {
         Ok(mut statement) => {
             match statement.query([]) {
                 Ok(mut rows) => {
-                    let mut result: Vec<PictureEntry> = vec![];
+                    let mut result: PictureEntries = vec![];
                     while let Some(row) = rows.next()? {
                         match Self::sql_to_picture_entry(row) {
                             Ok(entry) => {

@@ -23,6 +23,7 @@ mod direction;
 mod display;
 mod editor;
 mod gui;
+mod loader;
 mod image_data;
 mod order;
 mod palette;

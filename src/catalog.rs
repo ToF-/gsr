@@ -1,4 +1,4 @@
-use clap::Parser;
+use crate::loader::{load_picture_entry_from_file_path, load_picture_entries_from_covers, load_picture_entries_from_directory_into_db };
 use crate::display::title_display;
 use anyhow::{anyhow, Result};
 use crate::actions::Action;
@@ -9,8 +9,8 @@ use crate::editor::{Editor};
 use crate::order::Order;
 use crate::path::file_name;
 use crate::path::standard_directory;
-use crate::path::{get_picture_file_paths, file_path_directory, check_file};
-use crate::picture_entry::{PictureEntry};
+use crate::path::{get_picture_file_paths, file_path_directory};
+use crate::picture_entry::PictureEntry;
 use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
 use rand::Rng;
@@ -101,12 +101,9 @@ impl Catalog {
             return Err(anyhow!("no picture to show"))
         };
         match catalog.initialize_tags() {
-            Ok(()) => { },
-            Err(err) => {
-                return Err(anyhow!(err))
-            },
-        };
-        Ok(catalog)
+            Ok(()) => Ok(catalog),
+            Err(err) => Err(anyhow!(err))
+        }
     }
 
     #[allow(dead_code)]
@@ -197,17 +194,25 @@ impl Catalog {
         if self.args.is_none() {
             return Err(anyhow!("args not defined"))
         };
-        let args = &self.args.clone().unwrap();
+        let args = self.args.clone().unwrap();
         if let Some(file) = &args.file {
             self.db_centric = false;
-            self.load_picture_entry_from_file(&file)
+            match load_picture_entry_from_file_path(&self.database, &file) {
+                Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
+                Err(err) => Err(anyhow!(err)),
+            }
         } else if args.covers {
             self.db_centric = false;
-            self.load_picture_entries_from_covers()
-        } else if args.directory.is_some() && args.add.clone().is_some() && args.from.is_some() {
+            match load_picture_entries_from_covers(&mut self.database) {
+                Ok(picture_entries) => Ok( {
+                    self.picture_entries = picture_entries;
+                }),
+                Err(err) => Err(anyhow!(err)),
+            }
+        } else if args.directory.is_some() && args.add.is_some() && args.from.is_some() {
             let dir = args.directory.clone().unwrap();
-            match self.insert_entries_from_dir_to_db(&args.clone().add.unwrap(), true) {
-                Ok(()) => self.load_picture_entries_from_directory(&dir),
+            match load_picture_entries_from_directory_into_db(&mut self.database, &args.clone().add.unwrap(), true) {
+                Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
                 Err(err) => Err(anyhow!(err)),
             }
         } else if let Some(dir) = &args.directory {
@@ -219,9 +224,15 @@ impl Catalog {
                 };
                 if args.add.is_some() {
                     println!("adding new pictures from {}", &args.add.clone().unwrap());
-                    self.insert_entries_from_dir_to_db(&args.add.clone().unwrap(), false)
+                    match load_picture_entries_from_directory_into_db(&mut self.database, &args.clone().add.unwrap(), false) {
+                        Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
+                        Err(err) => Err(anyhow!(err)),
+                    }
                 } else if args.check {
-                    self.insert_entries_from_dir_to_db(&dir, true)
+                    match load_picture_entries_from_directory_into_db(&mut self.database, &dir, false) {
+                        Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
+                        Err(err) => Err(anyhow!(err)),
+                    }
                 } else if args.purge {
                         self.delete_broken_entries_from_db()
                     } else {
@@ -249,16 +260,6 @@ impl Catalog {
                     };
                     self.picture_entries = picture_entries;
                 };
-                Ok(())
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
-    fn insert_entries_from_dir_to_db(&mut self, directory: &String, in_std_dir: bool) -> Result<()> {
-        match self.database.insert_difference_from_dir(directory, in_std_dir) {
-            Ok(mut picture_entries) => {
-                self.picture_entries.append(&mut picture_entries);
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
@@ -384,26 +385,7 @@ impl Catalog {
         }
     }
 
-    pub fn load_picture_entries_from_covers(&mut self) -> Result<()> {
-        match self.database.select_cover_pictures() {
-            Ok(picture_entries) => {
-                self.picture_entries = picture_entries;
-                Ok(())
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
 
-    pub fn load_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
-        match check_file(file_path) {
-            Ok(_) => match self.database.retrieve_or_create_image_data(file_path) {
-                Ok(Some(picture_entry)) => Ok(self.picture_entries.push(picture_entry)),
-                Ok(None) => Err(anyhow!("{} image data not found in database'", file_path)),
-                Err(err) => Err(anyhow!(err)),
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
 
     // queries
 
@@ -1151,6 +1133,7 @@ impl Catalog {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use clap::Parser;
     use crate::rank::Rank;
     use crate::picture_entry::make_picture_entry;
     use std::time::SystemTime;

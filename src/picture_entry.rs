@@ -10,6 +10,8 @@ use crate::rank::Rank;
 use crate::picture_io::{copy_file_to_target_directory, delete_file, read_or_create_image_data, read_file_info};
 use crate::path::{THUMB_SUFFIX, image_data_file_path, temp_directory};
 
+pub type PictureEntries = Vec<PictureEntry>;
+
 #[derive(Clone, Debug)]
 pub struct PictureEntry {
     pub file_path: String,
@@ -175,7 +177,7 @@ impl PictureEntry {
             self.tags.insert(tag.to_string());
         }
     }
-    
+
     pub fn delete_tag(&mut self, tag : &str) {
         self.tags.remove(tag);
     }

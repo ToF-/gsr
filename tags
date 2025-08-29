@@ -34,6 +34,7 @@ Order	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
 PGM	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    const PGM: &str = "gsr";$/;"	c
 PGM	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    const PGM: &str = "gsr";$/;"	c
 Palette	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub type Palette = [u32;9];$/;"	T
+PictureEntries	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub type PictureEntries = Vec<PictureEntry>;$/;"	T
 PictureEntry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub struct PictureEntry {$/;"	s
 Rank	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
 Shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub type Shortcuts = HashMap<String, Command>;$/;"	T
@@ -175,8 +176,7 @@ input	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input(&self
 input_kind	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input_kind(&self) -> Option<InputKind> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, editor: &mut Editor, catalog: &mut Catalog) -> bool {$/;"	f
 insert_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {$/;"	f
-insert_difference_from_dir	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_dir(&mut self, directory: &String, in_std_dir:bool) -> Result<Vec<PictureEntry>> {$/;"	f
-insert_entries_from_dir_to_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn insert_entries_from_dir_to_db(&mut self, directory: &String, in_std_dir: bool) -> Result<()> {$/;"	f
+insert_difference_from_directory	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_directory(&mut self, directory: &String, in_std_dir:bool) -> Result<PictureEntries> {$/;"	f
 insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {$/;"	f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
@@ -191,12 +191,13 @@ left_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn
 length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&self) -> usize {$/;"	f
 load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_all_tags(&self) -> Result<Vec<String>> {$/;"	f
 load_directories	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {$/;"	f
-load_picture_entries_from_covers	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_covers(&mut self) -> Result<()> {$/;"	f
+load_picture_entries_from_covers	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_covers(database: &mut Database) -> Result<PictureEntries> {$/;"	f
 load_picture_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db(&mut self) -> Result<()> {$/;"	f
 load_picture_entries_from_db_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db_with_tag_selection(&mut self) -> Result<()> {$/;"	f
 load_picture_entries_from_directory	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_directory(&mut self, directory: &str) -> Result<()> {$/;"	f
+load_picture_entries_from_directory_into_db	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_directory_into_db(database: &mut Database, directory: &str, in_std_dir: bool) -> Result<PictureEntries> {$/;"	f
 load_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn load_picture_entries_from_source(&mut self) -> Result<()> {$/;"	f
-load_picture_entry_from_file	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {$/;"	f
+load_picture_entry_from_file_path	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entry_from_file_path(database: &Database, file_path: &str) -> Result<PictureEntries> {$/;"	f
 load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load_shortcuts() -> Result<Shortcuts> {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
 make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, tags: HashSet<String>) -> PictureEntry {$/;"	f
@@ -239,7 +240,7 @@ parent_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub f
 parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn parent_path_is_the_file_path_without_file_name() {$/;"	f
 picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn picture_entries(&self) -> &Vec<PictureEntry> {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
-populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<Vec<PictureEntry>> {$/;"	f
+populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<PictureEntries> {$/;"	f
 position_from_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f
 print_directories_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_directories_all(self) -> Result<()> {$/;"	f
 print_info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_info(&self, editor: &Editor) {$/;"	f
@@ -258,9 +259,9 @@ rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: 
 right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool {$/;"	f
 select_and_unselect_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
-select_cover_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_cover_pictures(&mut self) -> Result<Vec<PictureEntry>> {$/;"	f
-select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: String) -> Result<Vec<PictureEntry>> {$/;"	f
-select_pictures_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<Vec<PictureEntry>> {$/;"	f
+select_cover_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_cover_pictures(&mut self) -> Result<PictureEntries> {$/;"	f
+select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: String) -> Result<PictureEntries> {$/;"	f
+select_pictures_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<PictureEntries> {$/;"	f
 set_all_pictures_for_multiple_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_label(&mut self) -> Result<()> {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: &str) {$/;"	f
