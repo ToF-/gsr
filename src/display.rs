@@ -12,7 +12,7 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
         } else {
             String::from("▻")
         },
-        if catalog.sample_on() {
+        if catalog.args().unwrap().covers {
             file_path_directory(file_path)
         } else {
             String::from("")

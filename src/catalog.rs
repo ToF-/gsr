@@ -1,6 +1,5 @@
 use crate::display::title_display;
 use anyhow::{anyhow, Result};
-use core::cmp::Ordering;
 use crate::actions::Action;
 use crate::args::Args;
 use crate::database::Database;
@@ -44,7 +43,6 @@ pub struct Catalog {
     max_selected: usize,
     previous_order: Option<Order>,
     args: Option<Args>,
-    sample_on: bool,
     discarded: Vec<usize>,
     database: Database,
     pub tags: HashSet<String>,
@@ -73,7 +71,6 @@ impl Catalog {
             max_selected: 0,
             previous_order: Some(Order::Random),
             args: None,
-            sample_on: false,
             discarded: Vec::new(),
             database: match Database::initialize(true) {
                 Ok(database) => database,
@@ -89,29 +86,13 @@ impl Catalog {
 
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
-        if args.create_schema {
-            match Database::initialize(false) {
-                Ok(database) => match database.create_schema() {
-                    Ok(()) => {
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                },
-                Err(err) => return Err(anyhow!(err)),
-            };
-        };
         let mut catalog = Self::new();
         catalog.args = Some(args.clone());
-        let add_result:Result<()> = if args.sample.is_some() {
-            catalog.set_page_size(args.sample.unwrap());
-            catalog.sample_on = true;
-            catalog.add_pictures_entries_for_sample()
+        catalog.set_page_size(catalog.args.clone().unwrap().grid.unwrap());
+        let add_result = if args.query.is_some() {
+            catalog.load_picture_entries_from_db()
         } else {
-            catalog.set_page_size(catalog.args.clone().unwrap().grid.unwrap());
-            if args.query.is_some() {
-                catalog.load_picture_entries_from_db()
-            } else {
-                catalog.add_picture_entries_from_source()
-            }
+            catalog.add_picture_entries_from_source()
         };
         if let Err(err) = add_result {
             return Err(err)
@@ -334,74 +315,6 @@ impl Catalog {
         }
     }
 
-    pub fn add_pictures_entries_for_sample(&mut self) -> Result<()> {
-        let args = self.args.clone().expect("catalog args not properly set");
-        let mut picture_entries: Vec<PictureEntry> = Vec::new();
-        if let Some(directory) = &args.directory {
-            let cells_per_row = args.sample.unwrap();
-            let page_size = cells_per_row * cells_per_row;
-            match get_picture_file_paths(directory) {
-                Ok(file_paths) => {
-                    if file_paths.is_empty() {
-                        return Err(anyhow!("no picture to show"))
-                    };
-                    for file_path in file_paths {
-                        match PictureEntry::from_file(&file_path) {
-                            Ok(picture_entry) => picture_entries.push(picture_entry),
-                            Err(err) => return Err(anyhow!(err)),
-                        }
-                    };
-                    picture_entries.sort_by(|a, b|  {
-                        match file_path_directory(&a.file_path).cmp(&file_path_directory(&b.file_path)) {
-                            Ordering::Equal => a.cmp_rank(&b),
-                            other => other,
-                        }
-                    });
-                    let mut current_parent = String::from("");
-                    let mut page_len: usize = 0;
-                    let mut last_entry: PictureEntry = picture_entries[0].clone();
-                    let mut started: bool = false;
-                    let mut index: usize = 0;
-                    let mut parent_number: usize = 0;
-                    let total_entries: usize = picture_entries.len();
-                    for entry in &picture_entries {
-                        let parent = file_path_directory(&entry.file_path);
-                        if parent != current_parent {
-                            parent_number += 1;
-                            println!("{} {}", parent_number, parent);
-                            // if the current page was not full, fill it
-                            // the indices that fill it are discarded (blank at display)
-                            // the images that fill it are a copy of the last picture added
-                            while page_len < page_size {
-                                if started {
-                                    self.discarded.push(index);
-                                    index += 1;
-                                    self.picture_entries.push(last_entry.clone())
-                                }
-                                page_len += 1;
-                            };
-                            page_len = 0;
-                        };
-                        started = true;
-                        // if the current page is not full, add the current picture to the page
-                        if page_len < page_size {
-                            self.picture_entries.push(entry.clone());
-                            index += 1;
-                            page_len += 1;
-                        };
-                        current_parent = parent;
-                        last_entry = entry.clone()
-                    };
-                    println!("{}/{}",index,total_entries);
-                    Ok(())
-                },
-                Err(err) => Err(anyhow!(err)),
-            }
-        } else {
-            Ok(())
-        }
-    }
-
     pub fn load_picture_entries_from_db(&mut self) -> Result<()> {
         let restriction: String = match self.args.clone().unwrap().query.clone() {
             Some(s) => s,
@@ -562,6 +475,10 @@ impl Catalog {
 
     // queries
     
+    pub fn args(&self) -> Option<Args> {
+        self.args.clone()
+    }
+
     pub fn db_centric(&self) -> bool {
         self.db_centric
     }
@@ -582,10 +499,6 @@ impl Catalog {
         &self.discarded
     }
 
-    pub fn discarded_index(&self, index: usize) -> bool {
-        self.sample_on() && self.discarded.contains(&index)
-    }
-
     pub fn sort_selection_on(&self) -> bool {
         self.order.is_none()
     }
@@ -596,10 +509,6 @@ impl Catalog {
 
     pub fn expand_on(&self) -> bool {
         self.expand_on
-    }
-
-    pub fn sample_on(&self) -> bool {
-        self.sample_on
     }
 
     pub fn length(&self) -> usize {
@@ -645,7 +554,7 @@ impl Catalog {
 
     pub fn index_from_position(&self, coords: Coords) -> Option<usize> {
         let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size) as usize;
-        if index < self.length() && !self.discarded_index(index) {
+        if index < self.length() {
             Some(index)
         } else {
             None
@@ -676,7 +585,7 @@ impl Catalog {
         format!("{}", self.current_candidates.join(","))
     }
     pub fn can_move_to_index(&self, index: usize) -> bool {
-        index < self.picture_entries.len() && ! self.discarded_index(index)
+        index < self.picture_entries.len()
     }
 
     pub fn can_move_towards(&self, direction: Direction) -> bool {
@@ -686,10 +595,10 @@ impl Catalog {
         let row = (index - self.page_index()) / cells_per_row;
         if self.page_limit_on {
             match direction {
-                Direction::Left => col > 0 && !self.discarded_index(index-1),
-                Direction::Right => col+1 < cells_per_row && index+1 < self.length() && !self.discarded_index(index+1),
-                Direction::Up => row > 0 && !self.discarded_index(index - cells_per_row),
-                Direction::Down => row+1 < cells_per_row && index + cells_per_row < self.length() && !self.discarded_index(index+cells_per_row),
+                Direction::Left => col > 0,
+                Direction::Right => col+1 < cells_per_row && index+1 < self.length(),
+                Direction::Up => row > 0,
+                Direction::Down => row+1 < cells_per_row && index + cells_per_row < self.length(),
             }
         } else {
             true
@@ -798,10 +707,8 @@ impl Catalog {
         }
     }
     pub fn begin_sort_selection(&mut self) {
-        if ! self.sample_on() {
-            self.previous_order = self.order.clone();
-            self.order = None
-        }
+        self.previous_order = self.order.clone();
+        self.order = None
     }
 
     pub fn cancel_sort_selection(&mut self) {
@@ -1681,6 +1588,3 @@ mod tests {
     }
 }
 
-// shift+click = select/unselect
-// R = input relabel (has to be on a selected pic)
-// return = confirm relabel = all pic selected get labelled

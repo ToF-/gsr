@@ -45,6 +45,21 @@ fn main() {
             exit(1);
         },
         Ok(args) => {
+            if args.create_schema {
+                match Database::initialize(false) {
+                    Ok(database) => match database.create_schema() {
+                        Ok(()) => exit(0),
+                        Err(err) => {
+                            eprint!("{}", err);
+                            exit(1)
+                        }
+                    },
+                    Err(err) => {
+                        eprint!("{}", err);
+                        exit(1)
+                    }
+                }
+            };
             match Catalog::init_catalog(&args) {
                 Err(err) => {
                     eprintln!("{}", err);
@@ -114,9 +129,6 @@ fn main() {
                                 exit(1)
                             },
                         }
-                    }
-                    if !catalog.sample_on() {
-                        catalog.sort_by(args.order.clone());
                     }
                     let catalog_rc = Rc::new(RefCell::new(catalog));
                     let application = Application::builder()

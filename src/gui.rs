@@ -263,7 +263,7 @@ fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key
                 refresh
             } else if catalog.sort_selection_on() {
                 sort_selection_process_key(key, &mut catalog)
-            } else if catalog.sample_on() {
+            } else if catalog.args().unwrap().covers {
                 sample_mode_process_key(key, &mut gui, &mut catalog)
             } else {
                 view_mode_process_key(key, &mut gui, &mut catalog)
