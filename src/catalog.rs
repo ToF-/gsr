@@ -1,16 +1,14 @@
-use crate::path::file_name;
-use crate::actions::Action;
-use std::collections::HashSet;
-use std::cmp::Ordering::{Less, Greater, Equal};
-use crate::path::standard_directory;
-use crate::completion::candidates;
-use std::process::exit;
-use crate::database::Database;
 use anyhow::{anyhow, Result};
 use core::cmp::Ordering;
+use crate::actions::Action;
 use crate::args::Args;
+use crate::completion::candidates;
+use crate::database::Database;
 use crate::direction::Direction;
+use crate::editor::Editor;
 use crate::order::Order;
+use crate::path::file_name;
+use crate::path::standard_directory;
 use crate::path::{get_picture_file_paths, file_path_directory, check_file, is_thumbnail};
 use crate::picture_entry::{PictureEntry};
 use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
@@ -19,9 +17,12 @@ use rand::Rng;
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
 use regex::Regex;
+use std::cmp::Ordering::{Less, Greater, Equal};
 use std::collections::HashMap;
+use std::collections::HashSet;
 use std::fs::read_to_string;
 use std::path::PathBuf;
+use std::process::exit;
 
 pub type Coords = (usize, usize);
 
@@ -691,25 +692,20 @@ impl Catalog {
         }
     }
 
-    pub fn index_input_pattern(&mut self) -> Option<usize> {
-        if let Some(pattern) = &self.input {
-            self.picture_entries.iter().position(|entry| entry.original_file_path().contains(&*pattern))
-        } else {
-            None
-        }
+    pub fn index_input_pattern(&mut self, pattern: &str) -> Option<usize> {
+        self.picture_entries.iter().position(|entry|
+            entry.original_file_path().contains(&*pattern))
     }
 
-    pub fn index_label_search(&mut self) -> Option<usize> {
-        if let Some(pattern) = &self.input {
-            self.picture_entries.iter().position(|entry| if let Some(label) = entry.label() {
-                    label.contains(&*pattern)
-                } else {
-                    false
-                })
-        } else {
-            None
-        }
+    pub fn index_label_search(&mut self, pattern: &str) -> Option<usize> {
+        self.picture_entries.iter().position(|entry|
+            if let Some(label) = entry.label() {
+                label.contains(pattern)
+            } else {
+                false
+            })
     }
+
     pub fn index_input_number(&mut self) -> Option<usize> {
         if let Some(number) = &self.input {
             let index = number.parse::<usize>().unwrap();
@@ -727,7 +723,7 @@ impl Catalog {
         self.page_changed
     }
 
-    pub fn title_display(&self) -> String {
+    pub fn title_display(&self, editor: &Editor) -> String {
         let entry_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
         let file_path = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).file_path;
         let display= format!("{}{} S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
@@ -800,8 +796,8 @@ impl Catalog {
 
     }
 
-    pub fn print_info(&self) {
-        println!("{}", self.title_display());
+    pub fn print_info(&self, editor: &Editor) {
+        println!("{}", self.title_display(editor));
         println!("{}", self.current_entry().expect("can't access current entry").original_file_path());
         println!("{:?}", self.current_entry().expect("can't access current entry"));
     }
@@ -898,6 +894,24 @@ impl Catalog {
         self.input_kind = None
     }
 
+    pub fn move_to_input_pattern(&mut self, pattern: &str) {
+        match self.index_input_pattern(pattern) {
+            Some(index) => if self.can_move_to_index(index) {
+                self.move_to_index(index)
+            },
+            None => {},
+        }
+    }
+
+    pub fn move_to_label_pattern(&mut self, pattern: &str) {
+        match self.index_label_search(pattern) {
+            Some(index) => if self.can_move_to_index(index) {
+                self.move_to_index(index)
+            },
+            None => {},
+        }
+    }
+
     pub fn confirm_input(&mut self) {
         if let Some(kind) = self.input_kind.clone() {
             match kind {
@@ -912,20 +926,10 @@ impl Catalog {
                     self.input = None;
                 },
                 InputKind::SearchInput => {
-                    if let Some(index) = self.index_input_pattern() {
-                        if self.can_move_to_index(index) {
-                            self.move_to_index(index)
-                        }
-                    };
                     self.input_kind = None;
                     self.input = None
                 },
                 InputKind::SearchLabel => {
-                    if let Some(index) = self.index_label_search() {
-                        if self.can_move_to_index(index) {
-                            self.move_to_index(index)
-                        }
-                    };
                     self.input_kind = None;
                     self.input = None
                 },
@@ -963,66 +967,6 @@ impl Catalog {
         if self.current_entry().is_some() {
             self.start_index = None
         }
-    }
-
-    pub fn add_input_char(&mut self, ch: char) {
-        self.current_candidates = vec![];
-        if let Some(kind) = self.input_kind.clone() {
-            let ch_is_ok: bool = match kind {
-                InputKind::IndexInput => {
-                    match ch {
-                        '0'..='9' => true,
-                        _ => false,
-                    }
-                },
-                InputKind::AddTagInput|InputKind::DeleteTagInput|InputKind::LabelInput|InputKind::RelabelInput|InputKind::SearchLabel => {
-                    match ch {
-                        'a'..='z' => true,
-                        '0'..='9' => true,
-                        '-'|'_' => true,
-                        _ => false,
-                    }
-                },
-                InputKind::SearchInput => true,
-            };
-            if ch_is_ok {
-                self.input = self.input.clone().map( |s| {
-                    let mut t = s.clone();
-                    t.push(ch);
-                    t
-                });
-            }
-        }
-    }
-
-    pub fn complete_input(&mut self) {
-        if let Some(kind) = self.input_kind.clone(){
-            if [InputKind::AddTagInput,InputKind::DeleteTagInput,InputKind::LabelInput,InputKind::RelabelInput,InputKind::SearchLabel].contains(&kind) {
-                match &self.input {
-                    Some(prefix) => {
-                        let candidates = candidates(prefix, &self.tags);
-                        match candidates.len() {
-                            0 => { self.current_candidates = vec![] } ,
-                            1 => {
-                                self.input = Some(candidates[0].clone());
-                                self.current_candidates = vec![];
-                            },
-                            _ => { self.current_candidates = candidates.clone() },
-                        }
-                        println!("{:?}", candidates);
-                    },
-                    None => {},
-                }
-            }
-        }
-    }
-
-    pub fn del_input_char(&mut self) {
-        self.input = self.input.clone().map( |s| {
-            let mut t = s.clone();
-            t.pop();
-            t
-        })
     }
 
     fn apply_label(&mut self, label: &str) -> Result<()> {

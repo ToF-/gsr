@@ -1,3 +1,4 @@
+use crate::editor::Editor;
 use crate::glib::timeout_add_local;
 use anyhow::{Result};
 use crate::commands::{Command,Shortcuts, export_shortcuts};
@@ -28,6 +29,7 @@ struct Gui {
     single_view_picture: gtk::Picture,
     cells_per_row: i32,
     shortcuts: Shortcuts,
+    editor: Editor,
 }
 
 impl Gui {
@@ -155,6 +157,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         single_view_picture: picture,
         cells_per_row: cells_per_row,
         shortcuts: shortcuts.clone(),
+        editor: Editor::new(),
     };
     let gui_rc = Rc::new(RefCell::new(gui));
 
@@ -253,15 +256,17 @@ pub fn startup_gui(_application: &gtk::Application) {
 
 fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
-        if let Ok(gui) = gui_rc.try_borrow() {
-            let refresh: bool = if catalog.input_on() {
-                input_mode_process_key(key, &gui, &mut catalog)
+        if let Ok(mut gui) = gui_rc.try_borrow_mut() {
+            let refresh: bool = if gui.editor.editing() {
+                let refresh = input_mode_process_key(key, &mut gui.editor, &mut catalog);
+                set_title(&gui, &catalog);
+                refresh
             } else if catalog.sort_selection_on() {
                 sort_selection_process_key(key, &mut catalog)
             } else if catalog.sample_on() {
-                sample_mode_process_key(key, &gui, &mut catalog)
+                sample_mode_process_key(key, &mut gui, &mut catalog)
             } else {
-                view_mode_process_key(key, &gui, &mut catalog)
+                view_mode_process_key(key, &mut gui, &mut catalog)
             };
             if refresh { refresh_view(&gui, &catalog) }
         }
@@ -280,26 +285,31 @@ fn refresh_view(gui: &Gui, catalog: &Catalog) {
     set_title(gui, catalog);
 }
 
-fn input_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
+fn input_mode_process_key(key: Key, editor: &mut Editor, catalog: &mut Catalog) -> bool {
     let mut refresh: bool = false;
     match key.name() {
         None => refresh = false,
         Some(key_name) => match key_name.as_str() {
-            "Escape" => catalog.cancel_input(),
+            "Escape" => {
+                editor.cancel();
+            },
             "Return" => {
-                catalog.confirm_input();
+                editor.confirm(catalog);
                 refresh = true
             },
-            "BackSpace" => catalog.del_input_char(),
-            "Tab" => catalog.complete_input(),
+            "BackSpace" => {
+                editor.delete();
+            },
+            "Tab" => {
+                editor.complete();
+            },
             _ => {
                 if let Some(ch) = key.to_unicode() {
-                    catalog.add_input_char(ch)
+                    editor.append(ch);
                 }
             }
         },
     };
-    set_title(&gui, &catalog);
     refresh
 }
 
@@ -318,11 +328,11 @@ fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {
     refresh
 }
 
-fn sample_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
+fn sample_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool {
     view_mode_process_key(key, gui, catalog)
 }
 
-fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
+fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool {
     let mut refresh: bool = true;
     match key.name() {
         None => refresh = false,
@@ -350,15 +360,22 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                         Command::LastPosition => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
                         Command::CopyLabel => catalog.copy_label(),
                         Command::CopyTemp => result = catalog.copy_picture_file_to_temp(),
-                        Command::Delete => catalog.delete(),
+                        Command::Delete => {
+                            gui.editor.delete();
+                            catalog.delete()
+                        },
                         Command::ToggleExpand => catalog.toggle_expand(),
                         Command::ToggleFullSize => if gui.single_view_mode() {
                             catalog.toggle_full_size()
                         },
-                        Command::GotoIndex => catalog.begin_input(InputKind::IndexInput),
+                        Command::GotoIndex => {
+                            gui.editor.begin_input(InputKind::IndexInput, catalog.tags.clone());
+                        },
                         Command::Random => catalog.move_to_random_index(),
-                        Command::Info => catalog.print_info(),
-                        Command::Jump => catalog.begin_input(InputKind::SearchLabel),
+                        Command::Info => catalog.print_info(&gui.editor),
+                        Command::Jump => { 
+                            gui.editor.begin_input(InputKind::SearchLabel, catalog.tags.clone());
+                        },
                         Command::ExportCommands => result = export_shortcuts(&gui.shortcuts),
                         Command::NextPage => catalog.move_next_page(),
                         Command::TogglePageLimit => catalog.toggle_page_limit(),
@@ -372,7 +389,9 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                             gui.application_window.close()
                         },
                         Command::Repeat => result = catalog.end_repeat_last_action(),
-                        Command::Search => catalog.begin_input(InputKind::SearchInput),
+                        Command::Search => {
+                            gui.editor.begin_input(InputKind::SearchInput, catalog.tags.clone());
+                        }
                         Command::UnSelectPage => result = catalog.unselect_page(),
                         Command::UnselectAll => result = catalog.unselect_all(),
                         Command::TogglePalette => {
@@ -399,10 +418,18 @@ fn view_mode_process_key(key: Key, gui: &Gui, catalog: &mut Catalog) -> bool {
                             result = catalog.end_set_select();
                             catalog.count_selected()
                         },
-                        Command::AddTag => catalog.begin_input(InputKind::AddTagInput),
-                        Command::DeleteTag => catalog.begin_input(InputKind::DeleteTagInput),
-                        Command::Label => catalog.begin_input(InputKind::LabelInput),
-                        Command::Relabel => catalog.begin_input(InputKind::RelabelInput),
+                        Command::AddTag => {
+                            gui.editor.begin_input(InputKind::AddTagInput, catalog.tags.clone());
+                        }
+                        Command::DeleteTag => {
+                            gui.editor.begin_input(InputKind::DeleteTagInput, catalog.tags.clone());
+                        }
+                        Command::Label => {
+                            gui.editor.begin_input(InputKind::LabelInput, catalog.tags.clone());
+                        }
+                        Command::Relabel => {
+                            gui.editor.begin_input(InputKind::RelabelInput, catalog.tags.clone());
+                        }
                         Command::Right => {
                             refresh = arrow_command(Direction::Right, gui, catalog)
                         },
@@ -456,7 +483,7 @@ fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
     ctx.paint().expect("can't paint surface")
 }
 fn set_title(gui: &Gui, catalog: &Catalog) {
-    gui.application_window.set_title(Some(&catalog.title_display()))
+    gui.application_window.set_title(Some(&catalog.title_display(&gui.editor)))
 }
 
 fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {
@@ -607,7 +634,7 @@ fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool
         arrow_command_full_size(direction, gui)
     } else {
         let _ = arrow_command_view_mode(direction, gui, catalog);
-        gui.application_window.set_title(Some(&catalog.title_display()));
+        gui.application_window.set_title(Some(&catalog.title_display(&gui.editor)));
         false
     }
 }
