@@ -20,11 +20,18 @@ impl Editor {
         }
     }
 
+    pub fn input(&self) -> String {
+        self.input.clone().expect("input() not called properly")
+    }
+
+    pub fn input_kind(&self) -> Option<InputKind> {
+        self.input_kind.clone()
+    }
+
     pub fn begin_input(&mut self, kind: InputKind, tags: HashSet<String>) {
         self.tags = tags;
         self.input_kind = Some(kind);
         self.input = Some(String::from(""));
-        println!("{:?}:{:?}", self.input_kind, self.input);
     }
 
     pub fn editing(&self) -> bool {
@@ -33,7 +40,6 @@ impl Editor {
 
     pub fn cancel(&mut self) {
         self.input_kind = None;
-        println!("{:?}:{:?}", self.input_kind, self.input);
     }
 
     pub fn confirm(&mut self, catalog: &mut Catalog) {
@@ -47,29 +53,26 @@ impl Editor {
                     let _ = catalog.delete_tag(input);
                 },
                 InputKind::SearchInput => {
-                    println!("move to name pattern {}", input);
                     catalog.move_to_input_pattern(input);
                 },
-                InputKind::SearchLabel => {
-                    println!("move to label {}", input);
+                InputKind::SearchLabelInput => {
                     catalog.move_to_label_pattern(input);
                 },
                 InputKind::IndexInput => {
-                    if let Some(index) = catalog.index_input_number() {
-                        if catalog.can_move_to_index(index) {
+                    if let Ok(index) = input.parse::<usize>() {
+                        if index < catalog.length() && catalog.can_move_to_index(index) {
                             catalog.move_to_index(index)
                         }
-                    };
-                }
+                    }
+                },
                 InputKind::LabelInput => {
-                    let _ = catalog.set_label_with_input();
+                    catalog.apply_label(input);
                 },
                 InputKind::RelabelInput => {
-                    let _ = catalog.set_selected_labels_with_input();
+                    let _ = catalog.set_selected_labels_with_input(input);
                 },
             }
         }
-        println!("ending {:?}:{:?}", self.input_kind, self.input);
         self.input_kind = None;
         self.input = None
     }
@@ -79,7 +82,6 @@ impl Editor {
             let mut t = s.clone();
             t.pop();
             t });
-        println!("{:?}:{:?}", self.input_kind, self.input);
     }
 
     pub fn append(&mut self, ch: char) {
@@ -91,7 +93,7 @@ impl Editor {
                         _ => false,
                     }
                 },
-                InputKind::AddTagInput|InputKind::DeleteTagInput|InputKind::LabelInput|InputKind::RelabelInput|InputKind::SearchLabel => {
+                InputKind::AddTagInput|InputKind::DeleteTagInput|InputKind::LabelInput|InputKind::RelabelInput|InputKind::SearchLabelInput => {
                     match ch {
                         'a'..='z' => true,
                         '0'..='9' => true,
@@ -109,12 +111,11 @@ impl Editor {
                 });
             }
         }
-        println!("{:?}:{:?}", self.input_kind, self.input);
     }
 
     pub fn complete(&mut self) {
         if let Some(kind) = self.input_kind.clone(){
-            if [InputKind::AddTagInput,InputKind::DeleteTagInput,InputKind::LabelInput,InputKind::RelabelInput,InputKind::SearchLabel].contains(&kind) {
+            if [InputKind::AddTagInput,InputKind::DeleteTagInput,InputKind::LabelInput,InputKind::RelabelInput,InputKind::SearchLabelInput].contains(&kind) {
                 match &self.input {
                     Some(prefix) => {
                         let candidates = candidates(prefix, &self.tags);
@@ -126,12 +127,10 @@ impl Editor {
                             },
                             _ => { self.current_candidates = candidates.clone() },
                         }
-                        println!("{:?}", candidates);
                     },
                     None => {},
                 }
             }
         }
-        println!("{:?}:{:?}", self.input_kind, self.input);
     }
 }

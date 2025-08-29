@@ -374,7 +374,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::Random => catalog.move_to_random_index(),
                         Command::Info => catalog.print_info(&gui.editor),
                         Command::Jump => { 
-                            gui.editor.begin_input(InputKind::SearchLabel, catalog.tags.clone());
+                            gui.editor.begin_input(InputKind::SearchLabelInput, catalog.tags.clone());
                         },
                         Command::ExportCommands => result = export_shortcuts(&gui.shortcuts),
                         Command::NextPage => catalog.move_next_page(),

@@ -28,7 +28,7 @@ pub type Coords = (usize, usize);
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum InputKind {
-    AddTagInput, DeleteTagInput, SearchInput, SearchLabel, LabelInput, RelabelInput, IndexInput, }
+    AddTagInput, DeleteTagInput, SearchInput, SearchLabelInput, LabelInput, RelabelInput, IndexInput, }
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -37,7 +37,6 @@ pub struct Catalog {
     index: usize,
     page_size: usize,
     page_limit_on: bool,
-    input: Option<String>,
     label: Option<String>,
     last_action: Option<Action>,
     palette_on: bool,
@@ -47,7 +46,6 @@ pub struct Catalog {
     page_changed: bool,
     order: Option<Order>,
     max_selected: usize,
-    input_kind: Option<InputKind>,
     previous_order: Option<Order>,
     args: Option<Args>,
     sample_on: bool,
@@ -68,7 +66,6 @@ impl Catalog {
             index: 0,
             page_size: 1,
             page_limit_on: false,
-            input: None,
             label: None,
             last_action: None,
             palette_on: false,
@@ -78,7 +75,6 @@ impl Catalog {
             page_changed: false,
             order: Some(Order::Random),
             max_selected: 0,
-            input_kind: None,
             previous_order: Some(Order::Random),
             args: None,
             sample_on: false,
@@ -664,10 +660,6 @@ impl Catalog {
         self.page_index_of(self.index)
     }
 
-    pub fn input_on(&self) -> bool {
-        self.input.is_some()
-    }
-
     pub fn current_candidates(&self) -> String {
         format!("{}", self.current_candidates.join(","))
     }
@@ -706,19 +698,6 @@ impl Catalog {
             })
     }
 
-    pub fn index_input_number(&mut self) -> Option<usize> {
-        if let Some(number) = &self.input {
-            let index = number.parse::<usize>().unwrap();
-            if index < self.length() {
-                Some(index)
-            } else {
-                None
-            }
-        } else {
-            None
-        }
-    }
-
     pub fn page_changed(&self) -> bool {
         self.page_changed
     }
@@ -749,15 +728,15 @@ impl Catalog {
             entry_display,
             if self.expand_on { "□" } else { "" },
             if self.full_size_on { "░" } else { "" },
-            if let Some(kind) = self.input_kind.clone() {
+            if let Some(kind) = editor.input_kind() {
                 match kind {
-                    InputKind::AddTagInput => format!("add tag:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
-                    InputKind::DeleteTagInput => format!("delete tag:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
-                    InputKind::SearchInput => format!("search:{}", self.input.as_ref().unwrap()),
-                    InputKind::SearchLabel => format!("lsearch:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
-                    InputKind::LabelInput => format!("label:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
-                    InputKind::RelabelInput => format!("relabel:{} {}", self.input.as_ref().unwrap(), self.current_candidates()),
-                    InputKind::IndexInput => format!("index:{}", self.input.as_ref().unwrap()),
+                    InputKind::AddTagInput => format!("add tag:{} {}", editor.input(), self.current_candidates()),
+                    InputKind::DeleteTagInput => format!("delete tag:{} {}", editor.input(), self.current_candidates()),
+                    InputKind::SearchInput => format!("search:{}", editor.input()),
+                    InputKind::SearchLabelInput => format!("lsearch:{} {}", editor.input(), self.current_candidates()),
+                    InputKind::LabelInput => format!("label:{} {}", editor.input(), self.current_candidates()),
+                    InputKind::RelabelInput => format!("relabel:{} {}", editor.input(), self.current_candidates()),
+                    InputKind::IndexInput => format!("index:{}", editor.input()),
                 }
             } else {
                 String::from("")
@@ -884,16 +863,6 @@ impl Catalog {
         self.page_limit_on = !self.page_limit_on
     }
 
-    pub fn begin_input(&mut self, kind: InputKind) {
-        self.input_kind = Some(kind);
-        self.input = Some(String::from(""))
-    }
-
-    pub fn cancel_input(&mut self) {
-        self.input = None;
-        self.input_kind = None
-    }
-
     pub fn move_to_input_pattern(&mut self, pattern: &str) {
         match self.index_input_pattern(pattern) {
             Some(index) => if self.can_move_to_index(index) {
@@ -904,55 +873,12 @@ impl Catalog {
     }
 
     pub fn move_to_label_pattern(&mut self, pattern: &str) {
+        println!("move_to_label_pattern({})", pattern);
         match self.index_label_search(pattern) {
             Some(index) => if self.can_move_to_index(index) {
                 self.move_to_index(index)
             },
             None => {},
-        }
-    }
-
-    pub fn confirm_input(&mut self) {
-        if let Some(kind) = self.input_kind.clone() {
-            match kind {
-                InputKind::AddTagInput => {
-                    let _ = self.add_tag_with_input();
-                    self.input_kind = None;
-                    self.input = None;
-                },
-                InputKind::DeleteTagInput => {
-                    let _ = self.delete_tag_with_input();
-                    self.input_kind = None;
-                    self.input = None;
-                },
-                InputKind::SearchInput => {
-                    self.input_kind = None;
-                    self.input = None
-                },
-                InputKind::SearchLabel => {
-                    self.input_kind = None;
-                    self.input = None
-                },
-                InputKind::IndexInput => {
-                    if let Some(index) = self.index_input_number() {
-                        if self.can_move_to_index(index) {
-                            self.move_to_index(index)
-                        }
-                    };
-                    self.input_kind = None;
-                    self.input = None
-                }
-                InputKind::LabelInput => {
-                    let _ = self.set_label_with_input();
-                    self.input_kind = None;
-                    self.input = None;
-                },
-                InputKind::RelabelInput => {
-                    let _ = self.set_selected_labels_with_input();
-                    self.input_kind = None;
-                    self.input = None;
-                },
-            }
         }
     }
 
@@ -969,7 +895,7 @@ impl Catalog {
         }
     }
 
-    fn apply_label(&mut self, label: &str) -> Result<()> {
+    pub fn apply_label(&mut self, label: &str) -> Result<()> {
         if let Some(index) = self.index() {
             self.label = Some(label.to_string());
             let entry = &mut self.picture_entries[index];
@@ -1068,44 +994,19 @@ impl Catalog {
         }
     }
 
-    pub fn set_label_with_input(&mut self) -> Result<()> {
-        match &self.input.clone() {
-            Some(s) => self.apply_label(s),
-            None => Ok(()),
-        }
-    }
 
-    pub fn add_tag_with_input(&mut self) -> Result<()> {
-        match &self.input.clone() {
-            Some(s) => self.add_tag(s),
-            None => Ok(()),
-        }
-    }
-
-    pub fn delete_tag_with_input(&mut self) -> Result<()> {
-        match &self.input.clone() {
-            Some(s) => self.delete_tag(s),
-            None => Ok(()),
-        }
-    }
-
-    pub fn set_selected_labels_with_input(&mut self) -> Result<()> {
-        match &self.input {
-            Some(label) => {
-                for index in 0..self.picture_entries.len() {
-                    let entry = &mut self.picture_entries[index];
-                    if entry.selected {
-                        entry.set_label(label);
-                        match Self::update_image_data(&self.database, entry) {
-                            Ok(()) => {},
-                            Err(err) => return Err(anyhow!(err)),
-                        }
-                    }
+    pub fn set_selected_labels_with_input(&mut self, label: &str) -> Result<()> {
+        for index in 0..self.picture_entries.len() {
+            let entry = &mut self.picture_entries[index];
+            if entry.selected {
+                entry.set_label(label);
+                match Self::update_image_data(&self.database, entry) {
+                    Ok(()) => {},
+                    Err(err) => return Err(anyhow!(err)),
                 }
-                Ok(())
-            },
-            None => Ok(()),
+            }
         }
+        Ok(())
     }
 
     pub fn set_label(&mut self) -> Result<()> {
