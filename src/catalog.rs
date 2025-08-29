@@ -1,4 +1,6 @@
-use crate::loader::{load_picture_entry_from_file_path, load_picture_entries_from_covers, load_picture_entries_from_directory_into_db };
+use crate::loader::load_picture_entries_from_source;
+use crate::picture_entry::PictureEntries;
+use crate::loader::load_picture_entries_from_db;
 use crate::display::title_display;
 use anyhow::{anyhow, Result};
 use crate::actions::Action;
@@ -88,11 +90,8 @@ impl Catalog {
         let mut catalog = Self::new();
         catalog.args = Some(args.clone());
         catalog.set_page_size(catalog.args.clone().unwrap().grid.unwrap());
-        let add_result = if args.query.is_some() {
-            catalog.load_picture_entries_from_db()
-        } else {
-            catalog.load_picture_entries_from_source()
-        };
+        let mut database = Database::initialize(false).unwrap();
+        let add_result = Catalog::set_picture_entries(&mut catalog, load_picture_entries_from_source(&mut database, args));
         if let Err(err) = add_result {
             return Err(err)
         };
@@ -190,61 +189,6 @@ impl Catalog {
     // 5) showing the pictures in a specific file list
 
     // the issue of importing new pictures, or removing pictures is another matter
-    fn load_picture_entries_from_source(&mut self) -> Result<()> {
-        if self.args.is_none() {
-            return Err(anyhow!("args not defined"))
-        };
-        let args = self.args.clone().unwrap();
-        if let Some(file) = &args.file {
-            self.db_centric = false;
-            match load_picture_entry_from_file_path(&self.database, &file) {
-                Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
-                Err(err) => Err(anyhow!(err)),
-            }
-        } else if args.covers {
-            self.db_centric = false;
-            match load_picture_entries_from_covers(&mut self.database) {
-                Ok(picture_entries) => Ok( {
-                    self.picture_entries = picture_entries;
-                }),
-                Err(err) => Err(anyhow!(err)),
-            }
-        } else if args.directory.is_some() && args.add.is_some() && args.from.is_some() {
-            let dir = args.directory.clone().unwrap();
-            match load_picture_entries_from_directory_into_db(&mut self.database, &args.clone().add.unwrap(), true) {
-                Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
-                Err(err) => Err(anyhow!(err)),
-            }
-        } else if let Some(dir) = &args.directory {
-            self.db_centric = standard_directory() != "" && *dir == standard_directory();
-            if self.db_centric {
-                match self.load_picture_entries_from_db_with_tag_selection() {
-                    Ok(()) => {}
-                    Err(err) => return Err(anyhow!(err))
-                };
-                if args.add.is_some() {
-                    println!("adding new pictures from {}", &args.add.clone().unwrap());
-                    match load_picture_entries_from_directory_into_db(&mut self.database, &args.clone().add.unwrap(), false) {
-                        Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
-                        Err(err) => Err(anyhow!(err)),
-                    }
-                } else if args.check {
-                    match load_picture_entries_from_directory_into_db(&mut self.database, &dir, false) {
-                        Ok(picture_entries) => Ok( { self.picture_entries = picture_entries; }),
-                        Err(err) => Err(anyhow!(err)),
-                    }
-                } else if args.purge {
-                        self.delete_broken_entries_from_db()
-                    } else {
-                        Ok(())
-                }
-            } else {
-                self.load_picture_entries_from_directory(&dir)
-            }
-        } else {
-            Ok(())
-        }
-    }
 
     fn delete_broken_entries_from_db(&mut self) -> Result<()> {
         match self.database.delete_difference_from_file_system() {
@@ -266,124 +210,8 @@ impl Catalog {
         }
     }
 
-    pub fn load_picture_entries_from_db(&mut self) -> Result<()> {
-        let restriction: String = match self.args.clone().unwrap().query.clone() {
-            Some(s) => s,
-            None => String::from("true"),
-        };
-        let pattern: String = match self.args.clone().unwrap().pattern.clone() {
-            Some(s) => String::from(" and File_Path like '%".to_owned() + &s + "%'"),
-            None => String::from(""),
-        };
-        self.picture_entries = match self.database.select_pictures(restriction + &pattern) {
-            Ok(mut entries) => {
-                for entry in &mut entries {
-                    match self.database.entry_tags(&entry.file_path) {
-                        Ok(lags) => {
-                            entry.tags = lags
-                        },
-                        Err(err) => return Err(anyhow!(err)),
-                    }
-                };
-                entries
-            },
-            Err(err) => return Err(anyhow!(err)),
-        };
-        Ok(())
-    }
 
-    pub fn load_picture_entries_from_db_with_tag_selection(&mut self) -> Result<()> {
-        println!("loading picture data from database");
-        let args = &self.args.clone().unwrap();
-        match &args.select {
-            Some(labels) => {
-                self.picture_entries = match self.database.select_pictures_with_tag_selection(labels.to_vec()) {
-                    Ok(mut entries) => {
-                        for entry in &mut entries {
-                            match self.database.entry_tags(&entry.file_path) {
-                                Ok(labels) => {
-                                    entry.tags = labels
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        entries
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                };
-                Ok(())
-                },
-            None => self.load_picture_entries_from_db(),
-        }
-    }
 
-    pub fn load_picture_entries_from_directory(&mut self, directory: &str) -> Result<()> {
-        println!("loading picture data from directory {}", directory);
-        let args = &self.args.clone().unwrap();
-        match get_picture_file_paths(directory) {
-            Ok(file_paths) => {
-                let mut error: bool = false;
-                for file_path in file_paths {
-                    let matches_pattern = match args.pattern {
-                        None => true,
-                        Some(ref pattern) => {
-                            match Regex::new(&pattern) {
-                                Ok(reg_expr) => match reg_expr.captures(&file_path) {
-                                    Some(_) => true,
-                                    None => false,
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        },
-                    };
-                    let tag_select_set:HashSet<String> = match args.select {
-                        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
-                        None => HashSet::new(),
-                    };
-                    let tag_include_set:HashSet<String> = match args.include {
-                        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
-                        None => HashSet::new(),
-                    };
-                    let entry_tags: HashSet<String>;
-                    if tag_select_set.len() > 0 || tag_include_set.len() > 0 {
-                        match self.database.entry_tags(&file_path) {
-                            Ok(tags) => {
-                                entry_tags = HashSet::from_iter(tags.iter().cloned())
-                            },
-                            Err(err) => return Err(anyhow!(err)),
-                        }
-                    } else {
-                        entry_tags = HashSet::new()
-                    }
-                    let matches_select = match tag_select_set.len() {
-                        0 => true,
-                        _ => entry_tags.intersection(&tag_select_set).count() > 0,
-                    };
-                    let matches_include = match tag_include_set.len() {
-                        0 => true,
-                        _ => tag_include_set.is_subset(&entry_tags) ,
-                    };
-                    if matches_pattern && matches_select && matches_include {
-                        match PictureEntry::from_file_or_database(&file_path, &self.database) {
-                            Ok(picture_entry) => {
-                                self.picture_entries.push(picture_entry)
-                            },
-                            Err(err) => {
-                                    eprintln!("{}", err);
-                                    error = true;
-                            }
-                        }
-                    }
-                }
-                if error {
-                    Err(anyhow!(format!("Some pictures could not be opened")))
-                } else {
-                    Ok(())
-                }
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
 
 
 
@@ -577,7 +405,17 @@ impl Catalog {
         println!("{}", self.current_entry().expect("can't access current entry").original_file_path());
         println!("{:?}", self.current_entry().expect("can't access current entry"));
     }
-    // update
+    // updates
+    
+    pub fn set_picture_entries(&mut self, picture_entries_result: Result<PictureEntries>) -> Result<()> {
+        match picture_entries_result {
+            Ok(picture_entries) => {
+                self.picture_entries = picture_entries;
+                Ok(())
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
 
     pub fn cover(&mut self) -> Result<()> {
         let entry = self.picture_entries[self.index].clone();

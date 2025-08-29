@@ -176,7 +176,7 @@ input	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input(&self
 input_kind	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input_kind(&self) -> Option<InputKind> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, editor: &mut Editor, catalog: &mut Catalog) -> bool {$/;"	f
 insert_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {$/;"	f
-insert_difference_from_directory	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_directory(&mut self, directory: &String, in_std_dir:bool) -> Result<PictureEntries> {$/;"	f
+insert_difference_from_directory	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_directory(&mut self, directory: &str, in_std_dir:bool) -> Result<PictureEntries> {$/;"	f
 insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {$/;"	f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
@@ -192,11 +192,11 @@ length	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn length(&s
 load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_all_tags(&self) -> Result<Vec<String>> {$/;"	f
 load_directories	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {$/;"	f
 load_picture_entries_from_covers	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_covers(database: &mut Database) -> Result<PictureEntries> {$/;"	f
-load_picture_entries_from_db	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db(&mut self) -> Result<()> {$/;"	f
-load_picture_entries_from_db_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_db_with_tag_selection(&mut self) -> Result<()> {$/;"	f
-load_picture_entries_from_directory	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn load_picture_entries_from_directory(&mut self, directory: &str) -> Result<()> {$/;"	f
+load_picture_entries_from_db	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Result<PictureEntries> {$/;"	f
+load_picture_entries_from_db_with_tag_selection	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_db_with_tag_selection(database: &mut Database, args: &Args) -> Result<PictureEntries> {$/;"	f
+load_picture_entries_from_directory	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_directory(database: &mut Database, directory: &str, args: &Args) -> Result<PictureEntries> {$/;"	f
 load_picture_entries_from_directory_into_db	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_directory_into_db(database: &mut Database, directory: &str, in_std_dir: bool) -> Result<PictureEntries> {$/;"	f
-load_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn load_picture_entries_from_source(&mut self) -> Result<()> {$/;"	f
+load_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) -> Result<PictureEntries> {$/;"	f
 load_picture_entry_from_file_path	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entry_from_file_path(database: &Database, file_path: &str) -> Result<PictureEntries> {$/;"	f
 load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load_shortcuts() -> Result<Shortcuts> {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
@@ -268,6 +268,7 @@ set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn 
 set_label_for_cell_index	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_label_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focus: bool) {$/;"	f
 set_new_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn set_new_image_data() {$/;"	f
 set_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
+set_picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_picture_entries(&mut self, picture_entries_result: Result<PictureEntries>) -> Result<()> {$/;"	f
 set_picture_for_cell_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: usize) {$/;"	f
 set_picture_for_single_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_rank	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_rank(&mut self, rank: Rank) -> Result<()> {$/;"	f
