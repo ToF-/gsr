@@ -1,6 +1,10 @@
-use crate::catalog::{Catalog,InputKind};
+use crate::catalog::{Catalog};
 use crate::completion::candidates;
 use std::collections::HashSet;
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum InputKind {
+    AddTagInput, DeleteTagInput, SearchInput, SearchLabelInput, LabelInput, RelabelInput, IndexInput, }
 
 pub struct Editor {
     input: Option<String>,

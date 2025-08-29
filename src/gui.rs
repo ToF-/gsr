@@ -1,4 +1,5 @@
-use crate::editor::Editor;
+use crate::display::title_display;
+use crate::editor::{Editor,InputKind};
 use crate::glib::timeout_add_local;
 use anyhow::{Result};
 use crate::commands::{Command,Shortcuts, export_shortcuts};
@@ -11,7 +12,6 @@ use crate::direction::Direction;
 use crate::Args;
 use crate::order::order_from_string;
 use crate::Catalog;
-use crate::catalog::InputKind;
 use crate::picture_entry::PictureEntry;
 use crate::picture_io::check_or_create_thumbnail_file;
 use gtk::prelude::*;
@@ -483,7 +483,7 @@ fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
     ctx.paint().expect("can't paint surface")
 }
 fn set_title(gui: &Gui, catalog: &Catalog) {
-    gui.application_window.set_title(Some(&catalog.title_display(&gui.editor)))
+    gui.application_window.set_title(Some(&title_display(catalog, &gui.editor)))
 }
 
 fn arrow_command_full_size(direction: Direction, gui: &Gui) -> bool {
@@ -634,7 +634,7 @@ fn arrow_command(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool
         arrow_command_full_size(direction, gui)
     } else {
         let _ = arrow_command_view_mode(direction, gui, catalog);
-        gui.application_window.set_title(Some(&catalog.title_display(&gui.editor)));
+        gui.application_window.set_title(Some(&title_display(catalog, &gui.editor)));
         false
     }
 }

@@ -1,11 +1,11 @@
+use crate::display::title_display;
 use anyhow::{anyhow, Result};
 use core::cmp::Ordering;
 use crate::actions::Action;
 use crate::args::Args;
-use crate::completion::candidates;
 use crate::database::Database;
 use crate::direction::Direction;
-use crate::editor::Editor;
+use crate::editor::{Editor};
 use crate::order::Order;
 use crate::path::file_name;
 use crate::path::standard_directory;
@@ -25,10 +25,6 @@ use std::path::PathBuf;
 use std::process::exit;
 
 pub type Coords = (usize, usize);
-
-#[derive(Clone, Debug, PartialEq)]
-pub enum InputKind {
-    AddTagInput, DeleteTagInput, SearchInput, SearchLabelInput, LabelInput, RelabelInput, IndexInput, }
 
 #[derive(Debug)]
 pub struct Catalog {
@@ -566,6 +562,22 @@ impl Catalog {
 
     // queries
     
+    pub fn db_centric(&self) -> bool {
+        self.db_centric
+    }
+
+    pub fn max_selected(&self) -> usize {
+        self.max_selected
+    }
+
+    pub fn start_index(&self) -> Option<usize> {
+        self.start_index
+    }
+
+    pub fn order(&self) -> Option<Order> {
+        self.order
+    }
+
     pub fn discarded(&self) -> &Vec<usize> {
         &self.discarded
     }
@@ -702,48 +714,6 @@ impl Catalog {
         self.page_changed
     }
 
-    pub fn title_display(&self, editor: &Editor) -> String {
-        let entry_display = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).title_display();
-        let file_path = &<PictureEntry as Clone>::clone(&self.current_entry().unwrap()).file_path;
-        let display= format!("{}{} S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
-            if self.db_centric {
-                String::from("◯")
-            } else {
-                String::from("▻")
-            },
-            if self.sample_on() {
-                file_path_directory(file_path)
-            } else {
-                String::from("")
-            },
-            self.max_selected,
-            if self.start_index.is_some() { "…" } else { "" },
-            if let Some(order) = self.order.clone() {
-                order.to_string()
-            } else {
-                "??".to_string()
-            },
-            self.index().unwrap(),
-            self.last(),
-            entry_display,
-            if self.expand_on { "□" } else { "" },
-            if self.full_size_on { "░" } else { "" },
-            if let Some(kind) = editor.input_kind() {
-                match kind {
-                    InputKind::AddTagInput => format!("add tag:{} {}", editor.input(), self.current_candidates()),
-                    InputKind::DeleteTagInput => format!("delete tag:{} {}", editor.input(), self.current_candidates()),
-                    InputKind::SearchInput => format!("search:{}", editor.input()),
-                    InputKind::SearchLabelInput => format!("lsearch:{} {}", editor.input(), self.current_candidates()),
-                    InputKind::LabelInput => format!("label:{} {}", editor.input(), self.current_candidates()),
-                    InputKind::RelabelInput => format!("relabel:{} {}", editor.input(), self.current_candidates()),
-                    InputKind::IndexInput => format!("index:{}", editor.input()),
-                }
-            } else {
-                String::from("")
-            }
-        );
-        display
-    }
 
     pub fn copy_picture_file_to_temp(&self) -> Result<()> {
         let entry = self.current_entry().unwrap();
@@ -776,7 +746,7 @@ impl Catalog {
     }
 
     pub fn print_info(&self, editor: &Editor) {
-        println!("{}", self.title_display(editor));
+        println!("{}", title_display(self, editor));
         println!("{}", self.current_entry().expect("can't access current entry").original_file_path());
         println!("{:?}", self.current_entry().expect("can't access current entry"));
     }
