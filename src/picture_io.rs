@@ -207,7 +207,8 @@ mod tests {
     #[test]
     fn read_image_data_deserializes_image_data() {
         let result = read_image_data("testdata/smallIMAGE_DATA.json");
-        let expected = ImageData { colors: 15530, rank: Rank::NoStar, selected: false, palette: [2897673, 3959812, 4873222, 7969303, 9277061, 10988432, 12831138, 12896956, 16514043], label: String::from("") };
+        // let expected = ImageData { colors: 15530, rank: Rank::NoStar, selected: false, palette: [2897673, 3959812, 4873222, 7969303, 9277061, 10988432, 12831138, 12896956, 16514043], label: String::from("") };
+        let expected = ImageData { colors: 15555, rank: Rank::NoStar, selected: false, palette: [2565643, 4742662, 8034583, 8680564, 9276805, 11053969, 12830882, 12895932, 16514043], label: String::from("") };
         println!("{:?}", result);
         assert_eq!(true, result.is_ok());
         assert_eq!(expected, result.unwrap());

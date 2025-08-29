@@ -102,10 +102,6 @@ pub struct Args {
     #[arg(short, long, value_name="QUERY")]
     pub query: Option<String>,
 
-    /// display the files in FILE_LIST
-    #[arg(short, long, value_name="FILE_LIST")]
-    pub reading: Option<String>,
-
     /// wait N seconds between each picture
     #[arg(short, long, value_name="N")]
     pub seconds: Option<u64>,
@@ -268,14 +264,6 @@ impl Args {
 
             query: self.query.clone(),
 
-            reading: match &self.reading {
-                None => None,
-                Some(path) => match check_reading_list_file(&path) {
-                    Ok(_) => Some(path.to_string()),
-                    Err(err) => return Err(err),
-                },
-            },
-
             seconds: self.seconds,
 
             select: match self.select.clone() {
@@ -335,7 +323,7 @@ fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default:
 mod tests {
     use super::*;
 
-    const PGM: &str = "gsr2";
+    const PGM: &str = "gsr";
 
     fn my_checked_args(command_line: Vec<&str>) -> Result<Args> {
         let result = Args::try_parse_from(command_line.iter());
@@ -362,12 +350,6 @@ mod tests {
     #[test]
     fn checked_args_wont_accept_a_wrong_directory() {
         let args = my_checked_args(vec![PGM,"/foo"]);
-        println!("{:?}", args);
-        assert_eq!(false, args.is_ok());
-    }
-    #[test]
-    fn checked_args_wont_accept_a_wrong_all_move_target() {
-        let args = my_checked_args(vec![PGM,"-a","/foo"]);
         println!("{:?}", args);
         assert_eq!(false, args.is_ok());
     }

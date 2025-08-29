@@ -27,10 +27,6 @@ pub fn default_extract_list_file() -> Result<String> {
     }
 }
 
-pub fn is_thumbnail(file_name: &str) -> bool {
-   file_name.contains(&THUMB_SUFFIX)
-}
-
 pub fn check_path(source: &str, absolute: bool) -> Result<PathBuf> {
     let path = PathBuf::from(source);
     if !path.exists() {

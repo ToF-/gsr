@@ -140,23 +140,21 @@ impl Editor {
 }
 
 #[cfg(test)]
-    use super::*;
 
-
-    [#test]
+    #[test]
     fn editing_input() {
         let mut editor = Editor::new();
-        assert_eq!(false, editor.input_on());
-        editor.begin_input(InputKind::LabelInput);
-        assert_eq!(true, editor.input_on());
-        editor.add_input_char('F');
-        editor.add_input_char('o');
-        editor.add_input_char('o');
-        editor.add_input_char('-');
-        assert_eq!(String::from("Foo-"), editor.input.clone().unwrap());
-        editor.del_input_char();
-        assert_eq!(String::from("Foo"), editor.input.clone().unwrap());
-        editor.cancel_input();
-        assert_eq!(false, editor.input_on());
+        assert_eq!(false, editor.editing());
+        editor.begin_input(InputKind::LabelInput, HashSet::new());
+        assert_eq!(true, editor.editing());
+        editor.append('f');
+        editor.append('o');
+        editor.append('o');
+        editor.append('-');
+        assert_eq!(String::from("foo-"), editor.input.clone().unwrap());
+        editor.delete();
+        assert_eq!(String::from("foo"), editor.input.clone().unwrap());
+        editor.cancel();
+        assert_eq!(false, editor.editing());
     }
 

@@ -1,3 +1,4 @@
+use clap::Parser;
 use crate::display::title_display;
 use anyhow::{anyhow, Result};
 use crate::actions::Action;
@@ -8,7 +9,7 @@ use crate::editor::{Editor};
 use crate::order::Order;
 use crate::path::file_name;
 use crate::path::standard_directory;
-use crate::path::{get_picture_file_paths, file_path_directory, check_file, is_thumbnail};
+use crate::path::{get_picture_file_paths, file_path_directory, check_file};
 use crate::picture_entry::{PictureEntry};
 use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
@@ -19,8 +20,6 @@ use regex::Regex;
 use std::cmp::Ordering::{Less, Greater, Equal};
 use std::collections::HashMap;
 use std::collections::HashSet;
-use std::fs::read_to_string;
-use std::path::PathBuf;
 use std::process::exit;
 
 pub type Coords = (usize, usize);
@@ -110,6 +109,13 @@ impl Catalog {
         Ok(catalog)
     }
 
+    #[allow(dead_code)]
+    pub fn add_picture_entries(&mut self, entries: &Vec<PictureEntry>) {
+        for entry in entries {
+            self.picture_entries.push(entry.clone())
+        }
+    }
+
     pub fn initialize_tags(&mut self) -> Result<()> {
         self.tags = HashSet::new();
         match self.database.load_all_tags() {
@@ -188,20 +194,20 @@ impl Catalog {
 
     // the issue of importing new pictures, or removing pictures is another matter
     fn load_picture_entries_from_source(&mut self) -> Result<()> {
+        if self.args.is_none() {
+            return Err(anyhow!("args not defined"))
+        };
         let args = &self.args.clone().unwrap();
         if let Some(file) = &args.file {
             self.db_centric = false;
             self.load_picture_entry_from_file(&file)
-        } else if let Some(list) = &args.reading {
-            self.db_centric = false;
-            self.load_picture_entries_from_file_list(&list)
         } else if args.covers {
             self.db_centric = false;
             self.load_picture_entries_from_covers()
         } else if args.directory.is_some() && args.add.clone().is_some() && args.from.is_some() {
             let dir = args.directory.clone().unwrap();
             match self.insert_entries_from_dir_to_db(&args.clone().add.unwrap(), true) {
-                Ok(()) => self.load_picture_entries_from_dir(&dir),
+                Ok(()) => self.load_picture_entries_from_directory(&dir),
                 Err(err) => Err(anyhow!(err)),
             }
         } else if let Some(dir) = &args.directory {
@@ -222,7 +228,7 @@ impl Catalog {
                         Ok(())
                 }
             } else {
-                self.load_picture_entries_from_dir(&dir)
+                self.load_picture_entries_from_directory(&dir)
             }
         } else {
             Ok(())
@@ -306,7 +312,7 @@ impl Catalog {
         }
     }
 
-    pub fn load_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {
+    pub fn load_picture_entries_from_directory(&mut self, directory: &str) -> Result<()> {
         println!("loading picture data from directory {}", directory);
         let args = &self.args.clone().unwrap();
         match get_picture_file_paths(directory) {
@@ -371,28 +377,6 @@ impl Catalog {
                 }
             },
             Err(err) => Err(anyhow!(err)),
-        }
-    }
-
-    pub fn load_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {
-        match read_to_string(file_list) {
-            Err(err) => Err(anyhow!(err)),
-            Ok(content) => {
-                println!("reading {} file list", file_list);
-                for path in content.lines()
-                    .map(String::from)
-                        .filter(|p| !is_thumbnail(p))
-                        .collect::<Vec<_>>()
-                        .into_iter()
-                        .map(|l| PathBuf::from(l)) {
-                            let file_path = path.to_str().unwrap().to_string();
-                            match PictureEntry::from_file(&file_path) {
-                                Ok(picture_entry) => self.picture_entries.push(picture_entry),
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                Ok(())
-            },
         }
     }
 
@@ -1168,33 +1152,41 @@ mod tests {
     use std::time::SystemTime;
     use chrono::DateTime;
 
+    const PGM: &str = "gsr";
+
+    fn my_checked_args(command_line: Vec<&str>) -> Result<Args> {
+        let result = Args::try_parse_from(command_line.iter());
+        let mut args = result.unwrap();
+        args.checked_args()
+    }
+
     fn my_entries() -> Vec<PictureEntry> {
         let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
         let day_b: SystemTime = DateTime::parse_from_rfc2822("Sat, 1 Jul 2023 10:52:37 GMT").unwrap().into();
         let day_c: SystemTime = DateTime::parse_from_rfc2822("Mon, 1 Jan 2024 10:52:37 GMT").unwrap().into();
         let day_d: SystemTime = DateTime::parse_from_rfc2822("Mon, 1 Jan 2024 11:52:37 GMT").unwrap().into();
         vec!(
-            make_picture_entry(String::from("testdata/foo.jpeg"), 100, 5, day_d, Rank::NoStar, None, Some(String::from("foo")), false, false, vec![]),
-            make_picture_entry(String::from("testdata/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars, None, None, false, false, vec![]),
-            make_picture_entry(String::from("testdata/qux.jpeg"), 10, 25, day_c, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, vec![]),
-            make_picture_entry(String::from("testdata/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo")),false, false, vec![]))
+            make_picture_entry(String::from("testdata/foo.jpeg"), 100, 5, day_d, Rank::NoStar, None, Some(String::from("foo")), false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars, None, None, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/qux.jpeg"), 10, 25, day_c, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo")),false, false, HashSet::new()))
     }
 
     fn my_catalog() -> Catalog {
         let mut catalog = Catalog::new();
         let mut example = my_entries();
-        catalog.load_picture_entries(&mut example);
+        catalog.add_picture_entries(&mut example);
         catalog
     }
 
     fn my_larger_catalog() -> Catalog {
         let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
         let mut other_entries = vec![
-            make_picture_entry(String::from("testdata/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo")),false, false, vec![]),
-            make_picture_entry(String::from("testdata/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None, false, false, vec![]),
-            make_picture_entry(String::from("testdata/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, vec![])];
+            make_picture_entry(String::from("testdata/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo")),false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, HashSet::new())];
         let mut catalog = my_catalog();
-        catalog.load_picture_entries(&mut other_entries);
+        catalog.add_picture_entries(&mut other_entries);
         catalog
     }
 
@@ -1327,39 +1319,15 @@ mod tests {
     fn finding_a_picture_entry_by_input_pattern() {
         let mut example = my_entries();
         let mut catalog = Catalog::new();
-        catalog.load_picture_entries(&mut example);
+        catalog.add_picture_entries(&mut example);
         catalog.sort_by(Order::Size);
         catalog.move_to_index(0);
         assert_eq!(String::from("qux.jpeg"),catalog.current_entry().unwrap().original_file_name());
-        catalog.begin_input(InputKind::SearchInput);
-        catalog.add_input_char('f');
-        catalog.add_input_char('o');
-        let index = catalog.index_input_pattern();
+        let index = catalog.index_input_pattern("fo");
         assert_eq!(true, index.is_some());
         catalog.move_to_index(index.unwrap());
         assert_eq!(String::from("foo.jpeg"), catalog.current_entry().unwrap().original_file_name());
-        catalog.begin_input(InputKind::SearchInput);
-        catalog.add_input_char('q');
-        catalog.add_input_char('a');
-        assert_eq!(None, catalog.index_input_pattern());
-    }
-
-    #[test]
-    fn index_of_entry_by_input() {
-        let mut example = my_entries();
-        let mut catalog = Catalog::new();
-        catalog.load_picture_entries(&mut example);
-        catalog.sort_by(Order::Size);
-        catalog.move_to_index(0);
-        catalog.begin_input(InputKind::IndexInput);
-        catalog.add_input_char('3');
-        let index = catalog.index_input_number();
-        assert_eq!(true, index.is_some());
-        catalog.move_to_index(index.unwrap());
-        assert_eq!(String::from("bar.jpeg"), catalog.current_entry().unwrap().original_file_name());
-        catalog.add_input_char('3');
-        let wrong = catalog.index_input_number();
-        assert_eq!(true, wrong.is_none());
+        assert_eq!(None, catalog.index_input_pattern("qa"));
     }
 
     #[test]
@@ -1372,27 +1340,6 @@ mod tests {
         assert_eq!(true, catalog.palette_on());
         assert_eq!(true, catalog.full_size_on());
 
-    }
-
-    fn label_entry() {
-        let mut catalog = my_catalog();
-        catalog.move_to_index(1);
-        assert_eq!(None, catalog.current_entry().unwrap().label());
-        catalog.begin_input(InputKind::LabelInput);
-        assert_eq!(true, catalog.input_on());
-        catalog.add_input_char('R');
-        catalog.add_input_char('E');
-        catalog.add_input_char('X');
-        let _ = catalog.set_label();
-        assert_eq!(Some(String::from("REX")), catalog.current_entry().unwrap().label());
-        assert_eq!(false, catalog.input_on());
-        catalog.move_to_index(0);
-        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
-        catalog.copy_label();
-        catalog.move_to_index(1);
-        assert_eq!(Some(String::from("REX")), catalog.current_entry().unwrap().label());
-        let _ = catalog.set_label();
-        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
     }
 
     #[test]
@@ -1491,31 +1438,18 @@ mod tests {
 
     #[test] 
     fn adding_entries_from_a_directory() {
-        let mut catalog = Catalog::new();
-        let result = catalog.load_picture_entries_from_dir("testdata", None, None, None);
-        assert_eq!(true, result.is_ok());
+        let args = my_checked_args(vec![PGM, "testdata"]);
+        let catalog = Catalog::init_catalog(&args.unwrap()).expect("failed to create catalog");
         assert_eq!(10, catalog.length())
     }
 
     #[test] 
     fn adding_entries_from_a_directory_with_pattern_option() {
-        let mut catalog = Catalog::new();
-        let result = catalog.load_picture_entries_from_dir("testdata", Some(String::from("or")), None, None);
-        assert_eq!(true, result.is_ok());
-        assert_eq!(2, catalog.length());
+        let args = my_checked_args(vec![PGM, "testdata/nature", "--pattern", "or" ]);
+        let catalog = Catalog::init_catalog(&args.unwrap()).expect("failed to create catalog");
+        println!("{:?}", catalog.picture_entries().iter().map(|e| e.file_path.clone()).collect::<Vec<_>>());
+        assert_eq!(1, catalog.length());
         assert_eq!(String::from("labrador.jpg"), catalog.picture_entries[0].original_file_name());
-        assert_eq!(String::from("color-wheel.png"), catalog.picture_entries[1].original_file_name());
-    }
-
-    #[test]
-    fn adding_entries_from_a_file_list() {
-        let mut catalog = Catalog::new();
-        let result = catalog.load_picture_entries_from_file_list("testdata/selection");
-        assert_eq!(true, result.is_ok());
-        assert_eq!(3, catalog.length());
-        assert_eq!(String::from("3-cubes.jpeg"), catalog.picture_entries[0].original_file_name());
-        assert_eq!(String::from("ChessSet.jpg"), catalog.picture_entries[1].original_file_name());
-        assert_eq!(String::from("cumulus.jpeg"), catalog.picture_entries[2].original_file_name());
     }
 }
 

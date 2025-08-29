@@ -273,7 +273,7 @@ mod tests {
 
     fn my_entry(file_path: &str) -> PictureEntry {
         let day: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None, false, false, vec![])
+        make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None, false, false, HashSet::new())
     }
 
     #[test]
@@ -311,7 +311,7 @@ mod tests {
     #[test]
     fn setting_label() {
         let mut entry = my_entry("photos/foo.jpeg");
-        entry.set_label(String::from("foo"));
+        entry.set_label(&String::from("foo"));
         assert_eq!(Some(String::from("foo")), entry.label());
     }
 
