@@ -270,7 +270,11 @@ impl Catalog {
             Some(s) => s,
             None => String::from("true"),
         };
-        self.picture_entries = match self.database.select_pictures(restriction) {
+        let pattern: String = match self.args.clone().unwrap().pattern.clone() {
+            Some(s) => String::from(" and File_Path like '%".to_owned() + &s + "%'"),
+            None => String::from(""),
+        };
+        self.picture_entries = match self.database.select_pictures(restriction + &pattern) {
             Ok(mut entries) => {
                 for entry in &mut entries {
                     match self.database.entry_tags(&entry.file_path) {
