@@ -1,3 +1,4 @@
+use crate::display::info;
 use crate::path::copy_all_picture_files;
 use clap::Parser;
 use crate::args::Args;
@@ -104,8 +105,7 @@ fn main() {
                         }
                     }
                     if args.info {
-                        catalog.info();
-                        exit(0);
+                        info(&catalog);
                     }
                     if args.from.is_some() {
                         if args.add.is_none() {

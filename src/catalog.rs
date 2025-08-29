@@ -92,7 +92,7 @@ impl Catalog {
         let add_result = if args.query.is_some() {
             catalog.load_picture_entries_from_db()
         } else {
-            catalog.add_picture_entries_from_source()
+            catalog.load_picture_entries_from_source()
         };
         if let Err(err) = add_result {
             return Err(err)
@@ -159,62 +159,6 @@ impl Catalog {
         update_result
     }
 
-    pub fn info(&self) {
-        let mut total: f32 = 0.0;
-        let mut three_stars: f32 = 0.0;
-        let mut two_stars: f32 = 0.0;
-        let mut one_stars: f32 = 0.0;
-        let mut no_stars: f32 = 0.0;
-        let mut labelled: f32 = 0.0;
-        let mut labels: HashMap<String,f32> = HashMap::new();
-        let mut parents: HashMap<String,usize> = HashMap::new();
-        for entry in &self.picture_entries {
-            total += 1.0;
-            match entry.rank {
-                Rank::ThreeStars => { three_stars += 1.0 },
-                Rank::TwoStars => { two_stars += 1.0 },
-                Rank::OneStar => { one_stars += 1.0 }
-                Rank::NoStar => { no_stars += 1.0 },
-            };
-            if entry.label().is_some() {
-                labelled += 1.0;
-                if let Some(number) = labels.get_mut(&entry.label().unwrap()) {
-                    *number = *number + 1.0
-                } else {
-                    labels.insert(entry.label().unwrap().clone(), 1.0);
-                }
-            };
-            let parent:String = entry.parent_path();
-            if let Some(count) = parents.get_mut(&parent) {
-                *count = *count + 1
-                } else {
-                    parents.insert(parent, 1);
-            }
-        }
-        println!("total: {}", total);
-        println!("{}: {} ({:.2}%)", Rank::ThreeStars.to_string(), three_stars, three_stars / total * 100.0);
-        println!("{}: {} ({:.2}%)", Rank::TwoStars.to_string(), two_stars, two_stars / total * 100.0);
-        println!("{}: {} ({:.2}%)", Rank::OneStar.to_string(), one_stars, one_stars / total * 100.0);
-        println!("{}: {} ({:.2}%)", Rank::NoStar.to_string(), no_stars, no_stars / total * 100.0);
-        println!("labelled: {} ({:.2}%)", labelled, labelled / total * 100.0);
-        let mut all_labels = Vec::from_iter(labels.keys());
-        all_labels.sort();
-        for key in all_labels.iter() {
-            if let Some(val) = labels.get(&key as &str) {
-                println!("{key}:{val}")
-            } else {
-            };
-        }
-        let mut all_parents :Vec<(usize,String)> = Vec::new();
-        for(key,val) in parents.iter() {
-            all_parents.push((*val,key.to_string()));
-        }
-        all_parents.sort_by(|a,b| a.0.cmp(&b.0));
-        for (val,key) in all_parents.iter() {
-            println!("{val:>12} {key}");
-        }
-    }
-
     pub fn file_operations(&self, also_fs:bool) -> Result<()> {
         self.delete_files(also_fs)
     }
@@ -243,21 +187,21 @@ impl Catalog {
     // 5) showing the pictures in a specific file list
 
     // the issue of importing new pictures, or removing pictures is another matter
-    fn add_picture_entries_from_source(&mut self) -> Result<()> {
+    fn load_picture_entries_from_source(&mut self) -> Result<()> {
         let args = &self.args.clone().unwrap();
         if let Some(file) = &args.file {
             self.db_centric = false;
-            self.add_picture_entry_from_file(&file)
+            self.load_picture_entry_from_file(&file)
         } else if let Some(list) = &args.reading {
             self.db_centric = false;
-            self.add_picture_entries_from_file_list(&list)
+            self.load_picture_entries_from_file_list(&list)
         } else if args.covers {
             self.db_centric = false;
-            self.add_picture_entries_from_covers()
+            self.load_picture_entries_from_covers()
         } else if args.directory.is_some() && args.add.clone().is_some() && args.from.is_some() {
             let dir = args.directory.clone().unwrap();
             match self.insert_entries_from_dir_to_db(&args.clone().add.unwrap(), true) {
-                Ok(()) => self.add_picture_entries_from_dir(&dir),
+                Ok(()) => self.load_picture_entries_from_dir(&dir),
                 Err(err) => Err(anyhow!(err)),
             }
         } else if let Some(dir) = &args.directory {
@@ -278,7 +222,7 @@ impl Catalog {
                         Ok(())
                 }
             } else {
-                self.add_picture_entries_from_dir(&dir)
+                self.load_picture_entries_from_dir(&dir)
             }
         } else {
             Ok(())
@@ -362,7 +306,7 @@ impl Catalog {
         }
     }
 
-    pub fn add_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {
+    pub fn load_picture_entries_from_dir(&mut self, directory: &str) -> Result<()> {
         println!("loading picture data from directory {}", directory);
         let args = &self.args.clone().unwrap();
         match get_picture_file_paths(directory) {
@@ -430,7 +374,7 @@ impl Catalog {
         }
     }
 
-    pub fn add_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {
+    pub fn load_picture_entries_from_file_list(&mut self, file_list: &str) -> Result<()> {
         match read_to_string(file_list) {
             Err(err) => Err(anyhow!(err)),
             Ok(content) => {
@@ -452,7 +396,7 @@ impl Catalog {
         }
     }
 
-    pub fn add_picture_entries_from_covers(&mut self) -> Result<()> {
+    pub fn load_picture_entries_from_covers(&mut self) -> Result<()> {
         match self.database.select_cover_pictures() {
             Ok(picture_entries) => {
                 self.picture_entries = picture_entries;
@@ -462,7 +406,7 @@ impl Catalog {
         }
     }
 
-    pub fn add_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
+    pub fn load_picture_entry_from_file(&mut self, file_path: &str) -> Result<()> {
         match check_file(file_path) {
             Ok(_) => match self.database.retrieve_or_create_image_data(file_path) {
                 Ok(Some(picture_entry)) => Ok(self.picture_entries.push(picture_entry)),
@@ -474,6 +418,10 @@ impl Catalog {
     }
 
     // queries
+
+    pub fn picture_entries(&self) -> &Vec<PictureEntry> {
+        &self.picture_entries
+    }
     
     pub fn args(&self) -> Option<Args> {
         self.args.clone()
@@ -1235,7 +1183,7 @@ mod tests {
     fn my_catalog() -> Catalog {
         let mut catalog = Catalog::new();
         let mut example = my_entries();
-        catalog.add_picture_entries(&mut example);
+        catalog.load_picture_entries(&mut example);
         catalog
     }
 
@@ -1246,7 +1194,7 @@ mod tests {
             make_picture_entry(String::from("testdata/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None, false, false, vec![]),
             make_picture_entry(String::from("testdata/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, vec![])];
         let mut catalog = my_catalog();
-        catalog.add_picture_entries(&mut other_entries);
+        catalog.load_picture_entries(&mut other_entries);
         catalog
     }
 
@@ -1375,28 +1323,11 @@ mod tests {
         catalog.move_towards(Direction::Down);
         assert_eq!(0, catalog.index().unwrap()); // because there's no picture entry in pos 7
     }
-
-    fn editing_input() {
-        let mut catalog = Catalog::new();
-        assert_eq!(false, catalog.input_on());
-        catalog.begin_input(InputKind::LabelInput);
-        assert_eq!(true, catalog.input_on());
-        catalog.add_input_char('F');
-        catalog.add_input_char('o');
-        catalog.add_input_char('o');
-        catalog.add_input_char('-');
-        assert_eq!(String::from("Foo-"), catalog.input.clone().unwrap());
-        catalog.del_input_char();
-        assert_eq!(String::from("Foo"), catalog.input.clone().unwrap());
-        catalog.cancel_input();
-        assert_eq!(false, catalog.input_on());
-    }
-
     #[test]
     fn finding_a_picture_entry_by_input_pattern() {
         let mut example = my_entries();
         let mut catalog = Catalog::new();
-        catalog.add_picture_entries(&mut example);
+        catalog.load_picture_entries(&mut example);
         catalog.sort_by(Order::Size);
         catalog.move_to_index(0);
         assert_eq!(String::from("qux.jpeg"),catalog.current_entry().unwrap().original_file_name());
@@ -1417,7 +1348,7 @@ mod tests {
     fn index_of_entry_by_input() {
         let mut example = my_entries();
         let mut catalog = Catalog::new();
-        catalog.add_picture_entries(&mut example);
+        catalog.load_picture_entries(&mut example);
         catalog.sort_by(Order::Size);
         catalog.move_to_index(0);
         catalog.begin_input(InputKind::IndexInput);
@@ -1561,7 +1492,7 @@ mod tests {
     #[test] 
     fn adding_entries_from_a_directory() {
         let mut catalog = Catalog::new();
-        let result = catalog.add_picture_entries_from_dir("testdata", None, None, None);
+        let result = catalog.load_picture_entries_from_dir("testdata", None, None, None);
         assert_eq!(true, result.is_ok());
         assert_eq!(10, catalog.length())
     }
@@ -1569,7 +1500,7 @@ mod tests {
     #[test] 
     fn adding_entries_from_a_directory_with_pattern_option() {
         let mut catalog = Catalog::new();
-        let result = catalog.add_picture_entries_from_dir("testdata", Some(String::from("or")), None, None);
+        let result = catalog.load_picture_entries_from_dir("testdata", Some(String::from("or")), None, None);
         assert_eq!(true, result.is_ok());
         assert_eq!(2, catalog.length());
         assert_eq!(String::from("labrador.jpg"), catalog.picture_entries[0].original_file_name());
@@ -1579,7 +1510,7 @@ mod tests {
     #[test]
     fn adding_entries_from_a_file_list() {
         let mut catalog = Catalog::new();
-        let result = catalog.add_picture_entries_from_file_list("testdata/selection");
+        let result = catalog.load_picture_entries_from_file_list("testdata/selection");
         assert_eq!(true, result.is_ok());
         assert_eq!(3, catalog.length());
         assert_eq!(String::from("3-cubes.jpeg"), catalog.picture_entries[0].original_file_name());
