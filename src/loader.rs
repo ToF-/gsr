@@ -209,6 +209,7 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
                 if matches_pattern && matches_select && matches_include {
                     match PictureEntry::from_file_or_database(&file_path, database) {
                         Ok(picture_entry) => {
+                            println!("{}", picture_entry.file_path);
                             picture_entries.push(picture_entry)
                         },
                         Err(err) => {

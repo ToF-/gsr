@@ -34,15 +34,17 @@ impl Database {
         }
     }
 
-    pub fn initialize(check_schema: bool) -> Result<Self> {
+    pub fn initialize(create_schema: bool) -> Result<Self> {
         match env::var(DATABASE_CONNECTION) {
             Ok(connection_string) => match Self::from_path(&connection_string) {
-                Ok(database) => if check_schema {
-                    match database.check_schema() {
-                        Ok(()) => Ok(database),
-                        Err(err) => Err(anyhow!(err)),
-                    }
-                } else {
+                Ok(database) => {
+                    if create_schema {
+                        match database.create_schema() {
+                            Ok(()) => {},
+                            Err(err) => return Err(anyhow!(err)),
+                        }
+                    };
+                    println!("database: {}", connection_string);
                     Ok(database)
                 },
                 Err(err) => Err(anyhow!(err)),

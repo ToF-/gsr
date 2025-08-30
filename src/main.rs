@@ -1,3 +1,4 @@
+use crate::loader::load_picture_entries_from_directory_into_db;
 use crate::path::directory;
 use crate::display::info;
 use crate::loader::check_database_and_files;
@@ -49,21 +50,11 @@ fn main() {
             exit(1);
         },
         Ok(args) => {
-            let database: Database = match Database::initialize(false) {
-                Ok(database) => {
-                    if args.create_schema {
-                        match database.create_schema() {
-                            Ok(()) => exit(0),
-                            Err(err) => {
-                                eprint!("{}", err);
-                                exit(1)
-                            }
-                        }
-                    };
-                    database
-                },
+            println!("directory: {}", directory(args.clone().directory));
+            let mut database: Database = match Database::initialize(args.create_schema) {
+                Ok(database) => database,
                 Err(err) => {
-                    eprint!("{}", err);
+                    eprintln!("{}", err);
                     exit(1)
                 }
             };
@@ -71,9 +62,53 @@ fn main() {
                 match check_database_and_files(&directory(args.clone().directory), &database) {
                     Ok(()) => {},
                     Err(err) => {
-                        eprint!("{}", err);
+                        eprintln!("{}", err);
                         exit(1)
                     },
+                }
+            };
+            match args.from {
+                Some(ref ext_directory) => match args.add {
+                    Some(ref abs_directory) => match copy_all_picture_files(&ext_directory, &abs_directory) {
+                        Ok(()) => {},
+                        Err(err) => {
+                            eprintln!("{}", err);
+                            exit(1)
+                        }
+                    },
+                    None => match copy_all_picture_files(&ext_directory, &directory(args.clone().directory)) {
+                        Ok(()) => {},
+                        Err(err) => {
+                            eprintln!("{}", err);
+                            exit(1)
+                        }
+                    }
+                },
+                None => match args.add {
+                    Some(ref abs_directory) => match load_picture_entries_from_directory_into_db(&mut database, &abs_directory, false) {
+                        Ok(pictures_entries) => {
+                            println!("the following pictures have been inserted in the database:");
+                            for picture_entry in pictures_entries {
+                                println!("{}", picture_entry.file_path)
+                            }
+                        },
+                        Err(err) => {
+                            eprintln!("{}", err);
+                            exit(1)
+                        }
+                    }
+                    None => match load_picture_entries_from_directory_into_db(&mut database, &directory(args.clone().directory), true) {
+                        Ok(pictures_entries) => {
+                            println!("the following pictures have been inserted in the database:");
+                            for picture_entry in pictures_entries {
+                                println!("{}", picture_entry.file_path)
+                            }
+                        },
+                        Err(err) => {
+                            eprintln!("{}", err);
+                            exit(1)
+                        }
+                    }
                 }
             };
             match Catalog::init_catalog(&args) {
