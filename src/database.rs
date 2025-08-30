@@ -134,7 +134,7 @@ impl Database {
         match self.connection.execute("DELETE FROM Cover WHERE Dir_path = ?1 AND File_Name = ?2;",
             params![dir_path, file_name]) {
             Ok(deleted) => {
-                println!("{} row deleted", deleted);
+                println!("{}", "⌫".repeat(deleted));
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
@@ -145,7 +145,7 @@ impl Database {
         match self.connection.execute("INSERT INTO Cover VALUES (?1, ?2, ?3);", 
             params![dir_path, file_name, rank as i64]) {
             Ok(inserted) => {
-                println!("{} row inserted", inserted);
+                println!("{}", "⎀".repeat(inserted));
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
@@ -155,7 +155,7 @@ impl Database {
     pub fn insert_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {
         match self.connection.execute("INSERT INTO Tag VALUES (?1, ?2);", params![&*entry.file_path, label]) {
             Ok(inserted) => {
-                println!("{} row inserted", inserted);
+                println!("{}", "⎀".repeat(inserted));
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),
@@ -164,8 +164,8 @@ impl Database {
 
     pub fn delete_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {
         match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1 AND Label = ?2;", params![&*entry.file_path, label]) {
-            Ok(count) => {
-                println!("{} row deleted", count);
+            Ok(deleted) => {
+                println!("{}", "⌫".repeat(deleted));
                 Ok(())
             },
             Err(err) => {
@@ -186,10 +186,10 @@ impl Database {
             entry.selected as i64,
             &*entry.file_path]) {
             Ok(updated) => {
-                println!("{} picture row updated", updated);
+                println!("{}", "⟳".repeat(updated));
                 match self.connection.execute(" DELETE FROM Tag WHERE File_Path = ?1;", params![&*entry.file_path]) {
                     Ok(deleted) => {
-                        println!("{} tag rows deleted", deleted);
+                        println!("{}", "⌫".repeat(deleted));
                         for tag in entry.tags.iter() {
                             match self.insert_tag_label(entry, tag) {
                                 Ok(()) => {},
@@ -272,10 +272,10 @@ impl Database {
     pub fn delete_picture(&self, file_path: String) -> Result<()> {
         match self.connection.execute("DELETE FROM Picture WHERE File_Path = ?1;", params![file_path.clone()]) {
             Ok(count) => {
-                println!("{} picture deleted", count);
+                println!("{}", "⌫".repeat(count));
                 match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1;", params![file_path.clone()]) {
                     Ok(count) => {
-                        println!("{} tags deleted", count);
+                        println!("{}", "d".repeat(count));
                         Ok(())
                     },
                     Err(err) => return Err(anyhow!(err)),
@@ -532,7 +532,7 @@ pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
             entry.selected as i64,
             palette_to_blob(&entry.palette)]) {
                         Ok(inserted) => {
-                            println!("{} row inserted", inserted);
+                            println!("{}","⎀".repeat(inserted));
                             return Ok(entry)
                         },
                         Err(err) => return Err(anyhow!(err)),

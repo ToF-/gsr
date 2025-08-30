@@ -343,16 +343,16 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                     let mut result: Result<()> = Ok(());
                     match command {
                         Command::NoStar => {
-                            let _ = catalog.end_set_rank(Rank::NoStar);
+                            let _ = catalog.rank_current_entry(Rank::NoStar);
                         },
                         Command::OneStar => {
-                            let _ = catalog.end_set_rank(Rank::OneStar);
+                            let _ = catalog.rank_current_entry(Rank::OneStar);
                         },
                         Command::TwoStars => {
-                            let _ = catalog.end_set_rank(Rank::TwoStars);
+                            let _ = catalog.rank_current_entry(Rank::TwoStars);
                         },
                         Command::ThreeStars => {
-                            let _ = catalog.end_set_rank(Rank::ThreeStars);
+                            let _ = catalog.rank_current_entry(Rank::ThreeStars);
                         },
                         Command::Cover => result = catalog.cover(),
                         Command::Extract => catalog.extract(),
@@ -403,9 +403,9 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::Next => catalog.move_next_page(),
                         Command::SetRange => catalog.start_set(),
                         Command::Cancel => catalog.cancel_set(),
-                        Command::PasteLabel => result = catalog.end_set_label(),
-                        Command::Unlabel => result = catalog.end_unlabel(),
-                        Command::LabelTag => result = catalog.label_tag(),
+                        Command::PasteLabel => result = catalog.paste_label_current_entry(),
+                        Command::Unlabel => result = catalog.unlabel_current_entry(),
+                        Command::LabelTag => result = catalog.label_tag_current_entry(),
                         Command::ToggleSingleView => if catalog.page_size() > 1 {
                             if gui.single_view_mode() {
                                 gui.view_stack.set_visible_child(&gui.multiple_view_scrolled_window);
@@ -415,7 +415,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         },
                         Command::ChooseOrder => catalog.begin_sort_selection(),
                         Command::ToggleSelect => {
-                            result = catalog.end_set_select();
+                            result = catalog.toggle_select_current_entry();
                             catalog.count_selected()
                         },
                         Command::AddTag => {
@@ -612,7 +612,7 @@ fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mu
         catalog.start_set();
         if catalog.can_move_to_index(new_index) {
             catalog.move_to_index(new_index);
-            let _ = catalog.toggle_select();
+            let _ = catalog.toggle_select_current_entry();
             set_picture_for_single_view(gui, catalog);
             if catalog.page_index() != old_page_index {
                 set_all_pictures_for_multiple_view(gui, catalog)

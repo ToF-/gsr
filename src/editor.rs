@@ -51,7 +51,7 @@ impl Editor {
         if let Some(kind) = self.input_kind.clone() {
             match kind {
                 InputKind::AddTagInput => {
-                    let _ = catalog.add_tag(input);
+                    let _ = catalog.tag_current_entry(input);
                 },
                 InputKind::DeleteTagInput => {
                     let _ = catalog.delete_tag(input);
