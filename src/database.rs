@@ -1,6 +1,6 @@
 use std::path::{Path,PathBuf};
 use crate::path::get_picture_file_paths;
-use rusqlite::Row;
+use rusqlite::{Row, Error};
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use std::collections::HashSet;
 use std::collections::HashMap;
@@ -219,6 +219,13 @@ impl Database {
     }
 
     fn sql_to_picture_entry(row: &Row) -> Result<PictureEntry> {
+        match Self::rusqlite_to_picture_entry(row) {
+            Ok(picture_entry) => Ok(picture_entry),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    fn rusqlite_to_picture_entry(row: &Row) -> Result<PictureEntry,Error> {
         Ok(make_picture_entry(
                 row.get(0)?,
                 row.get(1)?,
@@ -259,60 +266,75 @@ impl Database {
                 HashSet::new(),))
     }
 
+    fn rusqlite_select_all_picture_file_paths(&self) -> Result<Vec<String>,Error> {
+        self.connection.prepare("SELECT File_Path FROM Picture;")
+            .and_then(|mut statement| { statement.query([])
+                .and_then(|mut rows| {
+                    let mut result:Vec<String> = vec![];
+                    while let Some(row) = rows.next()? {
+                        let file_path:String = row.get(0)?;
+                        result.push(file_path.clone())
+                    };
+                    Ok(result)
+                })
+            })
+    }
+
     pub fn select_all_picture_file_paths(&self) -> Result<Vec<String>> {
-        match self.connection.prepare("SELECT File_Path FROM Picture;") {
-            Ok(mut statement) => {
-                match statement.query([]) {
-                    Ok(mut rows) => {
-                        let mut result:Vec<String> = vec![];
-                        while let Some(row) = rows.next()? {
-                            let file_path:String = row.get(0)?;
-                            result.push(file_path.clone())
-                        }
-                        Ok(result)
-                    },
-                    Err(err) => Err(anyhow!(err)),
-                }
-            }
+        match self.rusqlite_select_all_picture_file_paths() {
+            Ok(result) => Ok(result),
             Err(err) => Err(anyhow!(err)),
         }
     }
 
-    pub fn delete_picture(&self, file_path: String) -> Result<()> {
-        match self.connection.execute("DELETE FROM Picture WHERE File_Path = ?1;", params![file_path.clone()]) {
-            Ok(count) => {
-                println!("{}", "⌫".repeat(count));
-                match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1;", params![file_path.clone()]) {
-                    Ok(count) => {
-                        println!("{}", "d".repeat(count));
-                        Ok(())
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
-            },
-            Err(err) => Err(anyhow!(err)),
+    fn rusqlite_delete_picture(&self, file_path: &str) -> Result<(),Error> {
+        self.connection.execute(
+            "DELETE FROM Picture \n\
+             WHERE File_Path = ?1;", params![file_path.to_string()])
+            .and_then(|_| {
+                self.connection.execute(
+                    "DELETE FROM Tak  \n\
+                     WHERE File_Path = ?1;", params![file_path.to_string()])
+                    .and_then(|_| Ok(()))
+            })
+    }
+
+    pub fn delete_picture(&self, file_path: &str) -> Result<()> {
+        match self.rusqlite_delete_picture(file_path) {
+            Ok(()) => Ok(()),
+            Err(err) => return Err(anyhow!(err)),
         }
+    }
+
+    fn rusqlite_select_pictures(&self, query: String) -> Result<PictureEntries, Error> {
+            self.connection.prepare(
+                &("SELECT File_Path,     \n\
+                          File_Size,     \n\
+                          Colors,        \n\
+                          Modified_Time, \n\
+                          Rank,          \n\
+                          Palette,       \n\
+                          Label,         \n\
+                          Selected,      \n\
+                          Deleted        \n\
+                          FROM Picture   \n\
+                          WHERE ".to_owned() + &query + ";"))
+                .and_then( |mut statement| { statement.query([])
+                    .and_then( |mut rows| {
+                        let mut picture_entries: PictureEntries = vec![];
+                        while let Some(row) = rows.next()? {
+                            match Self::rusqlite_to_picture_entry(row) {
+                                Ok(picture_entry) => { picture_entries.push(picture_entry); },
+                                Err(err) => return Err(err),
+                            }
+                        };
+                        Ok(picture_entries) })
+                })
     }
 
     pub fn select_pictures(&self, query: String) -> Result<PictureEntries> {
-        match self.connection.prepare(&("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted FROM Picture WHERE ".to_owned() + &query + ";")) {
-            Ok(mut statement) => {
-                match statement.query([]) {
-                    Ok(mut rows) => {
-                        let mut result: PictureEntries = vec![];
-                        while let Some(row) = rows.next()? {
-                            match Self::sql_to_picture_entry(row) {
-                                Ok(entry) => {
-                                    result.push(entry);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        return Ok(result)
-                    },
-                    Err(err) => Err(anyhow!(err)),
-                }
-            },
+        match self.rusqlite_select_pictures(query) {
+            Ok(result) => Ok(result),
             Err(err) => Err(anyhow!(err)),
         }
     }
