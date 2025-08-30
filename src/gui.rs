@@ -388,7 +388,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             result = catalog.file_operations(true);
                             gui.application_window.close()
                         },
-                        Command::Repeat => result = catalog.end_repeat_last_action(),
+                        Command::Repeat => result = catalog.end_repeat_last_comment(),
                         Command::Search => {
                             gui.editor.begin_input(InputKind::SearchInput, catalog.tags.clone());
                         }

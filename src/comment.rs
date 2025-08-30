@@ -1,12 +1,9 @@
-#![crate_name = "doc"]
-
-/// Actions one can apply to picture entries in the gallery
-///
 
 use crate::rank::Rank;
 
+/// Comment one can apply to picture entries in the gallery
 #[derive(Debug, Clone)]
-pub enum Action {
+pub enum Comment {
     /// Put a label on a picture entry
     Label { label: String },
     /// Remove the label on a picture entry

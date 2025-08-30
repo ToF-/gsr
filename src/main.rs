@@ -13,7 +13,7 @@ use std::rc::Rc;
 use crate::commands::load_shortcuts;
 use crate::database::Database;
 
-mod actions;
+mod comment;
 mod args;
 mod catalog;
 mod commands;

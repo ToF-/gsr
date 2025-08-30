@@ -3,7 +3,7 @@ use crate::picture_entry::PictureEntries;
 use crate::loader::load_picture_entries_from_db;
 use crate::display::title_display;
 use anyhow::{anyhow, Result};
-use crate::actions::Action;
+use crate::comment::Comment;
 use crate::args::Args;
 use crate::database::Database;
 use crate::direction::Direction;
@@ -34,7 +34,7 @@ pub struct Catalog {
     page_size: usize,
     page_limit_on: bool,
     label: Option<String>,
-    last_action: Option<Action>,
+    last_comment: Option<Comment>,
     palette_on: bool,
     full_size_on: bool,
     expand_on: bool,
@@ -62,7 +62,7 @@ impl Catalog {
             page_size: 1,
             page_limit_on: false,
             label: None,
-            last_action: None,
+            last_comment: None,
             palette_on: false,
             full_size_on: false,
             expand_on: false,
@@ -316,7 +316,7 @@ impl Catalog {
     }
 
     pub fn current_entry(&self) -> Option<&PictureEntry> {
-        self.index().and_then(|index| self.entry_at_index(index))
+        self.index().and_then(|index| { self.entry_at_index(index) } )
     }
 
     pub fn page_index_of(&self, index: usize) -> usize {
@@ -407,6 +407,16 @@ impl Catalog {
     }
     // updates
     
+    pub fn set_current_picture_entry(&mut self, picture_entry: PictureEntry) -> Result<()> {
+        match self.index() {
+            Some(index) => {
+                self.picture_entries[index] = picture_entry.clone();
+                Self::update_image_data(&self.database, &picture_entry.clone())
+            },
+            None => Ok(())
+        }
+    }
+
     pub fn set_picture_entries(&mut self, picture_entries_result: Result<PictureEntries>) -> Result<()> {
         match picture_entries_result {
             Ok(picture_entries) => {
@@ -439,7 +449,7 @@ impl Catalog {
     pub fn add_tag(&mut self, tag: &str) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
         entry.add_tag(tag);
-        self.last_action = Some(Action::AddTag { label: tag.to_string() });
+        self.last_comment = Some(Comment::AddTag { label: tag.to_string() });
         match self.database.insert_tag_label(entry, tag) {
             Ok(()) => {
                 if !self.tags.contains(tag) {
@@ -453,7 +463,7 @@ impl Catalog {
 
     pub fn delete_tag(&mut self, tag: &str) -> Result<()> {
         let entry = &mut self.picture_entries[self.index];
-        self.last_action = Some(Action::DeleteTag { label: tag.to_string() });
+        self.last_comment = Some(Comment::DeleteTag { label: tag.to_string() });
         if entry.tags.contains(tag) {
             entry.delete_tag(tag);
             self.database.delete_tag_label(entry, tag)
@@ -480,7 +490,7 @@ impl Catalog {
         if let Some(index) = self.index() {
             self.picture_entries[index].deleted = !self.picture_entries[index].deleted;
             self.page_changed = true;
-            self.last_action = Some(Action::Delete)
+            self.last_comment = Some(Comment::Delete)
         }
     }
     pub fn refresh(&mut self) {
@@ -528,26 +538,30 @@ impl Catalog {
         }
     }
 
-    pub fn apply_label(&mut self, label: &str) -> Result<()> {
-        if let Some(index) = self.index() {
-            self.label = Some(label.to_string());
-            let entry = &mut self.picture_entries[index];
-            entry.set_label(label);
-            if !self.tags.contains(label) {
-                self.tags.insert(label.to_string());
-            };
-            self.last_action = Some(Action::Label { label: label.to_string() });
-            Self::update_image_data(&self.database, &entry.clone())
-        } else {
-            Ok(())
+    pub fn label_current_entry(&mut self, label: &str) -> Result<()> {
+        match self.current_entry() {
+            Some(picture_entry) => {
+                let mut new_picture_entry = picture_entry.clone();
+                new_picture_entry.set_label(label);
+                match self.set_current_picture_entry(new_picture_entry) {
+                    Ok(()) => {
+                        self.label = Some(label.to_string());
+                        self.tags.insert(label.to_string());
+                        self.last_comment = Some(Comment::Label { label: label.to_string() });
+                        Ok(())
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                } 
+            },
+            None => Ok(()),
         }
     }
 
     pub fn apply_label_all(&mut self, label:&str) -> Result<()> {
         for i in 0..self.picture_entries.len() {
             self.index = i;
-            self.last_action = Some(Action::Label { label: label.to_string() });
-            match self.apply_label(label) {
+            self.last_comment = Some(Comment::Label { label: label.to_string() });
+            match self.label_current_entry(label) {
                 Ok(()) => {},
                 Err(err) => return Err(err),
             }
@@ -603,16 +617,16 @@ impl Catalog {
         }
     }
 
-    pub fn repeat_last_action(&mut self) -> Result<()> {
-        match self.last_action.clone() {
+    pub fn repeat_last_comment(&mut self) -> Result<()> {
+        match self.last_comment.clone() {
             None => Ok(()),
-            Some(Action::Label { label }) => self.apply_label(&label),
-            Some(Action::Unlabel) => self.unlabel(),
-            Some(Action::AddTag { label}) => self.add_tag(&label),
-            Some(Action::DeleteTag { label}) => self.delete_tag(&label),
-            Some(Action::Rank { rank }) => self.set_rank(rank),
-            Some(Action::Select) => self.toggle_select(),
-            Some(Action::Delete) => Ok(self.delete()),
+            Some(Comment::Label { label }) => self.label_current_entry(&label),
+            Some(Comment::Unlabel) => self.unlabel(),
+            Some(Comment::AddTag { label}) => self.add_tag(&label),
+            Some(Comment::DeleteTag { label}) => self.delete_tag(&label),
+            Some(Comment::Rank { rank }) => self.set_rank(rank),
+            Some(Comment::Select) => self.toggle_select(),
+            Some(Comment::Delete) => Ok(self.delete()),
         }
     }
 
@@ -620,7 +634,7 @@ impl Catalog {
         if let Some(index) = self.index() {
             let entry = &mut self.picture_entries[index];
             entry.set_rank(rank);
-            self.last_action = Some(Action::Rank { rank: rank });
+            self.last_comment = Some(Comment::Rank { rank: rank });
             Self::update_image_data(&self.database, entry)
         } else {
             Ok(())
@@ -644,7 +658,7 @@ impl Catalog {
 
     pub fn set_label(&mut self) -> Result<()> {
         match &self.label.clone() {
-            Some(s) => self.apply_label(s),
+            Some(s) => self.label_current_entry(s),
             None => Ok(()),
         }
     }
@@ -668,7 +682,7 @@ impl Catalog {
             Some(index) => {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 entry.unlabel();
-                self.last_action = Some(Action::Unlabel);
+                self.last_comment = Some(Comment::Unlabel);
                 Self::update_image_data(&self.database, entry)
             },
             None => Ok(()),
@@ -764,25 +778,25 @@ impl Catalog {
         }
     }
 
-    pub fn end_repeat_last_action(&mut self) -> Result<()> {
+    pub fn end_repeat_last_comment(&mut self) -> Result<()> {
         match self.index() {
             Some(index) => {
                 println!("end set: {}", index);
                 match self.start_index {
-                    None => self.repeat_last_action(),
+                    None => self.repeat_last_comment(),
                     Some(other) => {
                         let (start,end) = if other <= index { (other,index) } else { (index,other) };
                         for i in start..end+1 {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
-                            match &self.last_action {
+                            match &self.last_comment {
                                 None => {},
-                                Some(Action::Label { label }) => entry.set_label(&label),
-                                Some(Action::Unlabel) => entry.unlabel(),
-                                Some(Action::AddTag { label}) => entry.add_tag(&label),
-                                Some(Action::DeleteTag { label}) => entry.delete_tag(&label),
-                                Some(Action::Rank { rank }) => entry.set_rank(*rank),
-                                Some(Action::Select) => {},
-                                Some(Action::Delete) => {},
+                                Some(Comment::Label { label }) => entry.set_label(&label),
+                                Some(Comment::Unlabel) => entry.unlabel(),
+                                Some(Comment::AddTag { label}) => entry.add_tag(&label),
+                                Some(Comment::DeleteTag { label}) => entry.delete_tag(&label),
+                                Some(Comment::Rank { rank }) => entry.set_rank(*rank),
+                                Some(Comment::Select) => {},
+                                Some(Comment::Delete) => {},
                             };
                             match Self::update_image_data(&self.database, &entry.clone()) {
                                 Ok(()) => {},
@@ -803,7 +817,7 @@ impl Catalog {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 if !entry.deleted {
                     entry.selected = !entry.selected;
-                    self.last_action = Some(Action::Select);
+                    self.last_comment = Some(Comment::Select);
                     Self::update_image_data(&self.database, entry)
                 } else {
                     Ok(())

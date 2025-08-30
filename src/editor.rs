@@ -70,7 +70,7 @@ impl Editor {
                     }
                 },
                 InputKind::LabelInput => {
-                    let _ = catalog.apply_label(input);
+                    let _ = catalog.label_current_entry(input);
                 },
                 InputKind::RelabelInput => {
                     let _ = catalog.set_selected_labels_with_input(input);
