@@ -510,15 +510,21 @@ impl Catalog {
         }
     }
 
-    pub fn delete_tag(&mut self, tag: &str) -> Result<()> {
-        let entry = &mut self.picture_entries[self.index];
-        self.last_comment = Some(Comment::DeleteTag { label: tag.to_string() });
-        if entry.tags.contains(tag) {
-            entry.delete_tag(tag);
-            self.database.delete_tag_label(entry, tag)
-        } else {
-            println!("tag not found: {}", tag);
-            Ok(())
+    pub fn untag_current_entry(&mut self, tag: &str) -> Result<()> {
+        match self.current_entry() {
+            Some(picture_entry) => {
+                let mut new_picture_entry = picture_entry.clone();
+                new_picture_entry.delete_tag(tag);
+                match self.set_current_picture_entry(new_picture_entry) {
+                    Ok(()) => {
+                        self.tags.insert(tag.to_string());
+                        self.last_comment = Some(Comment::DeleteTag { label: tag.to_string() });
+                        Ok(())
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                } 
+            },
+            None => Ok(()),
         }
     }
 
@@ -700,7 +706,7 @@ impl Catalog {
             Some(Comment::Label { label }) => self.label_current_entry(&label),
             Some(Comment::Unlabel) => self.unlabel(),
             Some(Comment::AddTag { label}) => self.tag_current_entry(&label),
-            Some(Comment::DeleteTag { label}) => self.delete_tag(&label),
+            Some(Comment::DeleteTag { label}) => self.untag_current_entry(&label),
             Some(Comment::Rank { rank }) => self.rank_current_entry(rank),
             Some(Comment::Select) => self.toggle_select_current_entry(),
             Some(Comment::Delete) => Ok(self.delete()),

@@ -54,7 +54,7 @@ impl Editor {
                     let _ = catalog.tag_current_entry(input);
                 },
                 InputKind::DeleteTagInput => {
-                    let _ = catalog.delete_tag(input);
+                    let _ = catalog.untag_current_entry(input);
                 },
                 InputKind::SearchInput => {
                     catalog.move_to_input_pattern(input);
