@@ -1,6 +1,5 @@
 use crate::loader::load_picture_entries_from_source;
 use crate::picture_entry::PictureEntries;
-use crate::loader::load_picture_entries_from_db;
 use crate::display::title_display;
 use anyhow::{anyhow, Result};
 use crate::comment::Comment;
@@ -10,15 +9,13 @@ use crate::direction::Direction;
 use crate::editor::{Editor};
 use crate::order::Order;
 use crate::path::file_name;
-use crate::path::standard_directory;
-use crate::path::{get_picture_file_paths, file_path_directory};
+use crate::path::file_path_directory;
 use crate::picture_entry::PictureEntry;
 use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
 use rand::Rng;
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
-use regex::Regex;
 use std::cmp::Ordering::{Less, Greater, Equal};
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -160,51 +157,6 @@ impl Catalog {
         };
         update_result
     }
-
-    pub fn file_operations(&self, also_fs:bool) -> Result<()> {
-        self.delete_files(also_fs)
-    }
-
-    fn delete_files(&self, also_fs:bool) -> Result<()> {
-        for entry in self.picture_entries.iter().filter(|e| e.deleted) {
-            match self.database.delete_picture(entry.file_path.clone()) {
-                Ok(()) => {},
-                Err(err) => eprintln!("{}", err),
-            };
-            if also_fs {
-                match entry.delete_files() {
-                    Ok(()) => {},
-                    Err(err) => eprintln!("{}", err),
-                }
-            };
-        }
-        Ok(())
-    }
-
-    fn delete_broken_entries_from_db(&mut self) -> Result<()> {
-        match self.database.delete_difference_from_file_system() {
-            Ok(file_paths) => {
-                if self.picture_entries.len() > 0 {
-                    let mut picture_entries: Vec<PictureEntry> = vec![];
-                    let mut i = 0;
-                    while i < self.picture_entries.len() {
-                        if !file_paths.contains(&self.picture_entries[i].file_path) {
-                            picture_entries.push(self.picture_entries[i].clone());
-                        }
-                        i+= 1;
-                    };
-                    self.picture_entries = picture_entries;
-                };
-                Ok(())
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
-
-
-
-
 
     // queries
 

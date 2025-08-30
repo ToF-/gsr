@@ -1,4 +1,6 @@
+use crate::path::directory;
 use crate::display::info;
+use crate::loader::check_database_and_files;
 use crate::path::copy_all_picture_files;
 use clap::Parser;
 use crate::args::Args;
@@ -47,19 +49,31 @@ fn main() {
             exit(1);
         },
         Ok(args) => {
-            if args.create_schema {
-                match Database::initialize(false) {
-                    Ok(database) => match database.create_schema() {
-                        Ok(()) => exit(0),
-                        Err(err) => {
-                            eprint!("{}", err);
-                            exit(1)
+            let database: Database = match Database::initialize(false) {
+                Ok(database) => {
+                    if args.create_schema {
+                        match database.create_schema() {
+                            Ok(()) => exit(0),
+                            Err(err) => {
+                                eprint!("{}", err);
+                                exit(1)
+                            }
                         }
-                    },
+                    };
+                    database
+                },
+                Err(err) => {
+                    eprint!("{}", err);
+                    exit(1)
+                }
+            };
+            if args.check {
+                match check_database_and_files(&directory(args.clone().directory), &database) {
+                    Ok(()) => {},
                     Err(err) => {
                         eprint!("{}", err);
                         exit(1)
-                    }
+                    },
                 }
             };
             match Catalog::init_catalog(&args) {

@@ -162,18 +162,6 @@ impl Database {
         }
     }
 
-    pub fn delete_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {
-        match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1 AND Label = ?2;", params![&*entry.file_path, label]) {
-            Ok(deleted) => {
-                println!("{}", "⌫".repeat(deleted));
-                Ok(())
-            },
-            Err(err) => {
-                eprintln!("{}", err);
-                Err(anyhow!(err))
-            },
-        }
-    }
     pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {
         match self.connection.execute(" UPDATE Picture SET File_Size = ?1, Colors = ?2, Modified_Time = ?3, Rank = ?4, Palette = ?5, Label = ?6, Selected = ?7, Deleted = ?8 WHERE File_Path = ?9;",
             params![entry.file_size as i64,
@@ -267,6 +255,25 @@ impl Database {
                     result
                 },
                 HashSet::new(),))
+    }
+
+    pub fn select_all_picture_file_paths(&self) -> Result<Vec<String>> {
+        match self.connection.prepare("SELECT File_Path FROM Picture;") {
+            Ok(mut statement) => {
+                match statement.query([]) {
+                    Ok(mut rows) => {
+                        let mut result:Vec<String> = vec![];
+                        while let Some(row) = rows.next()? {
+                            let file_path:String = row.get(0)?;
+                            result.push(file_path.clone())
+                        }
+                        Ok(result)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            }
+            Err(err) => Err(anyhow!(err)),
+        }
     }
 
     pub fn delete_picture(&self, file_path: String) -> Result<()> {
