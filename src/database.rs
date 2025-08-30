@@ -27,6 +27,7 @@ pub struct Database {
 
 impl Database {
 
+    /// create the database from the given connection_string.
     pub fn from_path(connection_string: &str) -> Result<Self> {
         match Connection::open(connection_string) {
             Ok(connection) => Ok(Database { connection: connection, }),
@@ -34,12 +35,13 @@ impl Database {
         }
     }
 
+    /// initialize the database, creating the schema if needed.
     pub fn initialize(create_schema: bool) -> Result<Self> {
         match env::var(DATABASE_CONNECTION) {
             Ok(connection_string) => match Self::from_path(&connection_string) {
                 Ok(database) => {
                     if create_schema {
-                        match database.create_schema() {
+                        match database.rusqlite_create_schema() {
                             Ok(()) => {},
                             Err(err) => return Err(anyhow!(err)),
                         }
@@ -53,32 +55,36 @@ impl Database {
         }
     }
 
-    pub fn create_schema(&self) -> Result<()> {
+    fn rusqlite_create_schema(&self) -> Result<(),Error> {
         println!("creating database schema");
-        match self.connection.execute(
-            "CREATE TABLE IF NOT EXISTS Picture (\n\
-                File_Path TEXT NOT NULL PRIMARY KEY,\n\
-                File_Size INTEGER,\n\
-                Colors INTEGER,\n\
-                Modified_Time INTEGER,\n\
-                Rank INTEGER,\n\
-                Palette BLOB,\n\
-                Label TEXT,\n\
-                Selected BOOLEAN,\n\
-                Deleted BOOLEAN);", []) {
-            Ok(_) => match self.connection.execute(
-                "CREATE TABLE IF NOT EXISTS Tag (\n\
-                    File_Path TEXT NOT NULL,\n\
-                    Label TEXT NOT NULL,\n\
-                    PRIMARY KEY ( File_Path, Label));", []) {
-                Ok(_) => match self.connection.cache_flush() {
-                    Ok(_) => Ok(()),
-                    Err(err) => Err(anyhow!(err)),
-                }
-                Err(err) => Err(anyhow!(err)),
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
+        self.connection.execute(
+            "CREATE TABLE IF NOT EXISTS Picture (    \n\
+                File_Path TEXT NOT NULL PRIMARY KEY, \n\
+                File_Size INTEGER,                   \n\
+                Colors INTEGER,                      \n\
+                Modified_Time INTEGER,               \n\
+                Rank INTEGER,                        \n\
+                Palette BLOB,                        \n\
+                Label TEXT,                          \n\
+                Selected BOOLEAN,                    \n\
+                Deleted BOOLEAN,                     \n\
+                Cover BOOLEAN);", [])
+            .and_then(|_| {
+                self.connection.execute(
+                    "CREATE TABLE IF NOT EXISTS Tag ( \n\
+                    File_Path TEXT NOT NULL,          \n\
+                    Label TEXT NOT NULL,              \n\
+                    PRIMARY KEY ( File_Path, Label));", [])
+                    .and_then(|_| {
+                        self.connection.execute(
+                        "CREATE TABLE IF NOT EXISTS Cover (  \n\
+                         Dir_Path TEXT NOT NULL,             \n\
+                         File_Name TEXT NOT NULL,            \n\
+                         Rank INTEGER,                       \n\
+                         PRIMARY KEY (Dir_Path, File_Name));", [])
+                            .and_then(|_| Ok(()))
+                    })
+            })
     }
 
     pub fn check_schema(&self) -> Result<()> {
@@ -132,71 +138,106 @@ impl Database {
         }
     }
 
-    pub fn delete_cover(&self, dir_path: &str, file_name: &str) -> Result<()> {
-        match self.connection.execute("DELETE FROM Cover WHERE Dir_path = ?1 AND File_Name = ?2;",
-            params![dir_path, file_name]) {
-            Ok(deleted) => {
-                println!("{}", "⌫".repeat(deleted));
-                Ok(())
-            },
+    fn rusqlite_delete_cover(&self, dir_path: &str, file_name: &str) -> Result<usize,Error> {
+        self.connection.execute("DELETE FROM Cover WHERE Dir_path = ?1 AND File_Name = ?2;",
+            params![dir_path, file_name])
+            .and_then(|count| Ok(count))
+    }
+
+    fn rusqlite_insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<usize,Error> {
+        self.connection.execute(
+            "INSERT INTO Cover            \n\
+             (Dir_Path, File_Name, Rank) \n\
+             VALUES (?1, ?2, ?3);", 
+            params![dir_path, file_name, rank as i64])
+        .and_then(|count| Ok(count))
+    }
+
+    fn rusqlite_insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<(),Error> {
+        self.rusqlite_delete_cover(dir_path, file_name)
+            .and_then(|_| {
+                self.rusqlite_insert_cover(dir_path, file_name, rank)
+                    .and_then(|_| Ok(()) )
+            })
+    }
+
+    pub fn delete_cover(&mut self, dir_path: &str, file_name: &str) -> Result<()> {
+        match self.rusqlite_delete_cover(dir_path, file_name) {
+            Ok(_) => Ok(()),
             Err(err) => Err(anyhow!(err)),
         }
     }
 
-    pub fn insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {
-        match self.connection.execute("INSERT INTO Cover VALUES (?1, ?2, ?3);", 
-            params![dir_path, file_name, rank as i64]) {
-            Ok(inserted) => {
-                println!("{}", "⎀".repeat(inserted));
-                Ok(())
-            },
+    pub fn insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {
+        match self.rusqlite_insert_or_update_cover(dir_path, file_name, rank) {
+            Ok(_) => Ok(()),
             Err(err) => Err(anyhow!(err)),
         }
     }
 
-    pub fn insert_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {
-        match self.connection.execute("INSERT INTO Tag VALUES (?1, ?2);", params![&*entry.file_path, label]) {
-            Ok(inserted) => {
-                println!("{}", "⎀".repeat(inserted));
-                Ok(())
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
+    fn rusqlite_delete_tags_for_file_path(&mut self, file_path: &str) -> Result<(),Error> {
+        self.connection.execute(
+            "DELETE FROM Tag WHERE File_Path = ?1;",
+            params![file_path])
+            .and_then(|_| Ok(()))
     }
 
-    pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {
-        match self.connection.execute(" UPDATE Picture SET File_Size = ?1, Colors = ?2, Modified_Time = ?3, Rank = ?4, Palette = ?5, Label = ?6, Selected = ?7, Deleted = ?8 WHERE File_Path = ?9;",
-            params![entry.file_size as i64,
-            entry.colors as i64,
-            entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-            entry.rank as i64,
-            palette_to_blob(&entry.palette),
-            if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
-            entry.selected as i64,
-            entry.selected as i64,
-            &*entry.file_path]) {
-            Ok(updated) => {
-                println!("{}", "⟳".repeat(updated));
-                match self.connection.execute(" DELETE FROM Tag WHERE File_Path = ?1;", params![&*entry.file_path]) {
-                    Ok(deleted) => {
-                        println!("{}", "⌫".repeat(deleted));
-                        for tag in entry.tags.iter() {
-                            match self.insert_tag_label(entry, tag) {
-                                Ok(()) => {},
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        Ok(())
-                    },
-                    Err(err) => return Err(anyhow!(err)),
-                }
-            },
+    fn rusqlite_insert_tag_label(&mut self, file_path: &str, label: &str) -> Result<(),Error> {
+        self.connection.execute(
+            "INSERT INTO Tag      \n\
+            (File_Path, Label)    \n\
+            VALUES (?1, ?2);",
+            params![file_path, label])
+            .and_then(|_| Ok(()))
+    }
+
+    fn rusqlite_update_image_data(&mut self, entry: &PictureEntry) -> Result<(),Error> {
+        self.connection.execute(
+            "UPDATE PICTURE SET         \n\
+             File_Size = ?1,            \n\
+             Colors = ?2,               \n\
+             Modified_Time = ?3,        \n\
+             Rank = ?4,                 \n\
+             Palette = ?5,              \n\
+             Label = ?6,                \n\
+             Selected = ?7,             \n\
+             Deleted = ?8,              \n\
+             Cover = ?9
+             WHERE File_Path = ?10;",
+             params![
+             entry.file_size as i64,
+             entry.colors as i64,
+             entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+             entry.rank as i64,
+             palette_to_blob(&entry.palette),
+             if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
+             entry.selected as i64,
+             entry.selected as i64,
+             entry.cover,
+             &*entry.file_path])
+                 .and_then(|_| {
+                     self.rusqlite_delete_tags_for_file_path(&entry.file_path)
+                         .and_then(|_| {
+                             for tag in entry.tags.iter() {
+                                 match self.rusqlite_insert_tag_label(&entry.file_path, tag) {
+                                     Ok(()) => {},
+                                     Err(err) => return Err(err)
+                                 }
+                             };
+                             Ok(())
+                         })
+             })
+    }
+
+    pub fn update_image_data(&mut self, entry: &PictureEntry) -> Result<()> {
+        match self.rusqlite_update_image_data(entry) {
+            Ok(_) => Ok(()),
             Err(err) => Err(anyhow!(err)),
-            }
+        }
     }
 
     pub fn select_cover_pictures(&mut self) -> Result<PictureEntries> {
-        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, P.Rank, Palette, Label, Selected, Deleted FROM Picture P JOIN Cover C ON P.File_Path = CONCAT(C.Dir_Path, '/', C.File_Name);") {
+        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, P.Rank, Palette, Label, Selected, Deleted, Cover FROM Picture P JOIN Cover C ON P.File_Path = CONCAT(C.Dir_Path, '/', C.File_Name);") {
             Ok(mut statement) => {
                 match statement.query([]) {
                     Ok(mut rows) => {
@@ -226,7 +267,7 @@ impl Database {
     }
 
     fn rusqlite_to_picture_entry(row: &Row) -> Result<PictureEntry,Error> {
-        Ok(make_picture_entry(
+            Ok(make_picture_entry(
                 row.get(0)?,
                 row.get(1)?,
                 row.get(2)?,
@@ -261,6 +302,10 @@ impl Database {
                 },
                 {
                     let result:bool = row.get(8)?;
+                    result
+                },
+                {
+                    let result:bool = row.get(9)?;
                     result
                 },
                 HashSet::new(),))
@@ -348,7 +393,7 @@ impl Database {
                         match row {
                             Ok(file_path) => {
                                 let path = PathBuf::from(file_path.clone());
-                                if ! path.exists() { let _ = difference.insert(file_path); } else { };
+                                if ! path.exists() { let _ = difference.insert(file_path); };
                             },
                             Err(err) => return Err(anyhow!(err)),
                         }
@@ -547,8 +592,9 @@ pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
                         selected: false,
                         palette: palette,
                         label: String::from(""),
+                        cover: false,
                     };
-                    let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, HashSet::new());
+                    let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, image_data.cover, HashSet::new());
                     match self.connection.execute(" INSERT INTO Picture 
             (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted, Palette)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
@@ -577,7 +623,7 @@ pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
 }
 
 pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {
-    match self.connection.prepare(" SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, rowid FROM Picture WHERE File_Path = ?1;") {
+    match self.connection.prepare(" SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, Cover, rowid FROM Picture WHERE File_Path = ?1;") {
         Ok(mut statement) => match statement.query([file_path]) {
             Ok(mut rows) => match rows.next() {
                 Ok(Some(row)) => match Self::sql_to_picture_entry(row) {

@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS Picture (
     Palette BLOB,
     Label TEXT,
     Selected BOOLEAN,
-    Deleted BOOLEAN);
+    Deleted BOOLEAN,
+    Cover BOOLEAN)
 
 CREATE TABLE IF NOT EXISTS Tag (
     File_Path TEXT NOT NULL,

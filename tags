@@ -99,9 +99,8 @@ copy_label	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_
 copy_picture_file_to_temp	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn copy_picture_file_to_temp(&self) -> Result<()> {$/;"	f
 copy_picture_file_to_temp	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn copy_picture_file_to_temp(&self) -> Result<u64> {$/;"	f
 count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn count_selected(&mut self) {$/;"	f
-cover	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cover(&mut self) -> Result<()> {$/;"	f
+cover_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cover_current_entry(&mut self) -> Result<()> {$/;"	f
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
-create_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn create_schema(&self) -> Result<()> {$/;"	f
 current_candidates	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_candidates(&self) -> String {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
 db_centric	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn db_centric(&self) -> bool {$/;"	f
@@ -111,11 +110,10 @@ default_extract_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub 
 default_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn default_shortcuts() -> Shortcuts {$/;"	f
 delete	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn delete(&mut self) {$/;"	f
 delete	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn delete(&mut self) {$/;"	f
-delete_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_cover(&self, dir_path: &str, file_name: &str) -> Result<()> {$/;"	f
 delete_difference_from_file_system	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_difference_from_file_system(&mut self) -> Result<HashSet<String>> {$/;"	f
 delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delete_file(file_path: &str) -> Result<()> {$/;"	f
 delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) -> Result<()> {$/;"	f
-delete_picture	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_picture(&self, file_path: String) -> Result<()> {$/;"	f
+delete_picture	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_picture(&self, file_path: &str) -> Result<()> {$/;"	f
 delete_tag	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_tag(&mut self, tag : &str) {$/;"	f
 deleting_en_entry_makes_it_non_selectable	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
 dimension	/Users/christophethibaut/Coding/gsr/src/args.rs	/^fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {$/;"	f
@@ -168,10 +166,9 @@ initialize_tags	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn 
 input	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input(&self) -> String {$/;"	f
 input_kind	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input_kind(&self) -> Option<InputKind> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, editor: &mut Editor, catalog: &mut Catalog) -> bool {$/;"	f
-insert_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {$/;"	f
 insert_difference_from_directory	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_directory(&mut self, directory: &str, in_std_dir:bool) -> Result<PictureEntries> {$/;"	f
 insert_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
-insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_tag_label(&self, entry: &PictureEntry, label: &str) -> Result<()> {$/;"	f
+insert_or_update_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {$/;"	f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
 is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_prefix_path(prefix: &str, path: &str) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
@@ -253,6 +250,17 @@ repeat_last_comment	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub
 retrieve_or_create_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {$/;"	f
 rgba_key	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^fn rgba_key(rgba: Rgba<u8>) -> u32 {$/;"	f
 right_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
+rusqlite_create_schema	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_create_schema(&self) -> Result<(),Error> {$/;"	f
+rusqlite_delete_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_delete_cover(&self, dir_path: &str, file_name: &str) -> Result<usize,Error> {$/;"	f
+rusqlite_delete_picture	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_delete_picture(&self, file_path: &str) -> Result<(),Error> {$/;"	f
+rusqlite_delete_tags_for_file_path	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_delete_tags_for_file_path(&mut self, file_path: &str) -> Result<(),Error> {$/;"	f
+rusqlite_insert_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<usize,Error> {$/;"	f
+rusqlite_insert_or_update_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<(),Error> {$/;"	f
+rusqlite_insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_insert_tag_label(&mut self, file_path: &str, label: &str) -> Result<(),Error> {$/;"	f
+rusqlite_select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_all_picture_file_paths(&self) -> Result<Vec<String>,Error> {$/;"	f
+rusqlite_select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_pictures(&self, query: String) -> Result<PictureEntries, Error> {$/;"	f
+rusqlite_to_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_to_picture_entry(row: &Row) -> Result<PictureEntry,Error> {$/;"	f
+rusqlite_update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_update_image_data(&mut self, entry: &PictureEntry) -> Result<(),Error> {$/;"	f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool {$/;"	f
 select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_all_picture_file_paths(&self) -> Result<Vec<String>> {$/;"	f
 select_and_unselect_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
@@ -304,7 +312,7 @@ unselect_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn uns
 unselect_page	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn unselect_page(&mut self) -> Result<()> {$/;"	f
 untag_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn untag_current_entry(&mut self, tag: &str) -> Result<()> {$/;"	f
 update_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn update_files(&self) -> Result<()> {$/;"	f
-update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn update_image_data(&self, entry: &PictureEntry) -> Result<()> {$/;"	f
+update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn update_image_data(&mut self, entry: &PictureEntry) -> Result<()> {$/;"	f
 value_variants	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn value_variants<'a>() -> &'a [Self] {$/;"	f
 view_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool {$/;"	f
 write_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn write_image_data(image_data: &ImageData, file_path: &str) -> Result<()> {$/;"	f

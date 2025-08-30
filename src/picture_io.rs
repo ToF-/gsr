@@ -42,6 +42,7 @@ pub fn read_or_create_image_data(file_path: &str) -> Result<ImageData> {
                         selected: false,
                         palette: palette,
                         label: String::from(""),
+                        cover: false,
                     };
                     match write_image_data(&image_data, &image_data_file_path) {
                         Ok(()) => Ok(image_data),

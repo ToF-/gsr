@@ -14,6 +14,10 @@ pub enum Comment {
     DeleteTag { label: String },
     /// Rank the picture entry.
     Rank { rank: Rank },
+    /// Make the picture a cover for the directory
+    Cover,
+    /// Unmake the picture a cover for the directory
+    Uncover,
     /// Mark the picture entry as selected.
     Select,
     /// Mark the picture entry as deleted.

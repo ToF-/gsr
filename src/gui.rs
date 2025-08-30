@@ -354,7 +354,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::ThreeStars => {
                             let _ = catalog.rank_current_entry(Rank::ThreeStars);
                         },
-                        Command::Cover => result = catalog.cover(),
+                        Command::Cover => result = catalog.cover_current_entry(),
                         Command::Extract => catalog.extract(),
                         Command::FirstPosition => refresh = left_click_command_view_mode(0,0, gui, catalog),
                         Command::LastPosition => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
@@ -390,6 +390,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::Search => {
                             gui.editor.begin_input(InputKind::SearchInput, catalog.tags.clone());
                         }
+                        Command::Uncover => result = catalog.uncover_current_entry(),
                         Command::UnSelectPage => result = catalog.unselect_page(),
                         Command::UnselectAll => result = catalog.unselect_all(),
                         Command::TogglePalette => {

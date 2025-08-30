@@ -10,4 +10,5 @@ pub struct ImageData {
     pub selected: bool,
     pub palette: Palette,
     pub label: String,
+    pub cover: bool,
 }

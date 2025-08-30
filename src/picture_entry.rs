@@ -23,10 +23,11 @@ pub struct PictureEntry {
         label: String,
     pub selected: bool,
     pub deleted: bool,
+    pub cover: bool,
     pub tags: HashSet<String>,
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, tags: HashSet<String>) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, cover: bool, tags: HashSet<String>) -> PictureEntry {
     PictureEntry {
         file_path: file_path,
         file_size: file_size,
@@ -43,6 +44,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
         },
         selected: selected,
         deleted: deleted,
+        cover: cover,
         tags: tags,
     }
 }
@@ -69,6 +71,7 @@ impl PictureEntry {
                             Some(image_data.palette),
                             Some(image_data.label),
                             image_data.selected,
+                            false,
                             false,
                             HashSet::new())),
                     Err(err) => Err(anyhow!(err)),
@@ -251,7 +254,8 @@ impl PictureEntry {
     }
 
     pub fn title_display(self) -> String {
-        format!("{} {} [{} {} {}] {} {} {}",
+        format!("{} {} {} [{} {} {}] {} {} {}",
+            if self.cover { "🌟" } else { "" },
             self.original_file_name(),
             if self.selected { "△" } else { "" },
             self.file_size,

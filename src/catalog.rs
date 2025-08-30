@@ -373,21 +373,43 @@ impl Catalog {
         }
     }
 
-    pub fn cover(&mut self) -> Result<()> {
-        let entry = self.picture_entries[self.index].clone();
-        let dir_path = file_path_directory(&entry.file_path);
-        let file_name = file_name(&entry.file_path);
-        let rank = entry.rank;
-        println!("cover for {} with image {} and rank {}", dir_path, file_name, rank );
-        match self.database.delete_cover(&dir_path, &file_name) {
-            Ok(()) => match self.database.insert_cover(&dir_path, &file_name, rank) {
-                Ok(()) => Ok(()),
-                Err(err) => Err(anyhow!(err)),
+    pub fn cover_current_entry(&mut self) -> Result<()> {
+        match self.current_entry() {
+            Some(picture_entry) => {
+                let mut new_picture_entry = picture_entry.clone();
+                new_picture_entry.cover = true;
+                let dir_path = file_path_directory(&picture_entry.file_path);
+                let file_name = file_name(&picture_entry.file_path);
+                let rank = picture_entry.rank;
+                match self.database.insert_or_update_cover(&dir_path, &file_name, rank) {
+                    Ok(()) => {
+                        self.last_comment = Some(Comment::Cover);
+                        self.set_current_picture_entry(new_picture_entry)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
             },
-            Err(err) => Err(anyhow!(err)),
+            None => Ok(())
         }
     }
-
+    pub fn uncover_current_entry(&mut self) -> Result<()> {
+        match self.current_entry() {
+            Some(picture_entry) => {
+                let mut new_picture_entry = picture_entry.clone();
+                new_picture_entry.cover = false;
+                let dir_path = file_path_directory(&picture_entry.file_path);
+                let file_name = file_name(&picture_entry.file_path);
+                match self.database.delete_cover(&dir_path, &file_name) {
+                    Ok(()) => {
+                        self.last_comment = Some(Comment::Uncover);
+                        self.set_current_picture_entry(new_picture_entry)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            None => Ok(())
+        }
+    }
     pub fn label_current_entry(&mut self, label: &str) -> Result<()> {
         match self.current_entry() {
             Some(picture_entry) => {
@@ -660,6 +682,8 @@ impl Catalog {
             Some(Comment::AddTag { label}) => self.tag_current_entry(&label),
             Some(Comment::DeleteTag { label}) => self.untag_current_entry(&label),
             Some(Comment::Rank { rank }) => self.rank_current_entry(rank),
+            Some(Comment::Cover) => self.cover_current_entry(),
+            Some(Comment::Uncover) => self.uncover_current_entry(),
             Some(Comment::Select) => self.toggle_select_current_entry(),
             Some(Comment::Delete) => Ok(self.delete()),
         }
@@ -724,6 +748,8 @@ impl Catalog {
                                 Some(Comment::Rank { rank }) => entry.set_rank(*rank),
                                 Some(Comment::Select) => { entry.selected = !entry.selected }
                                 Some(Comment::Delete) => { entry.deleted = !entry.deleted },
+                                Some(Comment::Cover) => { entry.cover = true },
+                                Some(Comment::Uncover) => { entry.cover = false },
                             };
                             if self.last_comment.is_some() {
                                 match self.database.update_image_data(&entry.clone()) {
