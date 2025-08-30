@@ -237,7 +237,7 @@ impl Database {
     }
 
     pub fn select_cover_pictures(&mut self) -> Result<PictureEntries> {
-        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, P.Rank, Palette, Label, Selected, Deleted, Cover FROM Picture P JOIN Cover C ON P.File_Path = CONCAT(C.Dir_Path, '/', C.File_Name);") {
+        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, Cover FROM Picture WHERE Cover = True;") {
             Ok(mut statement) => {
                 match statement.query([]) {
                     Ok(mut rows) => {
