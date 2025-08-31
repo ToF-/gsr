@@ -97,18 +97,7 @@ fn main() {
                             exit(1)
                         }
                     }
-                    None => match load_picture_entries_from_directory_into_db(&mut database, &directory(args.clone().directory), true) {
-                        Ok(pictures_entries) => {
-                            println!("the following pictures have been inserted in the database:");
-                            for picture_entry in pictures_entries {
-                                println!("{}", picture_entry.file_path)
-                            }
-                        },
-                        Err(err) => {
-                            eprintln!("{}", err);
-                            exit(1)
-                        }
-                    }
+                    None => {},
                 }
             };
             match Catalog::init_catalog(&args) {

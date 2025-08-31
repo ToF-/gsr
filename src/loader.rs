@@ -10,6 +10,7 @@ use crate::path::check_file;
 use crate::picture_entry::{PictureEntries};
 
 pub fn check_database_and_files(directory: &str, database: &Database) -> Result<()> {
+    println!("checking database and files");
     match database.select_all_picture_file_paths() {
         Ok(database_file_paths) => {
             match file_paths_in_database_not_on_file_system(&database_file_paths) {

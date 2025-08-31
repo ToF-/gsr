@@ -70,7 +70,7 @@ impl Catalog {
             previous_order: Some(Order::Random),
             args: None,
             discarded: Vec::new(),
-            database: match Database::initialize(true) {
+            database: match Database::initialize(false) {
                 Ok(database) => database,
                 Err(err) => {
                     eprintln!("{}", err);
@@ -84,11 +84,12 @@ impl Catalog {
 
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
+        println!("initializing…");
         let mut catalog = Self::new();
         catalog.args = Some(args.clone());
         catalog.set_page_size(catalog.args.clone().unwrap().grid.unwrap());
-        let mut database = Database::initialize(false).unwrap();
-        let add_result = Catalog::set_picture_entries(&mut catalog, load_picture_entries_from_source(&mut database, args));
+        let picture_entries = load_picture_entries_from_source(&mut catalog.database, args);
+        let add_result = Catalog::set_picture_entries(&mut catalog, picture_entries);
         if let Err(err) = add_result {
             return Err(err)
         };
