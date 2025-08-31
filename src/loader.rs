@@ -77,7 +77,7 @@ pub fn file_path_in_directory_not_in_database(directory: &str, database_file_pat
 pub fn load_picture_entry_from_file_path(database: &Database, file_path: &str) -> Result<PictureEntries> {
     let mut picture_entries:PictureEntries = vec![];
     match check_file(file_path) {
-        Ok(_) => match database.retrieve_or_create_image_data(file_path) {
+        Ok(_) => match database.retrieve_or_insert_picture_entry(file_path) {
             Ok(Some(picture_entry)) => {
                 picture_entries.push(picture_entry);
                 Ok(picture_entries)
@@ -123,7 +123,7 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
         Some(s) => String::from(" and File_Path like '%".to_owned() + &s + "%'"),
         None => String::from(""),
     };
-    match database.select_pictures(restriction + &pattern) {
+    match database.select_pictures(&(restriction + &pattern)) {
         Ok(mut picture_entries) => {
             for picture_entry in &mut picture_entries {
                 match database.entry_tags(&picture_entry.file_path) {
@@ -165,9 +165,12 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
     let args = args.clone();
     match get_picture_file_paths(directory) {
         Ok(file_paths) => {
+            let total = file_paths.len();
+            let mut count = 0;
             let mut error: bool = false;
             let mut picture_entries: PictureEntries = vec![];
             for file_path in file_paths {
+                println!("{}/{}", count, total);
                 let matches_pattern = match args.pattern {
                     None => true,
                     Some(ref pattern) => {
@@ -217,7 +220,8 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
                             error = true;
                         }
                     }
-                }
+                };
+                count += 1;
             }
             if error {
                 Err(anyhow!(format!("Some pictures could not be opened")))

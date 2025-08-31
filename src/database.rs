@@ -1,3 +1,4 @@
+use rusqlite::Error::QueryReturnedNoRows;
 use std::path::{Path,PathBuf};
 use crate::path::get_picture_file_paths;
 use rusqlite::{Row, Error};
@@ -123,9 +124,9 @@ impl Database {
         if total > 0 {
             let mut picture_entries: PictureEntries = vec![];
             for file_path in difference_opt.unwrap() {
-                match self.insert_image_data(file_path) {
-                    Ok(entry) => {
-                        picture_entries.push(entry)
+                match self.insert_picture_entry(file_path) {
+                    Ok(picture_entry) => {
+                        picture_entries.push(picture_entry)
                     },
                     Err(err) => return Err(anyhow!(err)),
                 }; 
@@ -351,33 +352,90 @@ impl Database {
         }
     }
 
-    fn rusqlite_select_pictures(&self, query: String) -> Result<PictureEntries, Error> {
-            self.connection.prepare(
-                &("SELECT File_Path,     \n\
-                          File_Size,     \n\
-                          Colors,        \n\
-                          Modified_Time, \n\
-                          Rank,          \n\
-                          Palette,       \n\
-                          Label,         \n\
-                          Selected,      \n\
-                          Deleted        \n\
-                          FROM Picture   \n\
-                          WHERE ".to_owned() + &query + ";"))
-                .and_then( |mut statement| { statement.query([])
-                    .and_then( |mut rows| {
-                        let mut picture_entries: PictureEntries = vec![];
-                        while let Some(row) = rows.next()? {
-                            match Self::rusqlite_to_picture_entry(row) {
-                                Ok(picture_entry) => { picture_entries.push(picture_entry); },
+    fn rusqlite_retrieve_picture_entry(&self, file_path: &str) -> Result<PictureEntry, Error> {
+        self.connection.prepare(
+                "SELECT File_Path,     \n\
+                File_Size,             \n\
+                Colors,                \n\
+                Modified_Time,         \n\
+                Rank,                  \n\
+                Palette,               \n\
+                Label,                 \n\
+                Selected,              \n\
+                Deleted,               \n\
+                Cover,                 \n\
+                FROM Picture           \n\
+                WHERE File_Path = ?1;")
+            .and_then(|mut statement| {
+                statement.query(params![file_path])
+                    .and_then(|mut rows| {
+                        match rows.next() {
+                                Ok(Some(row)) => return Self::rusqlite_to_picture_entry(row),
+                                Ok(None) => return Err(QueryReturnedNoRows),
                                 Err(err) => return Err(err),
-                            }
-                        };
-                        Ok(picture_entries) })
-                })
+                        }
+                    })
+            })
     }
 
-    pub fn select_pictures(&self, query: String) -> Result<PictureEntries> {
+    fn rusqlite_retrieve_tags_for_file_path(&self, file_path: &str) -> Result<HashSet<String>, Error> {
+        self.connection.prepare(
+            "SELECT Label              \n\
+            FROM Tag WHERE File_Path = ?1;")
+            .and_then(|mut statement| {
+                statement.query(params![file_path])
+                    .and_then(|mut rows| {
+                        let mut result:HashSet<String> = HashSet::new();
+                        while let Ok(Some(row)) = rows.next() {
+                            let label:String = row.get(0)?;
+                            let _ = result.insert(label);
+                        }
+                        Ok(result)
+                    })
+            })
+    }
+
+    fn rusqlite_retrieve_picture_entry_and_tags(&self, file_path: &str) -> Result<PictureEntry, Error> {
+        self.rusqlite_retrieve_picture_entry(file_path)
+            .and_then(|mut picture_entry| {
+                self.rusqlite_retrieve_tags_for_file_path(file_path)
+                    .and_then(|tags| {
+                        picture_entry.tags = tags;
+                        Ok(picture_entry)
+                    })
+            })
+    }
+
+    fn rusqlite_select_pictures(&self, query: &str) -> Result<PictureEntries, Error> {
+        let full_query: String =
+            ("SELECT File_Path,     \n\
+              File_Size,             \n\
+              Colors,                \n\
+              Modified_Time,         \n\
+              Rank,                  \n\
+              Palette,               \n\
+              Label,                 \n\
+              Selected,              \n\
+              Deleted                \n\
+              FROM Picture           \n\
+              WHERE ".to_owned() + query + ";");
+        self.connection.prepare(&full_query)
+            .and_then(|mut statement| {
+                statement.query([])
+                    .and_then(|mut rows| {
+                            let mut picture_entries: PictureEntries = vec![];
+                            while let Some(row) = rows.next()? {
+                                match Self::rusqlite_to_picture_entry(row) {
+                                    Ok(picture_entry) => { picture_entries.push(picture_entry); },
+                                    Err(err) => return Err(err),
+                                }
+                            };
+                            Ok(picture_entries)
+                        })
+            })
+    }
+
+    pub fn select_pictures(&self, query: &str) -> Result<PictureEntries> {
         match self.rusqlite_select_pictures(query) {
             Ok(result) => Ok(result),
             Err(err) => Err(anyhow!(err)),
@@ -581,48 +639,45 @@ pub fn entry_tags(&self, file_path: &str) -> Result<HashSet<String>> {
     }
 }
 
-pub fn insert_image_data(&self, file_path: &str) -> Result<PictureEntry> {
-    match read_file_info(file_path) {
-        Ok((file_size, modified_time)) => {
-            match get_palette_from_picture(file_path) {
-                Ok((palette, colors)) => {
-                    let image_data = ImageData{
-                        colors: colors,
-                        rank: Rank::NoStar,
-                        selected: false,
-                        palette: palette,
-                        label: String::from(""),
-                        cover: false,
-                    };
-                    let entry = make_picture_entry(file_path.to_string(), file_size, image_data.colors, modified_time, image_data.rank, Some(image_data.palette), Some(image_data.label), image_data.selected, false, image_data.cover, HashSet::new());
-                    match self.connection.execute(" INSERT INTO Picture 
-            (File_path, File_size, Colors, Modified_time, Rank, Label, Selected, Deleted, Palette)
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);",
-            params![
-            entry.file_path,
-            entry.file_size as i64,
-            entry.colors as i64,
-            entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-            entry.rank as i64,
-            entry.label(),
-            entry.selected as i64,
-            entry.selected as i64,
-            palette_to_blob(&entry.palette)]) {
-                        Ok(inserted) => {
-                            println!("{}","⎀".repeat(inserted));
-                            return Ok(entry)
-                        },
-                        Err(err) => return Err(anyhow!(err)),
-                    }
-                },
-                Err(err) => return Err(anyhow!(err)),
+fn rusqlite_insert_picture_entry(&self, picture_entry: PictureEntry) -> Result<usize,Error> {
+    self.connection.execute(
+    "INSERT INTO Picture          \n\
+    (File_path,                   \n\
+     File_size,                   \n\
+     Colors,                      \n\
+     Modified_time,               \n\
+     Rank,                        \n\
+     Label,                       \n\
+     Selected,                    \n\
+     Deleted,                     \n\
+     Cover,                       \n\
+     Palette)                     \n\
+     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);",
+     params![
+     picture_entry.file_path,
+     picture_entry.file_size as i64,
+     picture_entry.colors as i64,
+     picture_entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
+     picture_entry.rank as i64,
+     picture_entry.label(),
+     picture_entry.selected as i64,
+     picture_entry.selected as i64,
+     picture_entry.cover as i64,
+     palette_to_blob(&picture_entry.palette)])
+}
+pub fn insert_picture_entry(&self, file_path: &str) -> Result<PictureEntry> {
+    match PictureEntry::from_file(file_path) {
+        Ok(picture_entry) => {
+            match self.rusqlite_insert_picture_entry(picture_entry.clone()) {
+                Ok(_) => Ok(picture_entry),
+                Err(err) => Err(anyhow!(err)),
             }
         },
         Err(err) => Err(anyhow!(err)),
     }
 }
 
-pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<PictureEntry>> {
+pub fn retrieve_or_insert_picture_entry(&self, file_path: &str) -> Result<Option<PictureEntry>> {
     match self.connection.prepare(" SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, Cover, rowid FROM Picture WHERE File_Path = ?1;") {
         Ok(mut statement) => match statement.query([file_path]) {
             Ok(mut rows) => match rows.next() {
@@ -638,19 +693,9 @@ pub fn retrieve_or_create_image_data(&self, file_path: &str) -> Result<Option<Pi
                 },
                 Ok(None) => {
                     if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
-                        println!("couldn't find {} in database; insert image data from this file ?", file_path);
-                        let mut response = String::new();
-                        let stdin = io::stdin();
-                        stdin.read_line(&mut response).expect("can't read from stdin");
-                        match response.chars().next() {
-                            Some(ch) if ch == 'y' || ch == 'Y' => {
-                                match self.insert_image_data(file_path) {
-                                    Ok(picture_entry) => Ok(Some(picture_entry)),
-                                    Err(err) => return Err(anyhow!(err)),
-                                }
-                            },
-                            Some(_)|
-                                None => Ok(None),
+                        match self.insert_picture_entry(file_path) {
+                            Ok(picture_entry) => Ok(Some(picture_entry)),
+                            Err(err) => return Err(anyhow!(err)),
                         }
                     } else {
                         Ok(None)
