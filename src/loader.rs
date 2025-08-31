@@ -167,7 +167,7 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
         Ok(file_paths) => {
             let total = file_paths.len();
             let mut count = 0;
-            let mut error: bool = false;
+            let mut errors = 0;
             let mut picture_entries: PictureEntries = vec![];
             for file_path in file_paths {
                 println!("{}/{}", count, total);
@@ -217,14 +217,15 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
                         },
                         Err(err) => {
                             eprintln!("{}", err);
-                            error = true;
+                            errors += 1
                         }
                     }
                 };
                 count += 1;
             }
-            if error {
-                Err(anyhow!(format!("Some pictures could not be opened")))
+            if errors > 0 {
+                println!("{} pictures could not be opened", errors);
+                Ok(picture_entries)
             } else {
                 Ok(picture_entries)
             }
