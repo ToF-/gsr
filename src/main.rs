@@ -68,6 +68,7 @@ fn main() {
                 }
             };
             if args.purge {
+                println!("removing orphan entries from the database…");
                 match database.delete_picture_data_where_file_do_not_exists() {
                     Ok(count) => {
                         println!("{} pictures removed from the database", count);

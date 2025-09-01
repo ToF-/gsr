@@ -361,7 +361,7 @@ impl Database {
              WHERE File_Path = ?1;", params![file_path.to_string()])
             .and_then(|_| {
                 self.connection.execute(
-                    "DELETE FROM Tak  \n\
+                    "DELETE FROM Tag  \n\
                      WHERE File_Path = ?1;", params![file_path.to_string()])
                     .and_then(|_| Ok(()))
             })
@@ -469,7 +469,8 @@ impl Database {
               Palette,               \n\
               Label,                 \n\
               Selected,              \n\
-              Deleted                \n\
+              Deleted,               \n\
+              Cover                  \n\
               FROM Picture           \n\
               WHERE ".to_owned() + query + ";");
         self.connection.prepare(&full_query)

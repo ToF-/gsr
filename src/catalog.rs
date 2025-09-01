@@ -125,7 +125,7 @@ impl Catalog {
 
     pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {
         self.sort_by(Order::Size);
-        let mut prev_entry: Option<PictureEntry> = None;
+         let mut prev_entry: Option<PictureEntry> = None;
         for entry in &self.picture_entries {
             if let Some(prev) = prev_entry {
                 match entry.equal_content(&prev) {

@@ -106,10 +106,8 @@ pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) ->
         load_picture_entries_from_covers(database)
     } else if args.directory.is_some() && args.add.is_some() && args.from.is_some() {
         load_picture_entries_from_directory_into_db(database, &args.clone().add.unwrap(), true)
-    } else if let Some(directory) = &args.directory {
-        load_picture_entries_from_directory(database, directory, &args)
-    } else {
-        Ok(vec![])
+    } else  {
+        load_picture_entries_from_db(database, &args)
     }
 }
 
