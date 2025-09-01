@@ -90,7 +90,7 @@ pub fn load_picture_entry_from_file_path(database: &Database, file_path: &str) -
 }
 
 pub fn load_picture_entries_from_covers(database: &mut Database) -> Result<PictureEntries> {
-    database.select_cover_pictures()
+    database.select_cover_picture_entries()
 }
 pub fn load_picture_entries_from_directory_into_db(database: &mut Database, directory: &str, in_std_dir: bool) -> Result<PictureEntries> {
     match database.insert_difference_from_directory(&directory, in_std_dir) {

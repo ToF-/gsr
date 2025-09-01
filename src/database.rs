@@ -56,6 +56,65 @@ impl Database {
         }
     }
 
+    /// check that the schema exsists in the database
+    pub fn check_schema(&self) -> Result<()> {
+        match self.connection.prepare("SELECT * FROM Picture WHERE rowid = 1;") {
+            Ok(_) => match self.connection.prepare("SELECT * FROM Tag WHERE rowid = 1;") {
+                Ok(_) => Ok(()),
+                Err(err) => Err(anyhow!(err)),
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    /// update a picture entry in the database
+    pub fn update_picture_entry(&mut self, entry: &PictureEntry) -> Result<()> {
+        match self.rusqlite_update_image_data(entry) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    /// insert the cover picture in the database or update it with rank if already existing
+    pub fn insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {
+        match self.rusqlite_insert_or_update_cover(dir_path, file_name, rank) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    /// delete the cover picture from the database
+    pub fn delete_cover(&mut self, dir_path: &str, file_name: &str) -> Result<()> {
+        match self.rusqlite_delete_cover(dir_path, file_name) {
+            Ok(_) => Ok(()),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    /// select the picture entries that are covers for their directory
+    pub fn select_cover_picture_entries(&mut self) -> Result<PictureEntries> {
+        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, Cover FROM Picture WHERE Cover = True;") {
+            Ok(mut statement) => {
+                match statement.query([]) {
+                    Ok(mut rows) => {
+                        let mut result: PictureEntries = vec![];
+                        while let Some(row) = rows.next()? {
+                            match Self::sql_to_picture_entry(row) {
+                                Ok(entry) => {
+                                    result.push(entry);
+                                },
+                                Err(err) => return Err(anyhow!(err)),
+                            }
+                        };
+                        return Ok(result)
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+    /// create the database schema
     fn rusqlite_create_schema(&self) -> Result<(),Error> {
         println!("creating database schema");
         self.connection.execute(
@@ -86,16 +145,6 @@ impl Database {
                             .and_then(|_| Ok(()))
                     })
             })
-    }
-
-    pub fn check_schema(&self) -> Result<()> {
-        match self.connection.prepare("SELECT * FROM Picture WHERE rowid = 1;") {
-            Ok(_) => match self.connection.prepare("SELECT * FROM Tag WHERE rowid = 1;") {
-                Ok(_) => Ok(()),
-                Err(err) => Err(anyhow!(err)),
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
     }
 
     fn decimate(&self, file_paths_set: HashSet<String>) -> Result<HashSet<String>> {
@@ -162,20 +211,6 @@ impl Database {
             })
     }
 
-    pub fn delete_cover(&mut self, dir_path: &str, file_name: &str) -> Result<()> {
-        match self.rusqlite_delete_cover(dir_path, file_name) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
-    pub fn insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {
-        match self.rusqlite_insert_or_update_cover(dir_path, file_name, rank) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
     fn rusqlite_delete_tags_for_file_path(&mut self, file_path: &str) -> Result<(),Error> {
         self.connection.execute(
             "DELETE FROM Tag WHERE File_Path = ?1;",
@@ -230,35 +265,6 @@ impl Database {
              })
     }
 
-    pub fn update_image_data(&mut self, entry: &PictureEntry) -> Result<()> {
-        match self.rusqlite_update_image_data(entry) {
-            Ok(_) => Ok(()),
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
-    pub fn select_cover_pictures(&mut self) -> Result<PictureEntries> {
-        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, Cover FROM Picture WHERE Cover = True;") {
-            Ok(mut statement) => {
-                match statement.query([]) {
-                    Ok(mut rows) => {
-                        let mut result: PictureEntries = vec![];
-                        while let Some(row) = rows.next()? {
-                            match Self::sql_to_picture_entry(row) {
-                                Ok(entry) => {
-                                    result.push(entry);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        return Ok(result)
-                    },
-                    Err(err) => Err(anyhow!(err)),
-                }
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
 
     fn sql_to_picture_entry(row: &Row) -> Result<PictureEntry> {
         match Self::rusqlite_to_picture_entry(row) {

@@ -358,7 +358,7 @@ impl Catalog {
         match self.index() {
             Some(index) => {
                 self.picture_entries[index] = picture_entry.clone();
-                self.database.update_image_data(&picture_entry)
+                self.database.update_picture_entry(&picture_entry)
             },
             None => Ok(())
         }
@@ -695,7 +695,7 @@ impl Catalog {
             let entry = &mut self.picture_entries[index];
             if entry.selected {
                 entry.set_label(label);
-                match self.database.update_image_data(entry) {
+                match self.database.update_picture_entry(entry) {
                     Ok(()) => {},
                     Err(err) => return Err(anyhow!(err)),
                 }
@@ -724,7 +724,7 @@ impl Catalog {
                 let entry: &mut PictureEntry = &mut self.picture_entries[index];
                 entry.unlabel();
                 self.last_comment = Some(Comment::Unlabel);
-                self.database.update_image_data(entry)
+                self.database.update_picture_entry(entry)
             },
             None => Ok(()),
         }
@@ -753,7 +753,7 @@ impl Catalog {
                                 Some(Comment::Uncover) => { entry.cover = false },
                             };
                             if self.last_comment.is_some() {
-                                match self.database.update_image_data(&entry.clone()) {
+                                match self.database.update_picture_entry(&entry.clone()) {
                                     Ok(()) => {},
                                     Err(err) => return Err(anyhow!(err)),
                                 }
@@ -775,7 +775,7 @@ impl Catalog {
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
                     entry.selected = false;
-                    match self.database.update_image_data(entry) {
+                    match self.database.update_picture_entry(entry) {
                         Ok(()) => {},
                         Err(err) => return Err(anyhow!(err)),
                     }
@@ -795,7 +795,7 @@ impl Catalog {
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
                     entry.selected = false;
-                    match self.database.update_image_data(entry) {
+                    match self.database.update_picture_entry(entry) {
                         Ok(()) => {},
                         Err(err) => return Err(anyhow!(err)),
                     }
