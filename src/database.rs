@@ -93,27 +93,42 @@ impl Database {
 
     /// select the picture entries that are covers for their directory
     pub fn select_cover_picture_entries(&mut self) -> Result<PictureEntries> {
-        match self.connection.prepare("SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, Cover FROM Picture WHERE Cover = True;") {
-            Ok(mut statement) => {
-                match statement.query([]) {
-                    Ok(mut rows) => {
-                        let mut result: PictureEntries = vec![];
-                        while let Some(row) = rows.next()? {
-                            match Self::sql_to_picture_entry(row) {
-                                Ok(entry) => {
-                                    result.push(entry);
-                                },
-                                Err(err) => return Err(anyhow!(err)),
-                            }
-                        };
-                        return Ok(result)
-                    },
-                    Err(err) => Err(anyhow!(err)),
-                }
-            },
+        match self.rusqlite_select_cover_picture_entries() {
+            Ok(picture_entries) => Ok(picture_entries),
             Err(err) => Err(anyhow!(err)),
         }
     }
+    
+    fn rusqlite_select_cover_picture_entries(&mut self) -> Result<PictureEntries, Error> {
+        self.connection.prepare(
+            "SELECT File_Path,            \n\
+            File_Size,                    \n\
+            Colors,                       \n\
+            Modified_Time,                \n\
+            Rank, Palette,                \n\
+            Label,                        \n\
+            Selected,                     \n\
+            Deleted,                      \n\
+            Cover                         \n\
+            FROM Picture                  \n\
+            WHERE Cover = True;")
+            .and_then(|mut statement| {
+                statement.query([])
+                    .and_then(|mut rows| {
+                        let mut picture_entries = vec![];
+                        while let Some(row) = rows.next()? {
+                            match Self::rusqlite_to_picture_entry(row) {
+                                Ok(picture_entry) => {
+                                    picture_entries.push(picture_entry);
+                                },
+                                Err(err) => return Err(err),
+                            }
+                        };
+                        Ok(picture_entries)
+                    })
+            })
+    }
+
     /// create the database schema
     fn rusqlite_create_schema(&self) -> Result<(),Error> {
         println!("creating database schema");
