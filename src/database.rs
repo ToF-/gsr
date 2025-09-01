@@ -1,3 +1,4 @@
+use crate::path::file_name;
 use rusqlite::Error::QueryReturnedNoRows;
 use std::path::{Path,PathBuf};
 use crate::path::get_picture_file_paths;
@@ -370,6 +371,37 @@ impl Database {
         match self.rusqlite_delete_picture(file_path) {
             Ok(()) => Ok(()),
             Err(err) => return Err(anyhow!(err)),
+        }
+    }
+
+    pub fn delete_picture_data_where_file_do_not_exists(&mut self) -> Result<usize> {
+        let mut count = 0;
+        let result = self.rusqlite_select_all_picture_file_paths()
+            .and_then(|file_paths| {
+                for file_path in file_paths {
+                    let path = PathBuf::from(&file_path);
+                    if !path.exists() {
+                        let result = self.rusqlite_delete_picture(&file_path)
+                            .and_then(|_| {
+                                self.rusqlite_delete_tags_for_file_path(&file_path)
+                                    .and_then(|_| {
+                                        let directory = file_path_directory(&file_path);
+                                        let file_name = file_name(&file_path);
+                                        self.rusqlite_delete_cover(&directory, &file_name)
+                                            .and_then(|_| Ok(()))
+                                    })
+                            });
+                        if result.is_err() {
+                            return result;
+                        };
+                        count += 1;
+                    };
+                };
+                Ok(())
+            });
+        match result {
+            Ok(()) => Ok (count),
+            Err(err) => Err(anyhow!(err)),
         }
     }
 

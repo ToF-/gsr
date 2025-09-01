@@ -67,6 +67,17 @@ fn main() {
                     },
                 }
             };
+            if args.purge {
+                match database.delete_picture_data_where_file_do_not_exists() {
+                    Ok(count) => {
+                        println!("{} pictures removed from the database", count);
+                    },
+                    Err(err) => {
+                        eprintln!("{}", err);
+                        exit(1)
+                    },
+                }
+            };
             match args.from {
                 Some(ref ext_directory) => match args.add {
                     Some(ref abs_directory) => match copy_all_picture_files(&ext_directory, &abs_directory) {
