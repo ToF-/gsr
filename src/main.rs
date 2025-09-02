@@ -52,7 +52,7 @@ fn main() {
             println!("directory: {}", directory(args.clone().directory));
             Database::initialize(args.create_schema)
                 .and_then(|mut database| {
-                    match operations(database.borrow_mut(), &args) { 
+                    match database_operations(database.borrow_mut(), &args) { 
                         Ok(_) => {},
                         Err(err) => return Err(anyhow!(err)),
                     };
@@ -61,66 +61,37 @@ fn main() {
                             if let Some(ref label) = args.label {
                                 match catalog.apply_label_all(label) {
                                     Ok(()) => {},
-                                    Err(err) => {
-                                        eprintln!("{}", err);
-                                        exit(1)
-                                    }
+                                    Err(err) => return Err(anyhow!(err)),
                                 }
                             };
                             println!("{:?} entries", catalog.length());
                             if args.update {
                                 match catalog.update_files() {
                                     Ok(()) => exit(0),
-                                    Err(err) => {
-                                        eprintln!("{}", err);
-                                        exit(1)
-                                    },
+                                    Err(err) => return Err(anyhow!(err)),
                                 }
-                            }
+                            };
                             if args.tags {
                                 match catalog.print_labels_all() {
                                     Ok(()) => exit(0),
-                                    Err(err) => {
-                                        eprintln!("{}", err);
-                                        exit(1);
-                                    },
+                                    Err(err) => return Err(anyhow!(err)),
                                 }
-                            }
+                            };
                             if args.directories {
                                 match catalog.print_directories_all() {
                                     Ok(()) => exit(0),
-                                    Err(err) => {
-                                        eprintln!("{}", err);
-                                        exit(1);
-                                    },
+                                    Err(err) => return Err(anyhow!(err)),
                                 }
-                            }
+                            };
                             if args.info {
                                 info(&catalog);
-                            }
-                            if args.from.is_some() {
-                                if args.add.is_none() {
-                                    eprintln!("option --from <SOURCE_DIR> must be used with option --add <TARGET_DIR>");
-                                    exit(1)
-                                } else {
-                                    match copy_all_picture_files(&args.from.clone().unwrap(), &args.add.clone().unwrap()) {
-                                        Ok(()) => {},
-                                        Err(err) => {
-                                            eprintln!("{}", err);
-                                            exit(1);
-                                        }
-                                    }
-                                }
                             };
                             if args.deduplicate.is_some() {
                                 match catalog.deduplicate_files(&args.deduplicate.unwrap()) {
-                                    Ok(()) => exit(0),
-                                    Err(err) => {
-                                        eprintln!("{}", err);
-                                        exit(1)
-                                    },
+                                    Ok(()) => return Ok(()),
+                                    Err(err) => return Err(anyhow!(err)),
                                 }
-                            }
+                            };
                             catalog.sort_by(args.order.clone());
                             let catalog_rc = Rc::new(RefCell::new(catalog));
                             let application = Application::builder()
@@ -137,8 +108,8 @@ fn main() {
                                 build_gui(application, &args, &catalog_rc, &shortcuts)
                             }));
 
-                            let empty: Vec<String> = vec![];
-                            application.run_with_args(&empty);
+                            let no_args: Vec<String> = vec![];
+                            application.run_with_args(&no_args);
                             Ok(())
                         })
                 })
@@ -149,7 +120,7 @@ fn main() {
     });
 }
 
-    fn operations(database: &mut Database, args: &Args) -> Result<()> {
+    fn database_operations(database: &mut Database, args: &Args) -> Result<()> {
         if args.check {
             match check_database_and_files(&directory(args.clone().directory), &database) {
                 Ok(()) => {},

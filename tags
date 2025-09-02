@@ -102,6 +102,7 @@ cover_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
 current_candidates	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_candidates(&self) -> String {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
+database_operations	/Users/christophethibaut/Coding/gsr/src/main.rs	/^    fn database_operations(database: &mut Database, args: &Args) -> Result<()> {$/;"	f
 db_centric	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn db_centric(&self) -> bool {$/;"	f
 deduplicate_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {$/;"	f
 default_extract_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn default_extract_list_file() -> Result<String> {$/;"	f
@@ -140,7 +141,7 @@ from	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn from(n: i64) -> Se
 from_and_to_i64	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn from_and_to_i64() {$/;"	f
 from_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn from_file(file_path: &str) -> Result<Self> {$/;"	f
 from_file_or_database	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn from_file_or_database(file_path: &str, database: &Database) -> Result<Self> {$/;"	f
-from_path	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn from_path(connection_string: &str) -> Result<Self> {$/;"	f
+from_path	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn from_path(connection_string: &str) -> Result<Self> {$/;"	f
 full_size_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn full_size_on(&self) -> bool {$/;"	f
 get_all_pictures_including_sub_folders_except_thumbnails	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn get_all_pictures_including_sub_folders_except_thumbnails() {$/;"	f
 get_an_error_on_absent_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn get_an_error_on_absent_directory() {$/;"	f
@@ -185,8 +186,9 @@ load_picture_entries_from_db	/Users/christophethibaut/Coding/gsr/src/loader.rs	/
 load_picture_entries_from_directory	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_directory(database: &mut Database, directory: &str, args: &Args) -> Result<PictureEntries> {$/;"	f
 load_picture_entries_from_directory_into_db	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_directory_into_db(database: &mut Database, directory: &str, in_std_dir: bool) -> Result<PictureEntries> {$/;"	f
 load_picture_entries_from_source	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) -> Result<PictureEntries> {$/;"	f
-load_picture_entry_from_file_path	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entry_from_file_path(database: &Database, file_path: &str) -> Result<PictureEntries> {$/;"	f
 load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load_shortcuts() -> Result<Shortcuts> {$/;"	f
+load_single_picture_entry	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_single_picture_entry(database: &Database, file_path: &str) -> Result<PictureEntries> {$/;"	f
+load_single_picture_entry_from_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_single_picture_entry_from_file_system(file_path: &str) -> Result<PictureEntries> {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
 make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, cover: bool, tags: HashSet<String>) -> PictureEntry {$/;"	f
 make_picture_entry_from_file_and_image_data_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn make_picture_entry_from_file_and_image_data_file() {$/;"	f
