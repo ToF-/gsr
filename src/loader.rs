@@ -154,6 +154,14 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
 
 pub fn load_picture_entries_from_directory(database: &mut Database, directory: &str, args: &Args) -> Result<PictureEntries> {
     let args = args.clone();
+    let tag_select_set:HashSet<String> = match args.select {
+        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+        None => HashSet::new(),
+    };
+    let tag_include_set:HashSet<String> = match args.include {
+        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+        None => HashSet::new(),
+    };
     match get_picture_file_paths(directory) {
         Ok(file_paths) => {
             let total = file_paths.len();
@@ -172,14 +180,6 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
                             Err(err) => return Err(anyhow!(err)),
                         }
                     },
-                };
-                let tag_select_set:HashSet<String> = match args.select {
-                    Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
-                    None => HashSet::new(),
-                };
-                let tag_include_set:HashSet<String> = match args.include {
-                    Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
-                    None => HashSet::new(),
                 };
                 let entry_tags: HashSet<String>;
                 if tag_select_set.len() > 0 || tag_include_set.len() > 0 {
