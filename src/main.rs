@@ -1,3 +1,5 @@
+use std::borrow::BorrowMut;
+use anyhow::{anyhow,Result};
 use crate::loader::load_picture_entries_from_directory_into_db;
 use crate::path::directory;
 use crate::display::info;
@@ -36,7 +38,7 @@ mod picture_io;
 mod rank;
 
 fn main() {
-    let result = Args::parse().checked_args();
+    // load command shortcuts from the .gallshkey.json file, exit if failed
     let shortcuts = match load_shortcuts() {
         Ok(result) => result,
         Err(err) => {
@@ -44,164 +46,148 @@ fn main() {
             exit(1)
         },
     };
-    match result {
-        Err(err) => {
-            eprintln!("{}", err);
-            exit(1);
-        },
-        Ok(args) => {
+
+    let main_result = Args::parse().checked_args()
+        .and_then(|args| {
             println!("directory: {}", directory(args.clone().directory));
-            let mut database: Database = match Database::initialize(args.create_schema) {
-                Ok(database) => database,
-                Err(err) => {
-                    eprintln!("{}", err);
-                    exit(1)
-                }
-            };
-            if args.check {
-                match check_database_and_files(&directory(args.clone().directory), &database) {
-                    Ok(()) => {},
-                    Err(err) => {
-                        eprintln!("{}", err);
-                        exit(1)
-                    },
-                }
-            };
-            if args.purge {
-                println!("removing orphan entries from the database…");
-                match database.delete_picture_data_where_file_do_not_exists() {
-                    Ok(count) => {
-                        println!("{} pictures removed from the database", count);
-                    },
-                    Err(err) => {
-                        eprintln!("{}", err);
-                        exit(1)
-                    },
-                }
-            };
-            match args.from {
-                Some(ref ext_directory) => match args.add {
-                    Some(ref abs_directory) => match copy_all_picture_files(&ext_directory, &abs_directory) {
-                        Ok(()) => {},
-                        Err(err) => {
-                            eprintln!("{}", err);
-                            exit(1)
-                        }
-                    },
-                    None => match copy_all_picture_files(&ext_directory, &directory(args.clone().directory)) {
-                        Ok(()) => {},
-                        Err(err) => {
-                            eprintln!("{}", err);
-                            exit(1)
-                        }
-                    }
-                },
-                None => match args.add {
-                    Some(ref abs_directory) => match load_picture_entries_from_directory_into_db(&mut database, &abs_directory, false) {
-                        Ok(pictures_entries) => {
-                            println!("the following pictures have been inserted in the database:");
-                            for picture_entry in pictures_entries {
-                                println!("{}", picture_entry.file_path)
-                            }
-                        },
-                        Err(err) => {
-                            eprintln!("{}", err);
-                            exit(1)
-                        }
-                    }
-                    None => {},
-                }
-            };
-            match Catalog::init_catalog(&args) {
-                Err(err) => {
-                    eprintln!("{}", err);
-                    exit(1);
-                },
-                Ok(mut catalog) => {
-                    if let Some(ref label) = args.label {
-                        match catalog.apply_label_all(label) {
-                            Ok(()) => {},
-                            Err(err) => {
-                                eprintln!("{}", err);
-                                exit(1)
-                            }
-                        }
+            Database::initialize(args.create_schema)
+                .and_then(|mut database| {
+                    match operations(database.borrow_mut(), &args) { 
+                        Ok(_) => {},
+                        Err(err) => return Err(anyhow!(err)),
                     };
-                    println!("{:?} entries", catalog.length());
-                    if args.update {
-                        match catalog.update_files() {
-                            Ok(()) => exit(0),
-                            Err(err) => {
-                                eprintln!("{}", err);
-                                exit(1)
-                            },
-                        }
-                    }
-                    if args.tags {
-                        match catalog.print_labels_all() {
-                            Ok(()) => exit(0),
-                            Err(err) => {
-                                eprintln!("{}", err);
-                                exit(1);
-                            },
-                        }
-                    }
-                    if args.directories {
-                        match catalog.print_directories_all() {
-                            Ok(()) => exit(0),
-                            Err(err) => {
-                                eprintln!("{}", err);
-                                exit(1);
-                            },
-                        }
-                    }
-                    if args.info {
-                        info(&catalog);
-                    }
-                    if args.from.is_some() {
-                        if args.add.is_none() {
-                            eprintln!("option --from <SOURCE_DIR> must be used with option --add <TARGET_DIR>");
-                            exit(1)
-                        } else {
-                            match copy_all_picture_files(&args.from.clone().unwrap(), &args.add.clone().unwrap()) {
-                                Ok(()) => {},
-                                Err(err) => {
-                                    eprintln!("{}", err);
-                                    exit(1);
+                    Catalog::init_catalog(&args)
+                        .and_then(|mut catalog| {
+                            if let Some(ref label) = args.label {
+                                match catalog.apply_label_all(label) {
+                                    Ok(()) => {},
+                                    Err(err) => {
+                                        eprintln!("{}", err);
+                                        exit(1)
+                                    }
+                                }
+                            };
+                            println!("{:?} entries", catalog.length());
+                            if args.update {
+                                match catalog.update_files() {
+                                    Ok(()) => exit(0),
+                                    Err(err) => {
+                                        eprintln!("{}", err);
+                                        exit(1)
+                                    },
                                 }
                             }
-                        }
-                    };
-                    if args.deduplicate.is_some() {
-                        match catalog.deduplicate_files(&args.deduplicate.unwrap()) {
-                            Ok(()) => exit(0),
-                            Err(err) => {
-                                eprintln!("{}", err);
-                                exit(1)
-                            },
-                        }
-                    }
-                    catalog.sort_by(args.order.clone());
-                    let catalog_rc = Rc::new(RefCell::new(catalog));
-                    let application = Application::builder()
-                        .application_id("org.example.gallsh")
-                        .build();
+                            if args.tags {
+                                match catalog.print_labels_all() {
+                                    Ok(()) => exit(0),
+                                    Err(err) => {
+                                        eprintln!("{}", err);
+                                        exit(1);
+                                    },
+                                }
+                            }
+                            if args.directories {
+                                match catalog.print_directories_all() {
+                                    Ok(()) => exit(0),
+                                    Err(err) => {
+                                        eprintln!("{}", err);
+                                        exit(1);
+                                    },
+                                }
+                            }
+                            if args.info {
+                                info(&catalog);
+                            }
+                            if args.from.is_some() {
+                                if args.add.is_none() {
+                                    eprintln!("option --from <SOURCE_DIR> must be used with option --add <TARGET_DIR>");
+                                    exit(1)
+                                } else {
+                                    match copy_all_picture_files(&args.from.clone().unwrap(), &args.add.clone().unwrap()) {
+                                        Ok(()) => {},
+                                        Err(err) => {
+                                            eprintln!("{}", err);
+                                            exit(1);
+                                        }
+                                    }
+                                }
+                            };
+                            if args.deduplicate.is_some() {
+                                match catalog.deduplicate_files(&args.deduplicate.unwrap()) {
+                                    Ok(()) => exit(0),
+                                    Err(err) => {
+                                        eprintln!("{}", err);
+                                        exit(1)
+                                    },
+                                }
+                            }
+                            catalog.sort_by(args.order.clone());
+                            let catalog_rc = Rc::new(RefCell::new(catalog));
+                            let application = Application::builder()
+                                .application_id("org.example.gallsh")
+                                .build();
 
-                    application.connect_startup(|application| {
-                        startup_gui(application);
-                    }); 
+                            application.connect_startup(|application| {
+                                startup_gui(application);
+                            }); 
 
-                    // clone! passes a strong reference to a variable in the closure that activates the application
-                    // move converts any variables captured by reference or mutable reference to variables captured by value.
-                    application.connect_activate(clone!(@strong args, @strong catalog_rc, @strong shortcuts => move |application: &gtk::Application| {
-                        build_gui(application, &args, &catalog_rc, &shortcuts)
-                    }));
+                            // clone! passes a strong reference to a variable in the closure that activates the application
+                            // move converts any variables captured by reference or mutable reference to variables captured by value.
+                            application.connect_activate(clone!(@strong args, @strong catalog_rc, @strong shortcuts => move |application: &gtk::Application| {
+                                build_gui(application, &args, &catalog_rc, &shortcuts)
+                            }));
 
-                    let empty: Vec<String> = vec![];
-                    application.run_with_args(&empty);
-                },
-            }
-        }
-    }
+                            let empty: Vec<String> = vec![];
+                            application.run_with_args(&empty);
+                            Ok(())
+                        })
+                })
+        });
+    main_result.inspect_err(|err| {
+        eprintln!("{}", err);
+        exit(1);
+    });
 }
 
+    fn operations(database: &mut Database, args: &Args) -> Result<()> {
+        if args.check {
+            match check_database_and_files(&directory(args.clone().directory), &database) {
+                Ok(()) => {},
+                Err(err) => return Err(anyhow!(err)),
+            }
+        };
+        if args.purge {
+            println!("removing orphan entries from the database…");
+            match database.delete_picture_data_where_file_do_not_exists() {
+                Ok(count) => {
+                    println!("{} pictures removed from the database", count);
+                },
+                Err(err) => return Err(anyhow!(err)),
+            }
+        };
+        match args.from {
+            Some(ref ext_directory) => match args.add {
+                Some(ref abs_directory) => match copy_all_picture_files(&ext_directory, &abs_directory) {
+                    Ok(()) => {},
+                    Err(err) => return Err(anyhow!(err)),
+                },
+                None => match copy_all_picture_files(&ext_directory, &directory(args.clone().directory)) {
+                    Ok(()) => {},
+                    Err(err) => return Err(anyhow!(err)),
+                }
+            },
+            None => match args.add {
+                Some(ref abs_directory) => match load_picture_entries_from_directory_into_db(database, &abs_directory, false) {
+                    Ok(pictures_entries) => {
+                        println!("the following pictures have been inserted in the database:");
+                        for picture_entry in pictures_entries {
+                            println!("{}", picture_entry.file_path)
+                        }
+                    },
+                    Err(err) => return Err(anyhow!(err)),
+                }
+                None => {},
+            }
+        };
+        Ok(())
+    }

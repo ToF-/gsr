@@ -25,14 +25,6 @@ pub struct Database {
 
 impl Database {
 
-    /// create the database from the given connection_string.
-    pub fn from_path(connection_string: &str) -> Result<Self> {
-        match Connection::open(connection_string) {
-            Ok(connection) => Ok(Database { connection: connection, }),
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
     /// initialize the database, creating the schema if needed.
     pub fn initialize(create_schema: bool) -> Result<Self> {
         match env::var(DATABASE_CONNECTION) {
@@ -85,6 +77,15 @@ impl Database {
         }
     }
     
+    /// create the database from the given connection_string.
+    fn from_path(connection_string: &str) -> Result<Self> {
+        match Connection::open(connection_string) {
+            Ok(connection) => Ok(Database { connection: connection, }),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
+
+    /// selects all the pictures entries used as cover for a directory
     fn rusqlite_select_cover_picture_entries(&mut self) -> Result<PictureEntries, Error> {
         self.connection.prepare(
             "SELECT File_Path,            \n\
