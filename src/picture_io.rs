@@ -71,7 +71,6 @@ pub fn copy_file_to_target_directory(source_file_path_str: &str, target_director
     let target_directory_path = Path::new(&target_directory_name);
     let target_file_path = target_directory_path.join(source_file_name);
     if source_file_path.to_str() != target_file_path.to_str() {
-        println!("copy {} to {}", source_file_path.display(), target_file_path.display());
         match std::fs::copy(source_file_path, target_file_path) {
             Ok(result) => Ok(result),
             Err(err) => Err(anyhow!(err)),
@@ -124,6 +123,7 @@ pub fn append_to_extract_file(name: &str, extract_file_path: &str) -> Result<()>
 }
 
 pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {
+    eprintln!("getting palette for picture {}", file_path);
     match image::open(file_path) {
         Ok(image) => {
             let palette = get_palette(&image);
@@ -143,7 +143,7 @@ fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, exten
     let mut thumbnails = match create_thumbnails(reader, mime, [ThumbnailSize::Small]) {
         Ok(tns) => tns,
         Err(err) => {
-            println!("error while creating thumbnails:{:?}", err);
+            eprintln!("error while creating thumbnails:{:?}", err);
             return Err(err)
         },
     };
@@ -155,7 +155,7 @@ fn write_thumbnail<R: std::io::Seek + std::io::Read>(reader: BufReader<R>, exten
     };
     match write_result {
         Err(err) => {
-            println!("error while writing thunbnail:{}", err);
+            eprintln!("error while writing thunbnail:{}", err);
             Err(err)
         },
         ok => ok,
@@ -167,7 +167,6 @@ pub fn check_or_create_thumbnail_file(thumbnail_file_path: &str, original_file_p
     if path.exists() {
         Ok(())
     } else {
-        println!("creating thumbnail file {}", thumbnail_file_path);
         match File::open(original_file_path) {
             Err(err) => Err(anyhow!(err)),
             Ok(input_file) => {

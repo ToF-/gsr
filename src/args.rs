@@ -91,8 +91,8 @@ pub struct Args {
     #[arg(short, long, value_name="ORDER", ignore_case(true), default_value_t = Order::Random)]
     pub order: Order,
 
-    /// display files that only match REGEXP
-    #[arg(short, long, value_name="REGEXP")]
+    /// display files that only contain STRING in their name
+    #[arg(short, long, value_name="STRING")]
     pub pattern: Option<String>,
 
     /// remove entries from the database when file no longer exits

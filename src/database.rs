@@ -1,5 +1,4 @@
 use crate::path::file_name;
-use rusqlite::Error::QueryReturnedNoRows;
 use std::path::{Path,PathBuf};
 use crate::path::get_picture_file_paths;
 use rusqlite::{Row, Error};
@@ -147,23 +146,6 @@ impl Database {
                             .and_then(|_| Ok(()))
                     })
             })
-    }
-
-    fn decimate(&self, file_paths_set: HashSet<String>) -> Result<HashSet<String>> {
-        let mut total_tags: usize = 0;
-        let mut total_pics: usize = 0;
-        for file_path in file_paths_set.iter() {
-            match self.connection.execute("DELETE FROM Tag WHERE File_Path = ?1;", params![file_path]) {
-                Ok(count) => { total_tags += count; },
-                Err(err) => return Err(anyhow!(err)),
-            };
-            match self.connection.execute("DELETE FROM Picture WHERE File_Path = ?1", params![file_path]) {
-                Ok(count) => { total_pics += count; },
-                Err(err) => return Err(anyhow!(err)),
-            };
-        };
-        println!("{} pictures, {} tags deleted", total_pics, total_tags);
-        Ok(file_paths_set)
     }
 
     fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<PictureEntries> {
@@ -353,13 +335,6 @@ impl Database {
             })
     }
 
-    pub fn delete_picture(&self, file_path: &str) -> Result<()> {
-        match self.rusqlite_delete_picture(file_path) {
-            Ok(()) => Ok(()),
-            Err(err) => return Err(anyhow!(err)),
-        }
-    }
-
     pub fn delete_picture_data_where_file_do_not_exists(&mut self) -> Result<usize> {
         let mut count = 0;
         let result = self.rusqlite_select_all_picture_file_paths()
@@ -389,60 +364,6 @@ impl Database {
             Ok(()) => Ok (count),
             Err(err) => Err(anyhow!(err)),
         }
-    }
-
-    fn rusqlite_retrieve_picture_entry(&self, file_path: &str) -> Result<PictureEntry, Error> {
-        self.connection.prepare(
-                "SELECT File_Path,     \n\
-                File_Size,             \n\
-                Colors,                \n\
-                Modified_Time,         \n\
-                Rank,                  \n\
-                Palette,               \n\
-                Label,                 \n\
-                Selected,              \n\
-                Deleted,               \n\
-                Cover,                 \n\
-                FROM Picture           \n\
-                WHERE File_Path = ?1;")
-            .and_then(|mut statement| {
-                statement.query(params![file_path])
-                    .and_then(|mut rows| {
-                        match rows.next() {
-                                Ok(Some(row)) => return Self::rusqlite_to_picture_entry(row),
-                                Ok(None) => return Err(QueryReturnedNoRows),
-                                Err(err) => return Err(err),
-                        }
-                    })
-            })
-    }
-
-    fn rusqlite_retrieve_tags_for_file_path(&self, file_path: &str) -> Result<HashSet<String>, Error> {
-        self.connection.prepare(
-            "SELECT Label              \n\
-            FROM Tag WHERE File_Path = ?1;")
-            .and_then(|mut statement| {
-                statement.query(params![file_path])
-                    .and_then(|mut rows| {
-                        let mut result:HashSet<String> = HashSet::new();
-                        while let Ok(Some(row)) = rows.next() {
-                            let label:String = row.get(0)?;
-                            let _ = result.insert(label);
-                        }
-                        Ok(result)
-                    })
-            })
-    }
-
-    fn rusqlite_retrieve_picture_entry_and_tags(&self, file_path: &str) -> Result<PictureEntry, Error> {
-        self.rusqlite_retrieve_picture_entry(file_path)
-            .and_then(|mut picture_entry| {
-                self.rusqlite_retrieve_tags_for_file_path(file_path)
-                    .and_then(|tags| {
-                        picture_entry.tags = tags;
-                        Ok(picture_entry)
-                    })
-            })
     }
 
     fn rusqlite_select_pictures(&self, query: &str) -> Result<PictureEntries, Error> {
@@ -478,45 +399,6 @@ impl Database {
     pub fn select_pictures(&self, query: &str) -> Result<PictureEntries> {
         match self.rusqlite_select_pictures(query) {
             Ok(result) => Ok(result),
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
-    pub fn delete_difference_from_file_system(&mut self) -> Result<HashSet<String>> {
-        match self.connection.prepare("SELECT file_path from Picture;") {
-            Ok(mut statement) => match statement.query_map([], |row| Ok(row.get::<usize,String>(0).unwrap())) {
-                Ok(rows) => {
-                    let mut difference: HashSet<String> = HashSet::new();
-                    for row in rows {
-                        match row {
-                            Ok(file_path) => {
-                                let path = PathBuf::from(file_path.clone());
-                                if ! path.exists() { let _ = difference.insert(file_path); };
-                            },
-                            Err(err) => return Err(anyhow!(err)),
-                        }
-                    };
-                    if difference.len() > 0 {
-                        println!("this pictures from the database are no longer in the file system:");
-                        for x in difference.clone() {
-                            println!("{x}");
-                        }
-                        println!("delete image data for these {} pictures from the database ?", difference.len());
-                        let mut response = String::new();
-                        let stdin = io::stdin();
-                        stdin.read_line(&mut response).expect("can't read from stdin");
-                        match response.chars().next() {
-                            Some(ch) if ch == 'y' || ch == 'Y' => {
-                                self.decimate(difference)
-                            },
-                            Some(_)| None => Ok(HashSet::new()),
-                        }
-                    } else { 
-                        Ok(HashSet::new())
-                    }
-                },
-                Err(err) => Err(anyhow!(err)),
-            },
             Err(err) => Err(anyhow!(err)),
         }
     }
@@ -574,30 +456,6 @@ impl Database {
             Err(anyhow!(format!("the path {} is relative and cannot be used as a picture file path", path.display())))
         }
     }
-
-pub fn select_pictures_with_tag_selection(&self, select:Vec<String>) -> Result<PictureEntries> {
-    let tag_labels: String = select.into_iter().map(|s| format!("'{}'", s)).collect::<Vec<String>>().join(",");
-    match self.connection.prepare(&("SELECT DISTINCT(Picture.File_Path), File_Size, Colors, Modified_Time, Rank, Palette, Picture.Label, Selected, Deleted FROM Picture INNER JOIN Tag ON Tag.File_Path = Picture.File_Path WHERE Tag.Label IN (".to_owned() + &tag_labels + ");")) {
-        Ok(mut statement) => {
-            match statement.query([]) {
-                Ok(mut rows) => {
-                    let mut result: PictureEntries = vec![];
-                    while let Some(row) = rows.next()? {
-                        match Self::sql_to_picture_entry(row) {
-                            Ok(entry) => {
-                                result.push(entry);
-                            },
-                            Err(err) => return Err(anyhow!(err)),
-                        }
-                    };
-                    return Ok(result)
-                },
-                Err(err) => Err(anyhow!(err)),
-            }
-        },
-        Err(err) => Err(anyhow!(err)),
-    }
-}
 
 pub fn load_all_tags(&self) -> Result<Vec<String>> {
     let mut result: Vec<String> = vec![];

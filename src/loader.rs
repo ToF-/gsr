@@ -1,7 +1,7 @@
+use regex::Regex;
 use std::path::PathBuf;
 use crate::picture_entry::PictureEntry;
 use std::collections::HashSet;
-use regex::Regex;
 use crate::path::get_picture_file_paths;
 use crate::args::Args;
 use anyhow::{anyhow,Result};
@@ -74,7 +74,7 @@ pub fn file_path_in_directory_not_in_database(directory: &str, database_file_pat
     Ok(result)
 }
 
-pub fn load_picture_entry_from_file_path(database: &Database, file_path: &str) -> Result<PictureEntries> {
+pub fn load_single_picture_entry(database: &Database, file_path: &str) -> Result<PictureEntries> {
     let mut picture_entries:PictureEntries = vec![];
     match check_file(file_path) {
         Ok(_) => match database.retrieve_or_insert_picture_entry(file_path) {
@@ -82,13 +82,26 @@ pub fn load_picture_entry_from_file_path(database: &Database, file_path: &str) -
                 picture_entries.push(picture_entry);
                 Ok(picture_entries)
             },
-            Ok(None) => Err(anyhow!("{} image data not found in database'", file_path)),
+            Ok(None) => {
+                load_single_picture_entry_from_file_system(file_path)
+            },
             Err(err) => Err(anyhow!(err)),
         },
         Err(err) => Err(anyhow!(err)),
     }
 }
 
+pub fn load_single_picture_entry_from_file_system(file_path: &str) -> Result<PictureEntries> {
+    let mut picture_entries:PictureEntries = vec![];
+
+    match PictureEntry::from_file(file_path) {
+        Ok(picture_entry) => {
+            picture_entries.push(picture_entry);
+            Ok(picture_entries)
+        },
+        Err(err) => Err(anyhow!(err)),
+    }
+}
 pub fn load_picture_entries_from_covers(database: &mut Database) -> Result<PictureEntries> {
     database.select_cover_picture_entries()
 }
@@ -101,11 +114,13 @@ pub fn load_picture_entries_from_directory_into_db(database: &mut Database, dire
 pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) -> Result<PictureEntries> {
     let args = args.clone();
     if let Some(file) = &args.file {
-        load_picture_entry_from_file_path(database, &file)
+        load_single_picture_entry(database, &file)
     } else if args.covers {
         load_picture_entries_from_covers(database)
     } else if args.directory.is_some() && args.add.is_some() && args.from.is_some() {
         load_picture_entries_from_directory_into_db(database, &args.clone().add.unwrap(), true)
+    } else if args.directory.is_some() {
+        load_picture_entries_from_directory(database, &args.directory.clone().unwrap(), &args)
     } else  {
         load_picture_entries_from_db(database, &args)
     }
@@ -137,29 +152,7 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
     }
 }
 
-pub fn load_picture_entries_from_db_with_tag_selection(database: &mut Database, args: &Args) -> Result<PictureEntries> {
-    println!("loading picture data from database");
-    let args = args.clone();
-    match &args.select {
-        Some(labels) => match database.select_pictures_with_tag_selection(labels.to_vec()) {
-            Ok(mut picture_entries) => {
-                for picture_entry in &mut picture_entries {
-                    match database.entry_tags(&picture_entry.file_path) {
-                        Ok(labels) => {
-                            picture_entry.tags = labels
-                        },
-                        Err(err) => return Err(anyhow!(err)),
-                    }
-                };
-                Ok(picture_entries)
-            },
-            Err(err) => return Err(anyhow!(err)),
-        },
-        None => load_picture_entries_from_db(database, &args)
-    }
-}
 pub fn load_picture_entries_from_directory(database: &mut Database, directory: &str, args: &Args) -> Result<PictureEntries> {
-    println!("loading picture data from directory {}", directory);
     let args = args.clone();
     match get_picture_file_paths(directory) {
         Ok(file_paths) => {
@@ -168,7 +161,6 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
             let mut errors = 0;
             let mut picture_entries: PictureEntries = vec![];
             for file_path in file_paths {
-                println!("{}/{}", count, total);
                 let matches_pattern = match args.pattern {
                     None => true,
                     Some(ref pattern) => {
