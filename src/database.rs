@@ -6,9 +6,6 @@ use rusqlite::{Row, Error};
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use std::collections::HashSet;
 use std::collections::HashMap;
-use crate::picture_io::read_file_info;
-use crate::picture_io::get_palette_from_picture;
-use crate::image_data::ImageData;
 use crate::picture_entry::make_picture_entry;
 use std::io;
 use std::time::Duration;
@@ -51,17 +48,6 @@ impl Database {
                     println!("database: {}", connection_string);
                     Ok(database)
                 },
-                Err(err) => Err(anyhow!(err)),
-            },
-            Err(err) => Err(anyhow!(err)),
-        }
-    }
-
-    /// check that the schema exsists in the database
-    pub fn check_schema(&self) -> Result<()> {
-        match self.connection.prepare("SELECT * FROM Picture WHERE rowid = 1;") {
-            Ok(_) => match self.connection.prepare("SELECT * FROM Tag WHERE rowid = 1;") {
-                Ok(_) => Ok(()),
                 Err(err) => Err(anyhow!(err)),
             },
             Err(err) => Err(anyhow!(err)),
@@ -461,7 +447,7 @@ impl Database {
 
     fn rusqlite_select_pictures(&self, query: &str) -> Result<PictureEntries, Error> {
         let full_query: String =
-            ("SELECT File_Path,     \n\
+            "SELECT File_Path,     \n\
               File_Size,             \n\
               Colors,                \n\
               Modified_Time,         \n\
@@ -472,7 +458,7 @@ impl Database {
               Deleted,               \n\
               Cover                  \n\
               FROM Picture           \n\
-              WHERE ".to_owned() + query + ";");
+              WHERE ".to_owned() + query + ";";
         self.connection.prepare(&full_query)
             .and_then(|mut statement| {
                 statement.query([])
