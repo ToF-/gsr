@@ -280,7 +280,7 @@ mod tests {
 
     fn my_entry(file_path: &str) -> PictureEntry {
         let day: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
-        make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None, false, false, HashSet::new())
+        make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None, false, false, false, HashSet::new())
     }
 
     #[test]

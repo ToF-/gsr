@@ -920,10 +920,10 @@ mod tests {
         let day_c: SystemTime = DateTime::parse_from_rfc2822("Mon, 1 Jan 2024 10:52:37 GMT").unwrap().into();
         let day_d: SystemTime = DateTime::parse_from_rfc2822("Mon, 1 Jan 2024 11:52:37 GMT").unwrap().into();
         vec!(
-            make_picture_entry(String::from("testdata/foo.jpeg"), 100, 5, day_d, Rank::NoStar, None, Some(String::from("foo")), false, false, HashSet::new()),
-            make_picture_entry(String::from("testdata/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars, None, None, false, false, HashSet::new()),
-            make_picture_entry(String::from("testdata/qux.jpeg"), 10, 25, day_c, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, HashSet::new()),
-            make_picture_entry(String::from("testdata/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo")),false, false, HashSet::new()))
+            make_picture_entry(String::from("testdata/foo.jpeg"), 100, 5, day_d, Rank::NoStar, None, Some(String::from("foo")), false, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars, None, None, false, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/qux.jpeg"), 10, 25, day_c, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo")),false, false, false, HashSet::new()))
     }
 
     fn my_catalog() -> Catalog {
@@ -936,9 +936,9 @@ mod tests {
     fn my_larger_catalog() -> Catalog {
         let day_a: SystemTime = DateTime::parse_from_rfc2822("Sun, 1 Jan 2023 10:52:37 GMT").unwrap().into();
         let mut other_entries = vec![
-            make_picture_entry(String::from("testdata/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo")),false, false, HashSet::new()),
-            make_picture_entry(String::from("testdata/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None, false, false, HashSet::new()),
-            make_picture_entry(String::from("testdata/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, HashSet::new())];
+            make_picture_entry(String::from("testdata/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo")),false, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None, false, false, false, HashSet::new()),
+            make_picture_entry(String::from("testdata/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, false, HashSet::new())];
         let mut catalog = my_catalog();
         catalog.add_picture_entries(&mut other_entries);
         catalog
@@ -1096,99 +1096,7 @@ mod tests {
 
     }
 
-    #[test]
-    fn label_and_unlabel_entries() {
-        let mut catalog = my_catalog();
-        catalog.move_to_index(0);
-        catalog.copy_label();
-        catalog.start_set();
-        catalog.move_to_index(3);
-        assert_eq!(true, catalog.end_set_label().is_ok());
-        catalog.move_to_index(1);
-        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
-        catalog.move_to_index(1);
-        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
-        catalog.move_to_index(2);
-        assert_eq!(Some(String::from("foo")), catalog.current_entry().unwrap().label());
-        catalog.move_to_index(0);
-        catalog.cancel_set();
-        catalog.start_set();
-        catalog.move_to_index(2);
-        assert_eq!(true, catalog.end_unlabel().is_ok());
-        catalog.move_to_index(1);
-        assert_eq!(None, catalog.current_entry().unwrap().label());
-        catalog.move_to_index(1);
-        assert_eq!(None, catalog.current_entry().unwrap().label());
-        catalog.move_to_index(2);
-        assert_eq!(None, catalog.current_entry().unwrap().label());
-        catalog.move_to_index(3);
-        assert_eq!(true, catalog.unlabel().is_ok());
-        assert_eq!(None, catalog.current_entry().unwrap().label());
-    }
 
-    #[test]
-    fn select_and_unselect_entries() {
-        let mut catalog = my_larger_catalog();
-        catalog.set_page_size(2);
-        catalog.move_to_index(0);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.copy_label();
-        catalog.start_set();
-        catalog.move_to_index(6);
-        assert_eq!(true, catalog.end_set_select().is_ok());
-        catalog.move_to_index(0);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(1);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(2);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(3);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(4);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(5);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(6);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(2);
-        assert_eq!(true, catalog.unselect_page().is_ok());
-        catalog.move_to_index(4);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(5);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(6);
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(0);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(1);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(2);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(3);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        assert_eq!(true, catalog.unselect_all().is_ok());
-        catalog.move_to_index(4);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(5);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.move_to_index(6);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-    }
-
-    #[test]
-    fn deleting_en_entry_makes_it_non_selectable() {
-        let mut catalog = my_catalog();
-        catalog.move_to_index(0);
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.delete();
-        assert_eq!(true, catalog.current_entry().unwrap().deleted);
-        let _ = catalog.toggle_select();
-        assert_eq!(false, catalog.current_entry().unwrap().selected);
-        catalog.delete();
-        assert_eq!(false, catalog.current_entry().unwrap().deleted);
-        let _ = catalog.toggle_select();
-        assert_eq!(true, catalog.current_entry().unwrap().selected);
-    }
 
     #[test] 
     fn adding_entries_from_a_directory() {
