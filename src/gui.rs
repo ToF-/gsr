@@ -373,17 +373,14 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         },
                         Command::GridTwo => {
                             catalog.set_new_page_size(2);
-                            catalog.set_last_index();
                             gui.application_window.close()
                         },
                         Command::GridFour => {
                             catalog.set_new_page_size(4);
-                            catalog.set_last_index();
                             gui.application_window.close()
                         },
                         Command::GridTen => {
                             catalog.set_new_page_size(10);
-                            catalog.set_last_index();
                             gui.application_window.close()
                         },
                         Command::Random => catalog.move_to_random_index(),
@@ -396,11 +393,11 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::TogglePageLimit => catalog.toggle_page_limit(),
                         Command::PrevPage => catalog.move_prev_page(),
                         Command::QuitWithCancel => {
-                            catalog.set_exit(true);
+                            catalog.exit();
                             gui.application_window.close()
                         },
                         Command::QuitWithConfirm => {
-                            catalog.set_exit(true);
+                            catalog.exit();
                             gui.application_window.close()
                         },
                         Command::Repeat => result = catalog.end_repeat_last_comment(),

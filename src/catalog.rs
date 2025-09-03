@@ -25,7 +25,6 @@ pub type Coords = (usize, usize);
 
 #[derive(Debug)]
 pub struct Catalog {
-    exit: bool,
     db_centric: bool,
     picture_entries: Vec<PictureEntry>,
     index: usize,
@@ -41,7 +40,7 @@ pub struct Catalog {
     start_index: Option<usize>,
     page_changed: bool,
     order: Option<Order>,
-    max_selected: usize,
+    selected_count: usize,
     previous_order: Option<Order>,
     args: Option<Args>,
     discarded: Vec<usize>,
@@ -56,7 +55,6 @@ impl Catalog {
 
     pub fn new() -> Self {
         Catalog {
-            exit: false,
             db_centric: false,
             picture_entries : Vec::new(),
             index: 0,
@@ -72,7 +70,7 @@ impl Catalog {
             start_index: None,
             page_changed: false,
             order: Some(Order::Random),
-            max_selected: 0,
+            selected_count: 0,
             previous_order: Some(Order::Random),
             args: None,
             discarded: Vec::new(),
@@ -89,12 +87,8 @@ impl Catalog {
     }
 
 
-    pub fn exit(&self) -> bool {
-       self.exit
-    }
-
-    pub fn set_exit(&mut self, exit: bool) {
-        self.exit = exit
+    pub fn exit(&mut self) {
+        self.new_page_size = None;
     }
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
@@ -175,6 +169,10 @@ impl Catalog {
 
     // queries
 
+    pub fn page_limit_on(&self) -> bool {
+        self.page_limit_on
+    }
+
     pub fn new_page_size(&self) -> Option<usize> {
         self.new_page_size
     }
@@ -194,8 +192,8 @@ impl Catalog {
         self.db_centric
     }
 
-    pub fn max_selected(&self) -> usize {
-        self.max_selected
+    pub fn selected_count(&self) -> usize {
+        self.selected_count
     }
 
     pub fn start_index(&self) -> Option<usize> {
@@ -582,7 +580,9 @@ impl Catalog {
     pub fn set_new_page_size(&mut self, page_size: usize) {
         assert!(page_size > 0 && page_size <= 10);
         self.new_page_size = Some(page_size);
+        self.last_index = Some(self.index);
     }
+
     pub fn toggle_page_limit(&mut self) {
         self.page_limit_on = !self.page_limit_on
     }
@@ -841,7 +841,7 @@ impl Catalog {
     }
 
     pub fn count_selected(&mut self) {
-        self.max_selected = self.picture_entries.clone().iter().filter(|entry| entry.selected).count()
+        self.selected_count = self.picture_entries.clone().iter().filter(|entry| entry.selected).count()
     }
 
     pub fn sort_by(&mut self, order: Order) {

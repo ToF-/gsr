@@ -8,7 +8,8 @@ use crate::path::file_path_directory;
 pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
     let entry_display = &<PictureEntry as Clone>::clone(catalog.current_entry().unwrap()).title_display();
     let file_path = &<PictureEntry as Clone>::clone(catalog.current_entry().unwrap()).file_path;
-    let display= format!("{}{} S:[{}] {} ordered by {} {}/{}  {} {} {} {}",
+    let display= format!(
+        "{}{} S:[{}] {} ordered by {} {}{}/{}{}  {} {} {} {}", 
         if catalog.db_centric() {
             String::from("◯")
         } else {
@@ -19,15 +20,17 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
         } else {
             String::from("")
         },
-        catalog.max_selected(),
+        catalog.selected_count(),
         if catalog.start_index().is_some() { "…" } else { "" },
         if let Some(order) = catalog.order().clone() {
             order.to_string()
         } else {
             "??".to_string()
         },
+        if catalog.page_limit_on() { "[" } else { "" },
         catalog.index().unwrap(),
         catalog.last(),
+        if catalog.page_limit_on() { "]" } else { "" },
         entry_display,
         if catalog.expand_on() { "□" } else { "" },
         if catalog.full_size_on() { "░" } else { "" },
