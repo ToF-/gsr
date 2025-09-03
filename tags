@@ -126,6 +126,7 @@ entry_at_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn e
 entry_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn entry_tags(&self, file_path: &str) -> Result<HashSet<String>> {$/;"	f
 equal_content	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn equal_content(&self, other:&PictureEntry) -> Result<bool> {$/;"	f
 error	/Users/christophethibaut/Coding/gsr/src/error.rs	/^pub fn error<T: std::fmt::Debug, E: std::error::Error + Error >(e: Result<T>) -> Result<T,anyhow::Error> {$/;"	f
+exit	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn exit(&self) -> bool {$/;"	f
 expand_on	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn expand_on(&self) -> bool {$/;"	f
 export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {$/;"	f
 extract	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn extract(&self) {$/;"	f
@@ -199,6 +200,7 @@ move_to_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn mo
 move_to_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_input_pattern(&mut self, pattern: &str) {$/;"	f
 move_to_label_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_label_pattern(&mut self, pattern: &str) {$/;"	f
 move_to_last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_last(&mut self) {$/;"	f
+move_to_last_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_last_index(&mut self) {$/;"	f
 move_to_random_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_to_random_index(&mut self) {$/;"	f
 move_towards	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn move_towards(&mut self, direction: Direction) {$/;"	f
 moving_next_picture_can_be_blocked_or_allowed	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn moving_next_picture_can_be_blocked_or_allowed() {$/;"	f
@@ -210,6 +212,7 @@ my_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn my_en
 my_larger_catalog	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn my_larger_catalog() -> Catalog {$/;"	f
 new	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn new() -> Self {$/;"	f
 new	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn new() -> Self {$/;"	f
+new_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn new_page_size(&self) -> Option<usize> {$/;"	f
 order	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn order(&self) -> Option<Order> {$/;"	f
 order_from_string	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub fn order_from_string(s: &str) -> Option<Order> {$/;"	f
 original_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_name(&self) -> String {$/;"	f
@@ -266,9 +269,12 @@ select_cover_picture_entries	/Users/christophethibaut/Coding/gsr/src/database.rs
 select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: &str) -> Result<PictureEntries> {$/;"	f
 set_all_pictures_for_multiple_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f
 set_current_picture_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_current_picture_entry(&mut self, picture_entry: PictureEntry) -> Result<()> {$/;"	f
+set_exit	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_exit(&mut self, exit: bool) {$/;"	f
 set_label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn set_label(&mut self, label: &str) {$/;"	f
 set_label_for_cell_index	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_label_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focus: bool) {$/;"	f
+set_last_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_last_index(&mut self) {$/;"	f
 set_new_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn set_new_image_data() {$/;"	f
+set_new_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_new_page_size(&mut self, page_size: usize) {$/;"	f
 set_page_size	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_page_size(&mut self, page_size: usize) {$/;"	f
 set_picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn set_picture_entries(&mut self, picture_entries_result: Result<PictureEntries>) -> Result<()> {$/;"	f
 set_picture_for_cell_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: usize) {$/;"	f

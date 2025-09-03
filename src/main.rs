@@ -94,30 +94,49 @@ fn main() {
                             };
                             catalog.sort_by(args.order.clone());
                             let catalog_rc = Rc::new(RefCell::new(catalog));
-                            let application = Application::builder()
-                                .application_id("org.example.gallsh")
-                                .build();
+                            loop {
+                                let application = Application::builder()
+                                    .application_id("org.example.gallsh")
+                                    .build();
 
-                            application.connect_startup(|application| {
-                                startup_gui(application);
-                            }); 
+                                application.connect_startup(|application| {
+                                    startup_gui(application);
+                                }); 
 
-                            // clone! passes a strong reference to a variable in the closure that activates the application
-                            // move converts any variables captured by reference or mutable reference to variables captured by value.
-                            application.connect_activate(clone!(@strong args, @strong catalog_rc, @strong shortcuts => move |application: &gtk::Application| {
-                                build_gui(application, &args, &catalog_rc, &shortcuts)
-                            }));
+                                // clone! passes a strong reference to a variable in the closure that activates the application
+                                // move converts any variables captured by reference or mutable reference to variables captured by value.
+                                application.connect_activate(clone!(@strong args, @strong catalog_rc, @strong shortcuts => move |application: &gtk::Application| {
+                                    build_gui(application, &args, &catalog_rc, &shortcuts)
+                                }));
 
-                            let no_args: Vec<String> = vec![];
-                            application.run_with_args(&no_args);
+                                let no_args: Vec<String> = vec![];
+                                application.run_with_args(&no_args);
+                                catalog_rc.try_borrow_mut()
+                                    .and_then(|mut catalog| {
+                                        if catalog.exit() {
+                                            exit(0);
+                                            Ok(())
+                                        }
+                                        else {
+                                            match catalog.new_page_size() {
+                                                None => {},
+                                                Some(size) => catalog.set_page_size(size)
+                                            }
+                                            Ok(())
+                                        }
+                                    });
+                            }
                             Ok(())
                         })
                 })
         });
-    main_result.inspect_err(|err| {
-        eprintln!("{}", err);
-        exit(1);
-    });
+    match main_result {
+        Ok(()) => exit(0),
+        Err(err) => {
+            eprintln!("{}", err);
+            exit(1);
+        }
+    }
 }
 
     fn database_operations(database: &mut Database, args: &Args) -> Result<()> {

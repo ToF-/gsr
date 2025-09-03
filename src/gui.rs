@@ -236,7 +236,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
         if let Ok(gui) = gui_rc.try_borrow() {
             gui.application_window.add_controller(evk);
-            catalog.move_to_index(0);
+            catalog.move_to_last_index();
             catalog.refresh();
             refresh_view(&gui, &catalog);
             gui.application_window.present()
@@ -371,6 +371,21 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::GotoIndex => {
                             gui.editor.begin_input(InputKind::IndexInput, catalog.tags.clone());
                         },
+                        Command::GridTwo => {
+                            catalog.set_new_page_size(2);
+                            catalog.set_last_index();
+                            gui.application_window.close()
+                        },
+                        Command::GridFour => {
+                            catalog.set_new_page_size(4);
+                            catalog.set_last_index();
+                            gui.application_window.close()
+                        },
+                        Command::GridTen => {
+                            catalog.set_new_page_size(10);
+                            catalog.set_last_index();
+                            gui.application_window.close()
+                        },
                         Command::Random => catalog.move_to_random_index(),
                         Command::Info => catalog.print_info(&gui.editor),
                         Command::Jump => { 
@@ -381,9 +396,11 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::TogglePageLimit => catalog.toggle_page_limit(),
                         Command::PrevPage => catalog.move_prev_page(),
                         Command::QuitWithCancel => {
+                            catalog.set_exit(true);
                             gui.application_window.close()
                         },
                         Command::QuitWithConfirm => {
+                            catalog.set_exit(true);
                             gui.application_window.close()
                         },
                         Command::Repeat => result = catalog.end_repeat_last_comment(),

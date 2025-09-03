@@ -1,4 +1,3 @@
-use crate::directory;
 use regex::Regex;
 use std::path::PathBuf;
 use crate::picture_entry::PictureEntry;

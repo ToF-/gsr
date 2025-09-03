@@ -25,10 +25,13 @@ pub type Coords = (usize, usize);
 
 #[derive(Debug)]
 pub struct Catalog {
+    exit: bool,
     db_centric: bool,
     picture_entries: Vec<PictureEntry>,
     index: usize,
+    last_index: Option<usize>,
     page_size: usize,
+    new_page_size: Option<usize>,
     page_limit_on: bool,
     copied_label: Option<String>,
     last_comment: Option<Comment>,
@@ -53,10 +56,13 @@ impl Catalog {
 
     pub fn new() -> Self {
         Catalog {
+            exit: false,
             db_centric: false,
             picture_entries : Vec::new(),
             index: 0,
+            last_index: None,
             page_size: 1,
+            new_page_size: None,
             page_limit_on: false,
             copied_label: None,
             last_comment: None,
@@ -82,6 +88,14 @@ impl Catalog {
         }
     }
 
+
+    pub fn exit(&self) -> bool {
+       self.exit
+    }
+
+    pub fn set_exit(&mut self, exit: bool) {
+        self.exit = exit
+    }
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
         println!("initializing…");
@@ -160,6 +174,10 @@ impl Catalog {
     }
 
     // queries
+
+    pub fn new_page_size(&self) -> Option<usize> {
+        self.new_page_size
+    }
 
     pub fn copied_label(&self) -> Option<String> {
         self.copied_label.clone()
@@ -354,6 +372,17 @@ impl Catalog {
     }
     // updates
     
+    pub fn set_last_index(&mut self) {
+        self.last_index = Some(self.index);
+    }
+
+    pub fn move_to_last_index(&mut self) {
+        match self.last_index {
+            Some(index) => self.move_to_index(index),
+            None => self.move_to_index(0),
+        }
+    }
+
     pub fn set_current_picture_entry(&mut self, picture_entry: PictureEntry) -> Result<()> {
         match self.index() {
             Some(index) => {
@@ -550,6 +579,10 @@ impl Catalog {
         self.page_size = page_size;
     }
 
+    pub fn set_new_page_size(&mut self, page_size: usize) {
+        assert!(page_size > 0 && page_size <= 10);
+        self.new_page_size = Some(page_size);
+    }
     pub fn toggle_page_limit(&mut self) {
         self.page_limit_on = !self.page_limit_on
     }
