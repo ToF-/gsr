@@ -114,7 +114,6 @@ delete_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn delet
 delete_files	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_files(&self) -> Result<()> {$/;"	f
 delete_picture_data_where_file_do_not_exists	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn delete_picture_data_where_file_do_not_exists(&mut self) -> Result<usize> {$/;"	f
 delete_tag	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn delete_tag(&mut self, tag : &str) {$/;"	f
-deleting_en_entry_makes_it_non_selectable	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn deleting_en_entry_makes_it_non_selectable() {$/;"	f
 dimension	/Users/christophethibaut/Coding/gsr/src/args.rs	/^fn dimension(source: Option<i32>, var_name: &str, dimension_name: &str, default: i32) -> i32 {$/;"	f
 directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn directory(directory: Option<String>) -> String {$/;"	f
 discarded	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn discarded(&self) -> &Vec<usize> {$/;"	f
@@ -171,7 +170,6 @@ insert_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
 is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_prefix_path(prefix: &str, path: &str) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
-label_and_unlabel_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn label_and_unlabel_entries() {$/;"	f
 label_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn label_current_entry(&mut self, label: &str) -> Result<()> {$/;"	f
 label_display	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label_display(&self, has_focus: bool) -> String {$/;"	f
 label_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn label_for_entry(entry: &PictureEntry, with_focus: bool) -> gtk::Label {$/;"	f
@@ -264,7 +262,6 @@ rusqlite_to_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^
 rusqlite_update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_update_image_data(&mut self, entry: &PictureEntry) -> Result<(),Error> {$/;"	f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool {$/;"	f
 select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_all_picture_file_paths(&self) -> Result<Vec<String>> {$/;"	f
-select_and_unselect_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    fn select_and_unselect_entries() {$/;"	f
 select_cover_picture_entries	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_cover_picture_entries(&mut self) -> Result<PictureEntries> {$/;"	f
 select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: &str) -> Result<PictureEntries> {$/;"	f
 set_all_pictures_for_multiple_view	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {$/;"	f

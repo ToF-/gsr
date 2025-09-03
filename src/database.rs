@@ -36,7 +36,6 @@ impl Database {
                             Err(err) => return Err(anyhow!(err)),
                         }
                     };
-                    println!("database: {}", connection_string);
                     Ok(database)
                 },
                 Err(err) => Err(anyhow!(err)),

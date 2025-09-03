@@ -1,3 +1,4 @@
+use crate::directory;
 use regex::Regex;
 use std::path::PathBuf;
 use crate::picture_entry::PictureEntry;
@@ -127,15 +128,10 @@ pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) ->
 }
 
 pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Result<PictureEntries> {
+    println!("loading picture entries from database {:?}", database);
     let args = args.clone();
-    let restriction: String = match args.query.clone() {
-        Some(s) => s,
-        None => String::from("true"),
-    };
-    let pattern: String = match args.pattern.clone() {
-        Some(s) => String::from(" and File_Path like '%".to_owned() + &s + "%'"),
-        None => String::from(""),
-    };
+    let restriction = args.query.unwrap_or(String::from("true"));
+    let pattern = args.pattern.clone().map_or(String::from(""), |s| String::from(" and File_Path like '%".to_owned() + &s  + "%';"));
     match database.select_pictures(&(restriction + &pattern)) {
         Ok(mut picture_entries) => {
             for picture_entry in &mut picture_entries {
@@ -153,6 +149,7 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
 }
 
 pub fn load_picture_entries_from_directory(database: &mut Database, directory: &str, args: &Args) -> Result<PictureEntries> {
+    println!("loading picture entries in directory {}", directory);
     let args = args.clone();
     let tag_select_set:HashSet<String> = match args.select {
         Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
@@ -164,8 +161,6 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
     };
     match get_picture_file_paths(directory) {
         Ok(file_paths) => {
-            let total = file_paths.len();
-            let mut count = 0;
             let mut errors = 0;
             let mut picture_entries: PictureEntries = vec![];
             for file_path in file_paths {
@@ -211,7 +206,6 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
                         }
                     }
                 };
-                count += 1;
             }
             if errors > 0 {
                 println!("{} pictures could not be opened", errors);

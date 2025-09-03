@@ -169,10 +169,12 @@ impl Args {
             },
 
             directory: {
-                let dir = directory(self.directory.clone());
-                match check_path(&dir, ! ABSOLUTE_PATH) {
-                    Ok(_) => Some(dir),
-                    Err(err) => return Err(err),
+                match &self.directory {
+                    Some(dir) => match check_path(&dir, ! ABSOLUTE_PATH) {
+                        Ok(_) => Some(dir.to_string()),
+                        Err(err) => return Err(err),
+                    }
+                    None => None,
                 }
             },
 
