@@ -375,8 +375,16 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             catalog.set_new_page_size(2);
                             gui.application_window.close()
                         },
+                        Command::GridThree => {
+                            catalog.set_new_page_size(3);
+                            gui.application_window.close()
+                        },
                         Command::GridFour => {
                             catalog.set_new_page_size(4);
+                            gui.application_window.close()
+                        },
+                        Command::GridFive => {
+                            catalog.set_new_page_size(5);
                             gui.application_window.close()
                         },
                         Command::GridTen => {
