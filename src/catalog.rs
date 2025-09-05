@@ -1,3 +1,4 @@
+use crate::navigator::Navigator;
 use crate::loader::load_picture_entries_from_source;
 use crate::picture_entry::PictureEntries;
 use crate::display::title_display;
@@ -25,6 +26,7 @@ pub type Coords = (usize, usize);
 
 #[derive(Debug)]
 pub struct Catalog {
+    navigator: Navigator,
     db_centric: bool,
     picture_entries: Vec<PictureEntry>,
     index: usize,
@@ -38,7 +40,6 @@ pub struct Catalog {
     full_size_on: bool,
     expand_on: bool,
     start_index: Option<usize>,
-    page_changed: bool,
     order: Option<Order>,
     selected_count: usize,
     previous_order: Option<Order>,
@@ -55,6 +56,7 @@ impl Catalog {
 
     pub fn new() -> Self {
         Catalog {
+            navigator: Navigator::new(),
             db_centric: false,
             picture_entries : Vec::new(),
             index: 0,
@@ -68,7 +70,6 @@ impl Catalog {
             full_size_on: false,
             expand_on: false,
             start_index: None,
-            page_changed: false,
             order: Some(Order::Random),
             selected_count: 0,
             previous_order: Some(Order::Random),
@@ -329,7 +330,7 @@ impl Catalog {
     }
 
     pub fn page_changed(&self) -> bool {
-        self.page_changed
+        self.navigator.page_changed()
     }
 
 
@@ -558,18 +559,19 @@ impl Catalog {
 
     pub fn toggle_expand(&mut self) {
         self.expand_on = !self.expand_on;
-        self.page_changed = true
+        self.navigator.change_page()
     }
 
     pub fn delete(&mut self) {
         if let Some(index) = self.index() {
             self.picture_entries[index].deleted = !self.picture_entries[index].deleted;
-            self.page_changed = true;
+            self.navigator.change_page();
+            self.navigator.change_page();
             self.last_comment = Some(Comment::Delete)
         }
     }
     pub fn refresh(&mut self) {
-        self.page_changed = true
+        self.navigator.change_page();
     }
 
     pub fn set_page_size(&mut self, page_size: usize) {
@@ -877,7 +879,9 @@ impl Catalog {
         if index != self.index {
             let old_page_index = self.page_index();
             self.index = index;
-            self.page_changed = self.page_index() != old_page_index
+            if self.page_index() != old_page_index {
+                self.navigator.change_page()
+            };
         }
     }
 

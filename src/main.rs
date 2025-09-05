@@ -19,6 +19,7 @@ use crate::commands::load_shortcuts;
 use crate::database::Database;
 
 mod comment;
+mod navigator;
 mod args;
 mod catalog;
 mod commands;
