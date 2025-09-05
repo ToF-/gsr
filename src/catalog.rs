@@ -31,7 +31,6 @@ pub struct Catalog {
     picture_entries: Vec<PictureEntry>,
     index: usize,
     last_index: Option<usize>,
-    page_size: usize,
     new_page_size: Option<usize>,
     page_limit_on: bool,
     copied_label: Option<String>,
@@ -56,12 +55,14 @@ impl Catalog {
 
     pub fn new() -> Self {
         Catalog {
-            navigator: Navigator::new(),
+            navigator: Navigator{
+                page_size: 1,
+                page_changed: false,
+            },
             db_centric: false,
             picture_entries : Vec::new(),
             index: 0,
             last_index: None,
-            page_size: 1,
             new_page_size: None,
             page_limit_on: false,
             copied_label: None,
@@ -214,7 +215,7 @@ impl Catalog {
     }
 
     pub fn cells_per_row(&self) -> usize {
-        self.page_size
+        self.navigator.page_size()
     }
 
     pub fn expand_on(&self) -> bool {
@@ -230,11 +231,11 @@ impl Catalog {
     }
 
     pub fn page_size(&self) -> usize {
-        self.page_size
+        self.navigator.page_size()
     }
 
     pub fn page_length(&self) -> usize {
-        self.page_size * self.page_size
+        self.navigator.page_length()
     }
 
     pub fn palette_on(&self) -> bool {
@@ -263,7 +264,7 @@ impl Catalog {
     }
 
     pub fn index_from_position(&self, coords: Coords) -> Option<usize> {
-        let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size) as usize;
+        let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size()) as usize;
         if index < self.length() {
             Some(index)
         } else {
@@ -300,7 +301,7 @@ impl Catalog {
 
     pub fn can_move_towards(&self, direction: Direction) -> bool {
         let index = self.index;
-        let cells_per_row = self.page_size;
+        let cells_per_row = self.page_size();
         let col = index % cells_per_row;
         let row = (index - self.page_index()) / cells_per_row;
         if self.page_limit_on {
@@ -576,7 +577,10 @@ impl Catalog {
 
     pub fn set_page_size(&mut self, page_size: usize) {
         assert!(page_size > 0 && page_size <= 10);
-        self.page_size = page_size;
+        self.navigator = Navigator {
+            page_size: page_size,
+            ..self.navigator
+        }
     }
 
     pub fn set_new_page_size(&mut self, page_size: usize) {
@@ -904,10 +908,10 @@ impl Catalog {
             match direction {
                 Direction::Right => if index + 1 < self.length() { index += 1 },
                 Direction::Left => if index > 0 { index -= 1 },
-                Direction::Down => if index + self.page_size < self.length() { index += self.page_size } else { index = 0 },
+                Direction::Down => if index + self.navigator.page_size() < self.length() { index += self.navigator.page_size() } else { index = 0 },
                 Direction::Up => {
-                    if index >= self.page_size {
-                        index -= self.page_size
+                    if index >= self.navigator.page_size() {
+                        index -= self.navigator.page_size()
                     } else {
                         let offset = index - self.page_index();
                         let new_page_index = self.last() - (self.last() % self.page_length());
