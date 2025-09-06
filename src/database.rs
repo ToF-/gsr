@@ -232,7 +232,7 @@ impl Database {
              palette_to_blob(&entry.palette),
              if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
              entry.selected as i64,
-             entry.selected as i64,
+             entry.deleted as i64,
              entry.cover,
              &*entry.file_path])
                  .and_then(|_| {
@@ -335,6 +335,12 @@ impl Database {
             })
     }
 
+    pub fn delete_picture(&self, file_path: &str) -> Result<()> {
+        match self.rusqlite_delete_picture(file_path) {
+            Ok(()) => Ok(()),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
     pub fn delete_picture_data_where_file_do_not_exists(&mut self) -> Result<usize> {
         let mut count = 0;
         let result = self.rusqlite_select_all_picture_file_paths()

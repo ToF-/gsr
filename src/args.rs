@@ -102,6 +102,10 @@ pub struct Args {
     #[arg(short, long, value_name="QUERY")]
     pub query: Option<String>,
 
+    /// retarget selected pictures with labels to directory TARGET/<LABEL>
+    #[arg(short, long, value_name="TARGET_DIR")]
+    pub redirect: Option<String>,
+
     /// wait N seconds between each picture
     #[arg(short, long, value_name="N")]
     pub seconds: Option<u64>,
@@ -265,6 +269,14 @@ impl Args {
             purge: self.purge,
 
             query: self.query.clone(),
+
+            redirect: match &self.redirect {
+                None => None,
+                Some(path) => match check_path(&path, true) {
+                    Ok(_) => Some(path.to_string()),
+                    Err(err) => return Err(err),
+                },
+            },
 
             seconds: self.seconds,
 

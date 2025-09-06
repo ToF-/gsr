@@ -362,7 +362,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::CopyTemp => result = catalog.copy_picture_file_to_temp(),
                         Command::Delete => {
                             gui.editor.delete();
-                            catalog.toggle_delete_current_entry()
+                            result = catalog.toggle_delete_current_entry()
                         },
                         Command::ToggleExpand => catalog.toggle_expand(),
                         Command::ToggleFullSize => if gui.single_view_mode() {
@@ -405,6 +405,8 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             gui.application_window.close()
                         },
                         Command::QuitWithConfirm => {
+                            catalog.redirect_files();
+                            catalog.delete_files();
                             catalog.exit();
                             gui.application_window.close()
                         },

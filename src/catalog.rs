@@ -1,21 +1,22 @@
-use rand::thread_rng;
-use crate::navigator::Navigator;
-use crate::loader::load_picture_entries_from_source;
-use crate::picture_entry::PictureEntries;
-use crate::display::title_display;
 use anyhow::{anyhow, Result};
-use crate::comment::Comment;
 use crate::args::Args;
+use crate::comment::Comment;
 use crate::database::Database;
 use crate::direction::Direction;
+use crate::display::title_display;
 use crate::editor::{Editor};
+use crate::loader::load_picture_entries_from_source;
+use crate::navigator::Navigator;
 use crate::order::Order;
 use crate::path::file_name;
 use crate::path::file_path_directory;
+use crate::picture_entry::PictureEntries;
 use crate::picture_entry::PictureEntry;
+use crate::picture_io::delete_file;
 use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
 use rand::prelude::SliceRandom;
+use rand::thread_rng;
 use std::cmp::Ordering::{Less, Greater, Equal};
 use std::collections::HashMap;
 use std::collections::HashSet;
@@ -157,6 +158,33 @@ impl Catalog {
         update_result
     }
 
+    pub fn delete_files(&self) -> Result<()> {
+        for entry in self.picture_entries.clone().iter()
+            .filter(|entry| entry.deleted) {
+                    println!("deleting {}", entry.original_file_path());
+                    self.database.delete_picture(&entry.original_file_path())
+                        .and_then(|_| {
+                            delete_file(&entry.original_file_path())
+                                .and_then(|_| {
+                                    delete_file(&entry.thumbnail_file_path())
+                                })
+                        });
+            }
+        Ok(())
+    }
+
+    pub fn redirect_files(&self) -> Result<()> {
+        match self.args.clone().unwrap().redirect {
+            Some(target) => {
+                for entry in self.picture_entries.clone().iter()
+                    .filter(|entry| entry.selected && !entry.deleted && entry.label().is_some()) {
+                    println!("redirecting {} to {}", entry.original_file_path(), target);
+                }
+                Ok(())
+            },
+            None => Ok(()),
+        }
+    }
     // queries
 
     pub fn navigator(&self) -> &Navigator {
@@ -457,6 +485,20 @@ impl Catalog {
         }
     }
 
+    pub fn toggle_delete_current_entry(&mut self) -> Result<()> {
+        match self.current_entry() {
+            Some(picture_entry) => {
+                let mut new_picture_entry = picture_entry.clone();
+                new_picture_entry.deleted = !new_picture_entry.deleted;
+                match self.set_current_picture_entry(new_picture_entry) {
+                    Ok(()) => Ok(()),
+                    Err(err) => Err(anyhow!(err)),
+                }
+            },
+            None => Ok(()),
+        }
+    }
+
     pub fn begin_sort_selection(&mut self) {
         self.previous_order = self.order.clone();
         self.order = None
@@ -471,13 +513,6 @@ impl Catalog {
         self.navigator.change_page()
     }
 
-    pub fn toggle_delete_current_entry(&mut self) {
-        if let Some(index) = self.navigator.index() {
-            self.picture_entries[index].deleted = !self.picture_entries[index].deleted;
-            self.navigator.change_page();
-            self.last_comment = Some(Comment::Delete)
-        }
-    }
     pub fn refresh(&mut self) {
         self.navigator.change_page();
     }
@@ -620,7 +655,7 @@ impl Catalog {
             Some(Comment::Cover) => self.cover_current_entry(),
             Some(Comment::Uncover) => self.uncover_current_entry(),
             Some(Comment::Select) => self.toggle_select_current_entry(),
-            Some(Comment::Delete) => Ok(self.toggle_delete_current_entry()),
+            Some(Comment::Delete) => self.toggle_delete_current_entry(),
         }
     }
 
