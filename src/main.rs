@@ -114,8 +114,8 @@ fn main() {
                                 application.run_with_args(&no_args);
                                 // if we exit from the application loop with a new page size, we
                                 // are not done and loop again
-                                catalog_rc.try_borrow_mut()
-                                    .and_then(|mut catalog| {
+                                match catalog_rc.try_borrow_mut() {
+                                    Ok(mut catalog) => 
                                         if catalog.done() {
                                             exit = true
                                         } else {
@@ -123,9 +123,9 @@ fn main() {
                                                 Some(size) => { catalog.set_page_size(size) },
                                                 None => {},
                                             }
-                                        };
-                                        Ok(())
-                                    });
+                                        },
+                                    Err(err) => return Err(err.into()),
+                                }
                             }
                             Ok(())
                         })

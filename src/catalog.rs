@@ -79,7 +79,7 @@ impl Catalog {
 
 
     pub fn exit(&mut self) {
-        self.navigator = self.navigator.exit()
+        self.navigator.exit()
     }
 
     pub fn init_catalog(args: &Args) -> Result<Self> {
@@ -348,13 +348,6 @@ impl Catalog {
         println!("{:?}", self.current_entry().expect("can't access current entry"));
     }
     // updates
-    
-    pub fn set_length(&mut self, length: usize) {
-        self.navigator = self.navigator.set_length(length)
-    }
-    pub fn set_last_index(&mut self) {
-        self.navigator = self.navigator.set_last_index()
-    }
 
     pub fn move_to_last_index(&mut self) {
         self.navigator = self.navigator.move_to_last_index()
@@ -374,7 +367,7 @@ impl Catalog {
         match picture_entries_result {
             Ok(picture_entries) => {
                 self.picture_entries = picture_entries;
-                self.navigator = self.navigator.set_length(self.picture_entries.len());
+                self.navigator.set_length(self.picture_entries.len());
                 Ok(())
             },
             Err(err) => Err(anyhow!(err)),

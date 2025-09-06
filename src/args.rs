@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::Parser;
 use std::env;
 use crate::order::Order;
-use crate::path::{ABSOLUTE_PATH, directory, check_file, check_reading_list_file, check_path, default_extract_list_file};
+use crate::path::{ABSOLUTE_PATH, check_file, check_reading_list_file, check_path, default_extract_list_file};
 
 const DEFAULT_WIDTH: i32   = 1000;
 const DEFAULT_HEIGHT: i32  = 1000;

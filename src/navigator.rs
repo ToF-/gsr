@@ -1,5 +1,4 @@
 use crate::catalog::Coords;
-use crate::catalog::Catalog;
 
 #[derive(Debug,Clone)]
 pub struct Navigator {
@@ -51,12 +50,10 @@ impl Navigator {
     pub fn start_index(&self) -> Option<usize> {
         self.start_index
     }
-    pub fn set_length(&self, length: usize) -> Self {
-        Navigator {
-            length: length,
-            ..self.clone()
-        }
+    pub fn set_length(&mut self, length: usize) {
+        self.length = length
     }
+
     pub fn set_new_page_size(&self, size: usize) -> Self {
         Navigator {
             new_page_size: Some(size),
@@ -82,11 +79,8 @@ impl Navigator {
             None => self.move_to_index(0),
         }
     }
-    pub fn exit(&self) -> Self {
-        Navigator {
-            done: true,
-            ..self.clone()
-        }
+    pub fn exit(&mut self) {
+        self.done = true
     }
 
     pub fn done(&self) -> bool {
@@ -110,12 +104,6 @@ impl Navigator {
     pub fn set_page_size(&self, page_size: usize) -> Self {
         Navigator {
             page_size: page_size,
-            ..self.clone()
-        }
-    }
-    pub fn set_last_index(&self) -> Self {
-        Navigator{
-            last_index: Some(self.index),
             ..self.clone()
         }
     }
