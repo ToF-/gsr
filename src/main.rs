@@ -116,10 +116,14 @@ fn main() {
                                 // are not done and loop again
                                 catalog_rc.try_borrow_mut()
                                     .and_then(|mut catalog| {
-                                        match catalog.new_page_size() {
-                                            Some(size) => { catalog.set_page_size(size) },
-                                            None => { exit = true },
-                                        }
+                                        if catalog.done() {
+                                            exit = true
+                                        } else {
+                                            match catalog.new_page_size() {
+                                                Some(size) => { catalog.set_page_size(size) },
+                                                None => {},
+                                            }
+                                        };
                                         Ok(())
                                     });
                             }
