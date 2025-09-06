@@ -144,6 +144,12 @@ pub fn file_path_directory(source: &str) -> String {
     path.parent().expect(&format!("can't get file_path parent of {}", source)).display().to_string()
 }
 
+pub fn file_path_directory_directory(source: &str) -> String {
+    let path = Path::new(source);
+    path.parent().expect(&format!("can't get file_path parent of {}", source))
+        .parent().expect(&format!("can't get file_path parent's parent of {}", source)).display().to_string()
+}
+
 pub fn file_name(source: &str) -> String {
     let path = Path::new(source);
     path.file_name().expect("can't get file_name").to_str().expect("can't convert to str").to_string()

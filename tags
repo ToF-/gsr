@@ -138,6 +138,7 @@ export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn ex
 extract	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn extract(&self) {$/;"	f
 file_name	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_name(source: &str) -> String {$/;"	f
 file_path_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_path_directory(source: &str) -> String {$/;"	f
+file_path_directory_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_path_directory_directory(source: &str) -> String {$/;"	f
 file_path_in_directory_not_in_database	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_path_in_directory_not_in_database(directory: &str, database_file_paths: &Vec<String>) -> Result<Vec<String>> {$/;"	f
 file_paths_in_database_not_on_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_database_not_on_file_system(database_file_paths: &Vec<String>) -> Result<Vec<String>> {$/;"	f
 find_index_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_index_input_pattern(&mut self, pattern: &str) -> Option<usize> {$/;"	f
@@ -173,6 +174,7 @@ input	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input(&self
 input_kind	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn input_kind(&self) -> Option<InputKind> {$/;"	f
 input_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn input_mode_process_key(key: Key, editor: &mut Editor, catalog: &mut Catalog) -> bool {$/;"	f
 insert_difference_from_directory	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_difference_from_directory(&mut self, directory: &str, in_std_dir:bool) -> Result<PictureEntries> {$/;"	f
+insert_new_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_new_picture_entry(&self, picture_entry: PictureEntry) -> Result<()> {$/;"	f
 insert_or_update_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {$/;"	f
 insert_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_picture_entry(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
 into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f

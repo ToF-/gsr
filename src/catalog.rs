@@ -8,12 +8,12 @@ use crate::editor::{Editor};
 use crate::loader::load_picture_entries_from_source;
 use crate::navigator::Navigator;
 use crate::order::Order;
+use crate::path::check_path;
 use crate::path::file_name;
 use crate::path::file_path_directory;
-use crate::picture_entry::PictureEntries;
-use crate::picture_entry::PictureEntry;
-use crate::picture_io::delete_file;
-use crate::picture_io::{append_to_extract_file, check_or_create_thumbnail_file};
+use crate::path::file_path_directory_directory;
+use crate::picture_entry::{PictureEntries, PictureEntry, make_picture_entry};
+use crate::picture_io::{append_to_extract_file, copy_file_to_target_directory, delete_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
 use rand::prelude::SliceRandom;
 use rand::thread_rng;
@@ -178,8 +178,53 @@ impl Catalog {
             Some(target) => {
                 for entry in self.picture_entries.clone().iter()
                     .filter(|entry| entry.selected && !entry.deleted && entry.label().is_some()) {
-                    println!("redirecting {} to {}", entry.original_file_path(), target);
-                }
+                        let new_directory: String = target.clone() + "/" + &entry.label().unwrap();
+                        match check_path(&new_directory, true) {
+                            Ok(path) => {
+                                let new_file_path = new_directory.clone() + "/" + &file_name(&entry.original_file_path());
+                                let new_thumb_file_path = new_directory.clone() + "/" + &file_name(&entry.thumbnail_file_path());
+                                println!("redirecting {} to {}", entry.original_file_path(), new_file_path);
+                                println!("redirecting {} to {}", entry.thumbnail_file_path(), new_thumb_file_path);
+                                let picture_entry = entry.clone();
+                                let db_result = self.database.delete_picture(&entry.original_file_path())
+                                    .and_then(|_| {
+                                        let new_entry = make_picture_entry(
+                                            new_file_path.clone(),
+                                            picture_entry.file_size,
+                                            picture_entry.colors,
+                                            picture_entry.modified_time,
+                                            picture_entry.rank,
+                                            Some(picture_entry.palette),
+                                            picture_entry.label(),
+                                            false,
+                                            false,
+                                            false,
+                                            picture_entry.tags.clone()
+                                        );
+                                        self.database.insert_new_picture_entry(new_entry)
+                                    });
+                                match db_result {
+                                    Ok(_) => { },
+                                    Err(err) => {
+                                        eprintln!("{}", err)
+                                    },
+                                };
+                                let fs_result = copy_file_to_target_directory(&entry.original_file_path(), &new_directory)
+                                    .and_then(|_| {
+                                        copy_file_to_target_directory(&entry.thumbnail_file_path(), &new_directory)
+                                    });
+                                match fs_result {
+                                    Ok(_) => { },
+                                    Err(err) => {
+                                        eprintln!("{}", err)
+                                    }
+                                }
+                            }
+                            Err(err) => { 
+                                eprintln!("{}", err)
+                            }
+                        }
+                    };
                 Ok(())
             },
             None => Ok(()),

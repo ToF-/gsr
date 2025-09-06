@@ -569,6 +569,14 @@ fn rusqlite_insert_picture_entry(&self, picture_entry: PictureEntry) -> Result<u
      picture_entry.cover as i64,
      palette_to_blob(&picture_entry.palette)])
 }
+
+pub fn insert_new_picture_entry(&self, picture_entry: PictureEntry) -> Result<()> {
+    match self.rusqlite_insert_picture_entry(picture_entry) {
+        Ok(_) => Ok(()),
+        Err(err) => Err(anyhow!(err)),
+    }
+}
+
 pub fn insert_picture_entry(&self, file_path: &str) -> Result<PictureEntry> {
     match PictureEntry::from_file(file_path) {
         Ok(picture_entry) => {
