@@ -249,4 +249,13 @@ impl Navigator {
 
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*; 
 
+    #[test]
+    fn cannot_move_beyond_length() {
+        let navigator = Navigator::new();
+        assert_eq!(false, navigator.can_move_to_index(4));
+    }
+}
