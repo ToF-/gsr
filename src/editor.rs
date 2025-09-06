@@ -64,8 +64,8 @@ impl Editor {
                 },
                 InputKind::IndexInput => {
                     if let Ok(index) = input.parse::<usize>() {
-                        if index < catalog.length() && catalog.can_move_to_index(index) {
-                            catalog.move_to_index(index)
+                        if index < catalog.navigator().length() && catalog.navigator().can_move_to_index(index) {
+                            catalog.mut_navigator().move_to_index(index)
                         }
                     }
                 },

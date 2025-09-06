@@ -21,16 +21,16 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
             String::from("")
         },
         catalog.selected_count(),
-        if catalog.start_index().is_some() { "…" } else { "" },
+        if catalog.navigator().start_index().is_some() { "…" } else { "" },
         if let Some(order) = catalog.order().clone() {
             order.to_string()
         } else {
             "??".to_string()
         },
-        if catalog.page_limit_on() { "[" } else { "" },
+        if catalog.navigator().page_limit_on() { "[" } else { "" },
         catalog.index().unwrap(),
         catalog.last(),
-        if catalog.page_limit_on() { "]" } else { "" },
+        if catalog.navigator().page_limit_on() { "]" } else { "" },
         entry_display,
         if catalog.expand_on() { "□" } else { "" },
         if catalog.full_size_on() { "░" } else { "" },

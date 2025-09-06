@@ -47,7 +47,7 @@ impl Gui {
 
 pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<RefCell<Catalog>>, shortcuts: &Shortcuts) {
     let cells_per_row: i32 = match catalog_rc.try_borrow() {
-        Ok(catalog) => catalog.cells_per_row() as i32,
+        Ok(catalog) => catalog.navigator().cells_per_row() as i32,
         Err(err) => panic!("{}", err),
     };
     let width = args.width.unwrap();
@@ -357,7 +357,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::Cover => result = catalog.cover_current_entry(),
                         Command::Extract => catalog.extract(),
                         Command::FirstPosition => refresh = left_click_command_view_mode(0,0, gui, catalog),
-                        Command::LastPosition => refresh = left_click_command_view_mode(catalog.cells_per_row()-1, catalog.cells_per_row()-1, gui, catalog),
+                        Command::LastPosition => refresh = left_click_command_view_mode(catalog.navigator().cells_per_row()-1, catalog.navigator().cells_per_row()-1, gui, catalog),
                         Command::CopyLabel => catalog.copy_label(),
                         Command::CopyTemp => result = catalog.copy_picture_file_to_temp(),
                         Command::Delete => {
@@ -398,7 +398,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         },
                         Command::ExportCommands => result = export_shortcuts(&gui.shortcuts),
                         Command::NextPage => catalog.move_next_page(),
-                        Command::TogglePageLimit => catalog.toggle_page_limit(),
+                        Command::TogglePageLimit => catalog.mut_navigator().toggle_page_limit(),
                         Command::PrevPage => catalog.move_prev_page(),
                         Command::QuitWithCancel => {
                             catalog.exit();
@@ -587,12 +587,12 @@ fn set_all_pictures_for_multiple_view(gui: &Gui, catalog: &Catalog) {
 
 fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalog) -> bool {
     let old_index: usize = catalog.index().unwrap();
-    let old_page_index: usize = catalog.page_index();
-    if catalog.can_move_towards(direction.clone()) {
+    let old_page_index: usize = catalog.navigator().page_index();
+    if catalog.navigator().can_move_towards(direction.clone()) {
         catalog.move_towards(direction);
         set_picture_for_single_view(gui, catalog);
         let new_index = catalog.index().unwrap();
-        if catalog.page_index() != old_page_index {
+        if catalog.navigator().page_index() != old_page_index {
             set_all_pictures_for_multiple_view(gui, catalog)
         } else {
             set_label_for_cell_index(gui, catalog, old_index, false)
@@ -606,12 +606,12 @@ fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalo
 
 fn left_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {
     let old_index: usize = catalog.index().unwrap();
-    let old_page_index: usize = catalog.page_index();
+    let old_page_index: usize = catalog.navigator().page_index();
     if let Some(new_index) = catalog.index_from_position((col, row)) {
-        if catalog.can_move_to_index(new_index) {
-            catalog.move_to_index(new_index);
+        if catalog.navigator().can_move_to_index(new_index) {
+            catalog.mut_navigator().move_to_index(new_index);
             set_picture_for_single_view(gui, catalog);
-            if catalog.page_index() != old_page_index {
+            if catalog.navigator().page_index() != old_page_index {
                 set_all_pictures_for_multiple_view(gui, catalog)
             } else {
                 set_label_for_cell_index(gui, catalog, old_index, false)
@@ -628,14 +628,14 @@ fn left_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut
 
 fn right_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {
     let old_index: usize = catalog.index().unwrap();
-    let old_page_index: usize = catalog.page_index();
+    let old_page_index: usize = catalog.navigator().page_index();
     if let Some(new_index) = catalog.index_from_position((col, row)) {
         catalog.start_set();
-        if catalog.can_move_to_index(new_index) {
-            catalog.move_to_index(new_index);
+        if catalog.navigator().can_move_to_index(new_index) {
+            catalog.mut_navigator().move_to_index(new_index);
             let _ = catalog.toggle_select_current_entry();
             set_picture_for_single_view(gui, catalog);
-            if catalog.page_index() != old_page_index {
+            if catalog.navigator().page_index() != old_page_index {
                 set_all_pictures_for_multiple_view(gui, catalog)
             } else {
                 set_label_for_cell_index(gui, catalog, old_index, false)
@@ -686,7 +686,7 @@ fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {
     picture.set_halign(Align::Center);
     picture.set_opacity(opacity);
     picture.set_can_shrink(!catalog.full_size_on());
-    if catalog.cells_per_row() < 10 {
+    if catalog.navigator().cells_per_row() < 10 {
         picture.set_filename(Some(entry.original_file_path()));
     } else {
         let _ = check_or_create_thumbnail_file(&entry.thumbnail_file_path(), &entry.original_file_path());

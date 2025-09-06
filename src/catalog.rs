@@ -90,7 +90,7 @@ impl Catalog {
             return Err(err)
         };
         catalog.count_selected();
-        if catalog.length() == 0 {
+        if catalog.navigator().length() == 0 {
             return Err(anyhow!("no picture to show"))
         };
         match catalog.initialize_tags() {
@@ -157,18 +157,14 @@ impl Catalog {
 
     // queries
 
-    pub fn done(&self) -> bool {
-        self.navigator.done()
+    pub fn navigator(&self) -> &Navigator {
+        &self.navigator
     }
-
-    pub fn page_limit_on(&self) -> bool {
-        self.navigator.page_limit_on()
+    
+    pub fn mut_navigator(&mut self) -> &mut Navigator {
+        &mut self.navigator
     }
-
-    pub fn new_page_size(&self) -> Option<usize> {
-        self.navigator.new_page_size()
-    }
-
+    
     pub fn copied_label(&self) -> Option<String> {
         self.copied_label.clone()
     }
@@ -188,10 +184,6 @@ impl Catalog {
         self.selected_count
     }
 
-    pub fn start_index(&self) -> Option<usize> {
-        self.navigator.start_index()
-    }
-
     pub fn order(&self) -> Option<Order> {
         self.order
     }
@@ -204,16 +196,8 @@ impl Catalog {
         self.order.is_none()
     }
 
-    pub fn cells_per_row(&self) -> usize {
-        self.navigator.page_size()
-    }
-
     pub fn expand_on(&self) -> bool {
         self.expand_on
-    }
-
-    pub fn length(&self) -> usize {
-        self.navigator.length()
     }
 
     pub fn last(&self) -> usize {
@@ -261,19 +245,8 @@ impl Catalog {
         self.navigator.index().and_then(|index| { self.entry_at_index(index) } )
     }
 
-    pub fn page_index(&self) -> usize {
-        self.navigator.page_index()
-    }
-
     pub fn current_candidates(&self) -> String {
         format!("{}", self.current_candidates.join(","))
-    }
-    pub fn can_move_to_index(&self, index: usize) -> bool {
-        self.navigator.can_move_to_index(index)
-    }
-
-    pub fn can_move_towards(&self, direction: Direction) -> bool {
-        self.navigator.can_move_towards(direction)
     }
 
     pub fn find_index_input_pattern(&mut self, pattern: &str) -> Option<usize> {
@@ -537,14 +510,10 @@ impl Catalog {
         self.navigator.set_new_page_size(page_size)
     }
 
-    pub fn toggle_page_limit(&mut self) {
-        self.navigator.toggle_page_limit()
-    }
-
     pub fn move_to_input_pattern(&mut self, pattern: &str) {
         match self.find_index_input_pattern(pattern) {
-            Some(index) => if self.can_move_to_index(index) {
-                self.move_to_index(index)
+            Some(index) => if self.navigator.can_move_to_index(index) {
+                self.navigator.move_to_index(index)
             },
             None => {},
         }
@@ -553,8 +522,8 @@ impl Catalog {
     pub fn move_to_label_pattern(&mut self, pattern: &str) {
         println!("move_to_label_pattern({})", pattern);
         match self.find_index_label_search(pattern) {
-            Some(index) => if self.can_move_to_index(index) {
-                self.move_to_index(index)
+            Some(index) => if self.navigator.can_move_to_index(index) {
+                self.navigator.move_to_index(index)
             },
             None => {},
         }
@@ -755,7 +724,7 @@ impl Catalog {
     pub fn unselect_page(&mut self) -> Result<()> {
         match self.navigator.index() {
             Some(_) => {
-                let start = self.page_index();
+                let start = self.navigator.page_index();
                 let end = start + self.page_length();
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
@@ -776,7 +745,7 @@ impl Catalog {
         match self.navigator.index() {
             Some(_) => {
                 let start = 0;
-                let end = self.length();
+                let end = self.navigator.length();
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
                     entry.selected = false;
@@ -811,7 +780,7 @@ impl Catalog {
             };
             self.order = Some(order);
             if let Some(index) = self.picture_entries.iter().position(|entry| entry.original_file_path() == original_file_path) {
-                self.move_to_index(index)
+                self.navigator.move_to_index(index)
             } else {
                 panic!("couldn't find entry with original file name= {}", original_file_path)
             }
@@ -822,17 +791,12 @@ impl Catalog {
         self.navigator.move_to_random_index()
     }
 
-    pub fn move_to_index(&mut self, index: usize) {
-        self.navigator.move_to_index(index)
-
-    }
-
     pub fn move_to_first(&mut self) {
-        self.move_to_index(0)
+        self.navigator.move_to_index(0)
     }
 
     pub fn move_to_last(&mut self) {
-        self.move_to_index(self.last())
+        self.navigator.move_to_index(self.last())
     }
 
     pub fn move_next_page(&mut self) {

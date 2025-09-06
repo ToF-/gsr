@@ -65,7 +65,7 @@ fn main() {
                                     Err(err) => return Err(anyhow!(err)),
                                 }
                             };
-                            println!("{:?} entries", catalog.length());
+                            println!("{:?} entries", catalog.navigator().length());
                             if args.update {
                                 match catalog.update_files() {
                                     Ok(()) => exit(0),
@@ -116,10 +116,10 @@ fn main() {
                                 // are not done and loop again
                                 match catalog_rc.try_borrow_mut() {
                                     Ok(mut catalog) => 
-                                        if catalog.done() {
+                                        if catalog.navigator().done() {
                                             exit = true
                                         } else {
-                                            match catalog.new_page_size() {
+                                            match catalog.navigator().new_page_size() {
                                                 Some(size) => { catalog.set_page_size(size) },
                                                 None => {},
                                             }
