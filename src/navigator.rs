@@ -258,4 +258,77 @@ mod tests {
         let navigator = Navigator::new();
         assert_eq!(false, navigator.can_move_to_index(4));
     }
+
+    #[test]
+    fn page_index_depends_on_page_size_and_index() {
+        let mut navigator = Navigator::new();
+        navigator.set_length(7);
+        navigator.set_page_size(2);
+        assert_eq!(4, navigator.page_length());
+        navigator.move_to_index(0);
+        assert_eq!(0, navigator.page_index());
+        navigator.move_to_index(6);
+        assert_eq!(4, navigator.page_index());
+    }
+
+
+    #[test]
+    fn after_moving_next_page_index_depends_on_page_size() {
+        let mut navigator = Navigator::new();
+        navigator.set_length(7);
+        navigator.set_page_size(2);
+        navigator.move_to_index(2);
+        navigator.move_next_page();
+        assert_eq!(4, navigator.page_index());
+        navigator.move_next_page();
+        assert_eq!(0, navigator.page_index());
+        navigator.move_prev_page();
+        assert_eq!(4, navigator.page_index());
+    }
+
+    #[test]
+    fn moving_next_picture_can_be_blocked_or_allowed() {
+        let mut navigator = Navigator::new();
+        navigator.set_length(7);
+        navigator.toggle_page_limit();
+        assert_eq!(true, navigator.page_limit_on);
+        navigator.set_page_size(2);
+        navigator.move_to_index(0);
+        navigator.move_towards(Direction::Right);
+        assert_eq!(1, navigator.index().unwrap());
+        assert_eq!(4, navigator.page_length());
+        assert_eq!(true, navigator.can_move_towards(Direction::Down));
+        navigator.move_towards(Direction::Down);
+        assert_eq!(3, navigator.index().unwrap());
+        navigator.move_towards(Direction::Left);
+        assert_eq!(2, navigator.index().unwrap());
+        assert_eq!(true, navigator.can_move_towards(Direction::Up));
+        navigator.move_towards(Direction::Up);
+        assert_eq!(0, navigator.index().unwrap());
+        assert_eq!(false, navigator.can_move_towards(Direction::Left));
+        assert_eq!(false, navigator.can_move_towards(Direction::Up));
+        assert_eq!(true, navigator.can_move_towards(Direction::Right));
+        assert_eq!(true, navigator.can_move_towards(Direction::Down));
+        navigator.move_towards(Direction::Right);
+        assert_eq!(false, navigator.can_move_towards(Direction::Right));
+        navigator.move_towards(Direction::Down);
+        assert_eq!(false, navigator.can_move_towards(Direction::Down));
+        navigator.toggle_page_limit();
+        assert_eq!(false, navigator.page_limit_on);
+        assert_eq!(3, navigator.index().unwrap());
+        navigator.move_towards(Direction::Down);
+        assert_eq!(5, navigator.index().unwrap());
+        assert_eq!(true, navigator.can_move_towards(Direction::Down));
+        navigator.move_towards(Direction::Down);
+        assert_eq!(0, navigator.index().unwrap());
+        navigator.move_towards(Direction::Right);
+        assert_eq!(1, navigator.index().unwrap());
+        assert_eq!(true, navigator.can_move_towards(Direction::Up));
+        navigator.move_towards(Direction::Up);
+        assert_eq!(6, navigator.index().unwrap()); // because there's no picture entry in pos 7
+        navigator.move_to_index(5);
+        assert_eq!(true, navigator.can_move_towards(Direction::Down));
+        navigator.move_towards(Direction::Down);
+        assert_eq!(0, navigator.index().unwrap()); // because there's no picture entry in pos 7
+    }
 }
