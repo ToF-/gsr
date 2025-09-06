@@ -193,7 +193,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     left_gesture.connect_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_,_,_,_| {
         {
             let mut catalog = catalog_rc.borrow_mut();
-            catalog.move_prev_page();
+            catalog.mut_navigator().move_prev_page();
         }
         if let Ok(catalog) =  catalog_rc.try_borrow() {
             if let Ok(gui) = gui_rc.try_borrow() {
@@ -208,7 +208,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     right_gesture.connect_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_,_,_,_| {
         {
             let mut catalog = catalog_rc.borrow_mut();
-            catalog.move_next_page();
+            catalog.mut_navigator().move_next_page();
         }
         if let Ok(catalog) =  catalog_rc.try_borrow() {
             if let Ok(gui) = gui_rc.try_borrow() {
@@ -226,7 +226,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
         timeout_add_local(Duration::new(seconds, 0), clone!(@strong catalog_rc, @strong gui_rc => move | | {
             if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
                 if let Ok(gui) = gui_rc.try_borrow() {
-                    catalog.move_next_page();
+                    catalog.mut_navigator().move_next_page();
                     refresh_view(&gui, &catalog);
                 }
             };
@@ -236,7 +236,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
         if let Ok(gui) = gui_rc.try_borrow() {
             gui.application_window.add_controller(evk);
-            catalog.move_to_last_index();
+            catalog.mut_navigator().move_to_previous_index();
             catalog.refresh();
             refresh_view(&gui, &catalog);
             gui.application_window.present()
@@ -362,7 +362,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::CopyTemp => result = catalog.copy_picture_file_to_temp(),
                         Command::Delete => {
                             gui.editor.delete();
-                            catalog.delete()
+                            catalog.toggle_delete_current_entry()
                         },
                         Command::ToggleExpand => catalog.toggle_expand(),
                         Command::ToggleFullSize => if gui.single_view_mode() {
@@ -391,15 +391,15 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             catalog.set_new_page_size(10);
                             gui.application_window.close()
                         },
-                        Command::Random => catalog.move_to_random_index(),
+                        Command::Random => catalog.mut_navigator().move_to_random_index(),
                         Command::Info => catalog.print_info(&gui.editor),
                         Command::Jump => { 
                             gui.editor.begin_input(InputKind::SearchLabelInput, catalog.tags.clone());
                         },
                         Command::ExportCommands => result = export_shortcuts(&gui.shortcuts),
-                        Command::NextPage => catalog.move_next_page(),
+                        Command::NextPage => catalog.mut_navigator().move_next_page(),
                         Command::TogglePageLimit => catalog.mut_navigator().toggle_page_limit(),
-                        Command::PrevPage => catalog.move_prev_page(),
+                        Command::PrevPage => catalog.mut_navigator().move_prev_page(),
                         Command::QuitWithCancel => {
                             catalog.exit();
                             gui.application_window.close()
@@ -419,9 +419,9 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             catalog.toggle_palette();
                             set_title(gui, catalog);
                         },
-                        Command::StartPosition => catalog.move_to_first(),
-                        Command::EndPosition => catalog.move_to_last(),
-                        Command::Next => catalog.move_next_page(),
+                        Command::StartPosition => catalog.mut_navigator().move_to_first_index(),
+                        Command::EndPosition => catalog.mut_navigator().move_to_last_index(),
+                        Command::Next => catalog.mut_navigator().move_next_page(),
                         Command::SetRange => catalog.start_set(),
                         Command::Cancel => catalog.cancel_set(),
                         Command::PasteLabel => result = catalog.paste_label_current_entry(),
@@ -589,7 +589,7 @@ fn arrow_command_view_mode(direction: Direction, gui: &Gui, catalog: &mut Catalo
     let old_index: usize = catalog.index().unwrap();
     let old_page_index: usize = catalog.navigator().page_index();
     if catalog.navigator().can_move_towards(direction.clone()) {
-        catalog.move_towards(direction);
+        catalog.mut_navigator().move_towards(direction);
         set_picture_for_single_view(gui, catalog);
         let new_index = catalog.index().unwrap();
         if catalog.navigator().page_index() != old_page_index {

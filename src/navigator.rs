@@ -7,7 +7,7 @@ use crate::catalog::Coords;
 pub struct Navigator {
     done: bool,
     index: usize,
-    last_index: Option<usize>,
+    previous_index: Option<usize>,
     length: usize,
     new_page_size: Option<usize>,
     page_changed: bool,
@@ -22,7 +22,7 @@ impl Navigator {
         Navigator {
             done: false,
             index: 0,
-            last_index: None,
+            previous_index: None,
             length: 0,
             new_page_size: None,
             page_changed: false,
@@ -70,7 +70,7 @@ impl Navigator {
     pub fn set_new_page_size(&mut self, page_size: usize) {
         assert!(page_size > 0 && page_size <= 10);
         self.new_page_size = Some(page_size);
-        self.last_index = Some(self.index)
+        self.previous_index = Some(self.index)
     }
 
     pub fn move_to_index(&mut self, index: usize) {
@@ -79,8 +79,17 @@ impl Navigator {
             self.index = index;
         }
     }
+
+    pub fn move_to_first_index(&mut self) {
+        self.move_to_index(0)
+    }
+
     pub fn move_to_last_index(&mut self) {
-        match self.last_index {
+        self.move_to_index(self.length - 1)
+    }
+
+    pub fn move_to_previous_index(&mut self) {
+        match self.previous_index {
             Some(index) => self.move_to_index(index),
             None => self.move_to_index(0),
         }

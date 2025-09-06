@@ -305,10 +305,6 @@ impl Catalog {
     }
     // updates
 
-    pub fn move_to_last_index(&mut self) {
-        self.navigator.move_to_last_index()
-    }
-
     pub fn set_current_picture_entry(&mut self, picture_entry: PictureEntry) -> Result<()> {
         match self.navigator.index() {
             Some(index) => {
@@ -377,23 +373,6 @@ impl Catalog {
                         self.copied_label = Some(label.to_string());
                         self.tags.insert(label.to_string());
                         self.last_comment = Some(Comment::Label { label: label.to_string() });
-                        Ok(())
-                    },
-                    Err(err) => Err(anyhow!(err)),
-                } 
-            },
-            None => Ok(()),
-        }
-    }
-
-    pub fn unlabel_current_entry(&mut self) -> Result<()> {
-        match self.current_entry() {
-            Some(picture_entry) => {
-                let mut new_picture_entry = picture_entry.clone();
-                new_picture_entry.unlabel();
-                match self.set_current_picture_entry(new_picture_entry) {
-                    Ok(()) => {
-                        self.last_comment = Some(Comment::Unlabel);
                         Ok(())
                     },
                     Err(err) => Err(anyhow!(err)),
@@ -490,10 +469,9 @@ impl Catalog {
         self.navigator.change_page()
     }
 
-    pub fn delete(&mut self) {
+    pub fn toggle_delete_current_entry(&mut self) {
         if let Some(index) = self.navigator.index() {
             self.picture_entries[index].deleted = !self.picture_entries[index].deleted;
-            self.navigator.change_page();
             self.navigator.change_page();
             self.last_comment = Some(Comment::Delete)
         }
@@ -633,14 +611,14 @@ impl Catalog {
         match self.last_comment.clone() {
             None => Ok(()),
             Some(Comment::Label { label }) => self.label_current_entry(&label),
-            Some(Comment::Unlabel) => self.unlabel(),
+            Some(Comment::Unlabel) => self.unlabel_current_entry(),
             Some(Comment::AddTag { label}) => self.tag_current_entry(&label),
             Some(Comment::DeleteTag { label}) => self.untag_current_entry(&label),
             Some(Comment::Rank { rank }) => self.rank_current_entry(rank),
             Some(Comment::Cover) => self.cover_current_entry(),
             Some(Comment::Uncover) => self.uncover_current_entry(),
             Some(Comment::Select) => self.toggle_select_current_entry(),
-            Some(Comment::Delete) => Ok(self.delete()),
+            Some(Comment::Delete) => Ok(self.toggle_delete_current_entry()),
         }
     }
 
@@ -672,13 +650,18 @@ impl Catalog {
         self.full_size_on = !self.full_size_on
     }
 
-    pub fn unlabel(&mut self) -> Result<()> {
-        match self.navigator.index() {
-            Some(index) => {
-                let entry: &mut PictureEntry = &mut self.picture_entries[index];
-                entry.unlabel();
-                self.last_comment = Some(Comment::Unlabel);
-                self.database.update_picture_entry(entry)
+    pub fn unlabel_current_entry(&mut self) -> Result<()> {
+        match self.current_entry() {
+            Some(picture_entry) => {
+                let mut new_picture_entry = picture_entry.clone();
+                new_picture_entry.unlabel();
+                match self.set_current_picture_entry(new_picture_entry) {
+                    Ok(()) => {
+                        self.last_comment = Some(Comment::Unlabel);
+                        Ok(())
+                    },
+                    Err(err) => Err(anyhow!(err)),
+                } 
             },
             None => Ok(()),
         }
@@ -785,30 +768,6 @@ impl Catalog {
                 panic!("couldn't find entry with original file name= {}", original_file_path)
             }
         }
-    }
-
-    pub fn move_to_random_index(&mut self) {
-        self.navigator.move_to_random_index()
-    }
-
-    pub fn move_to_first(&mut self) {
-        self.navigator.move_to_index(0)
-    }
-
-    pub fn move_to_last(&mut self) {
-        self.navigator.move_to_index(self.last())
-    }
-
-    pub fn move_next_page(&mut self) {
-        self.navigator.move_next_page()
-    }
-
-    pub fn move_towards(&mut self, direction: Direction) {
-        self.navigator.move_towards(direction)
-    }
-
-    pub fn move_prev_page(&mut self) {
-        self.navigator.move_prev_page()
     }
 }
 
