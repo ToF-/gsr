@@ -5,28 +5,36 @@ use crate::editor::{Editor, InputKind};
 use crate::picture_entry::PictureEntry;
 use crate::path::file_path_directory;
 
+pub fn directory_display(catalog: &Catalog, file_path: &str) -> String {
+    if catalog.args().unwrap().covers {
+        file_path_directory(file_path).to_string()
+    } else {
+        String::from("")
+    }
+}
+
+pub fn editor_input_display(editor: &Editor) -> String {
+    match editor.input_kind() {
+            Some(InputKind::AddTagInput) => format!("add tag:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::DeleteTagInput) => format!("delete tag:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::SearchInput) => format!("search:{}", editor.input()),
+            Some(InputKind::SearchLabelInput) => format!("label search:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::LabelInput) => format!("label:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::RelabelInput) => format!("relabel:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::IndexInput) => format!("index:{}", editor.input()),
+            None => String::from(""),
+    }
+}
+
 pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
     let entry_display = &<PictureEntry as Clone>::clone(catalog.current_entry().unwrap()).title_display();
     let file_path = &<PictureEntry as Clone>::clone(catalog.current_entry().unwrap()).file_path;
     let display= format!(
-        "{}{} S:[{}] {} ordered by {} {}{}/{}{}  {} {} {} {}", 
-        if catalog.db_centric() {
-            String::from("◯")
-        } else {
-            String::from("▻")
-        },
-        if catalog.args().unwrap().covers {
-            file_path_directory(file_path)
-        } else {
-            String::from("")
-        },
+        "{} S:{} {} ordered by {} {}{}/{}{}  {} {} {} {}", 
+        directory_display(catalog, file_path),
         catalog.selected_count(),
         if catalog.navigator().start_index().is_some() { "…" } else { "" },
-        if let Some(order) = catalog.order().clone() {
-            order.to_string()
-        } else {
-            "??".to_string()
-        },
+        if let Some(order) = catalog.order().clone() { order.to_string() } else { "??".to_string() },
         if catalog.navigator().page_limit_on() { "[" } else { "" },
         catalog.index().unwrap(),
         catalog.last(),
@@ -34,19 +42,7 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
         entry_display,
         if catalog.expand_on() { "□" } else { "" },
         if catalog.full_size_on() { "░" } else { "" },
-        if let Some(kind) = editor.input_kind() {
-            match kind {
-                InputKind::AddTagInput => format!("add tag:{} {}", editor.input(), editor.current_candidates()),
-                InputKind::DeleteTagInput => format!("delete tag:{} {}", editor.input(), editor.current_candidates()),
-                InputKind::SearchInput => format!("search:{}", editor.input()),
-                InputKind::SearchLabelInput => format!("label search:{} {}", editor.input(), editor.current_candidates()),
-                InputKind::LabelInput => format!("label:{} {}", editor.input(), editor.current_candidates()),
-                InputKind::RelabelInput => format!("relabel:{} {}", editor.input(), editor.current_candidates()),
-                InputKind::IndexInput => format!("index:{}", editor.input()),
-            }
-        } else {
-            String::from("")
-        }
+        editor_input_display(editor)
     );
     display
 }

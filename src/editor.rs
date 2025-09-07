@@ -9,9 +9,9 @@ pub enum InputKind {
 pub struct Editor {
     input: Option<String>,
     input_kind: Option<InputKind>,
-    tabbed: bool,
+    completion: bool,
     pub tags: HashSet<String>,
-    current_candidates: Vec<String>,
+    candidates: Vec<String>,
 }
 
 impl Editor {
@@ -20,9 +20,9 @@ impl Editor {
         Editor {
             input: None,
             input_kind: None,
-            tabbed: false,
+            completion: false,
             tags: HashSet::new(),
-            current_candidates: vec![],
+            candidates: vec![],
         }
     }
 
@@ -38,7 +38,7 @@ impl Editor {
         self.tags = tags;
         self.input_kind = Some(kind);
         self.input = Some(String::from(""));
-        self.tabbed = false
+        self.completion = false
     }
 
     pub fn editing(&self) -> bool {
@@ -47,12 +47,12 @@ impl Editor {
 
     pub fn cancel(&mut self) {
         self.input_kind = None;
-        self.tabbed = false
+        self.completion = false
     }
 
-    pub fn current_candidates(&self) -> String {
-        if self.tabbed {
-            self.current_candidates.join(",")
+    pub fn candidates(&self) -> String {
+        if self.completion {
+            self.candidates.join(",")
         } else {
             String::from("")
         }
@@ -89,7 +89,7 @@ impl Editor {
                 },
             }
         }
-        self.tabbed = false;
+        self.completion = false;
         self.input_kind = None;
         self.input = None
     }
@@ -99,7 +99,7 @@ impl Editor {
             let mut t = s.clone();
             t.pop();
             t });
-        self.tabbed = false;
+        self.completion = false;
     }
 
     pub fn append(&mut self, ch: char) {
@@ -127,7 +127,7 @@ impl Editor {
                     t.push(ch);
                     t
                 });
-                self.tabbed = false;
+                self.completion = false;
             }
         }
     }
@@ -139,17 +139,17 @@ impl Editor {
                     Some(prefix) => {
                         let candidates = candidates(prefix, &self.tags);
                         match candidates.len() {
-                            0 => { self.current_candidates = vec![] } ,
+                            0 => { self.candidates = vec![] } ,
                             1 => {
                                 self.input = Some(candidates[0].clone());
-                                self.current_candidates = vec![];
+                                self.candidates = vec![];
                             },
-                            _ => { self.current_candidates = candidates.clone() },
+                            _ => { self.candidates = candidates.clone() },
                         }
                     },
                     None => {},
                 };
-                self.tabbed = true
+                self.completion = true
             }
         }
     }

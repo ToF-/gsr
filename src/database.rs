@@ -463,9 +463,9 @@ impl Database {
         }
     }
 
-pub fn load_all_tags(&self) -> Result<Vec<String>> {
-    let mut result: Vec<String> = vec![];
-    let query = "SELECT DISTINCT Label FROM Tag;";
+pub fn load_all_tags(&self) -> Result<HashSet<String>> {
+    let mut result: HashSet<String> = HashSet::new();
+    let query = "SELECT DISTINCT Label FROM Tag UNION SELECT DISTINCT Label FROM Picture;";
     match self.connection.prepare(query) {
         Ok(mut statement) => {
             match statement.query_map([], |row| {
@@ -475,7 +475,7 @@ pub fn load_all_tags(&self) -> Result<Vec<String>> {
                     for row in rows {
                         match row {
                             Ok(label) => {
-                                result.push(label);
+                                let _ = result.insert(label);
                             },
                             Err(err) => return Err(anyhow!(err)),
                         }

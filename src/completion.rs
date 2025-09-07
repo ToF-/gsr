@@ -1,7 +1,11 @@
 use std::collections::HashSet;
 
 pub fn candidates(prefix: &String, labels: &HashSet<String>) -> Vec<String> {
-    let mut result: Vec<String> = labels.into_iter().filter(|label| label.starts_with(prefix)).map(|s| s.clone()).collect::<Vec<String>>();
+    let mut result: Vec<String> = labels
+        .into_iter()
+        .filter(|label| label.starts_with(prefix))
+        .map(|s| s.clone())
+        .collect::<Vec<String>>();
     result.sort();
     result
 
