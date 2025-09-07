@@ -589,6 +589,24 @@ pub fn insert_picture_entry(&self, file_path: &str) -> Result<PictureEntry> {
     }
 }
 
+pub fn insert_new_picture_with_file_path(&self, picture_entry: &PictureEntry, file_path: &str) -> Result<()> {
+    let new_entry = make_picture_entry(
+        file_path.to_string(),
+        picture_entry.file_size,
+        picture_entry.colors,
+        picture_entry.modified_time,
+        picture_entry.rank,
+        Some(picture_entry.palette),
+        picture_entry.label(),
+        false,
+        false,
+        false,
+        picture_entry.tags.clone()
+    );
+    self.insert_new_picture_entry(new_entry)
+}
+
+
 pub fn retrieve_or_insert_picture_entry(&self, file_path: &str) -> Result<Option<PictureEntry>> {
     match self.connection.prepare(" SELECT File_Path, File_Size, Colors, Modified_Time, Rank, Palette, Label, Selected, Deleted, Cover, rowid FROM Picture WHERE File_Path = ?1;") {
         Ok(mut statement) => match statement.query([file_path]) {

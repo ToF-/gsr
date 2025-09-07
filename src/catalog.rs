@@ -1,3 +1,4 @@
+use std::path::{Path, PathBuf};
 use anyhow::{anyhow, Result};
 use crate::args::Args;
 use crate::comment::Comment;
@@ -158,18 +159,51 @@ impl Catalog {
         update_result
     }
 
+    pub fn delete_picture_entry(&self, picture_entry: &PictureEntry) -> Result<()> {
+        println!("deleting {}", picture_entry.original_file_path());
+        self.database.delete_picture(&picture_entry.original_file_path())
+            .and_then(|_| {
+                delete_file(&picture_entry.original_file_path())
+                    .and_then(|_| {
+                        delete_file(&picture_entry.thumbnail_file_path())
+                    })
+            })
+    }
+
     pub fn delete_files(&self) -> Result<()> {
         for entry in self.picture_entries.clone().iter()
             .filter(|entry| entry.deleted) {
-                    println!("deleting {}", entry.original_file_path());
-                    self.database.delete_picture(&entry.original_file_path())
-                        .and_then(|_| {
-                            delete_file(&entry.original_file_path())
-                                .and_then(|_| {
-                                    delete_file(&entry.thumbnail_file_path())
-                                })
-                        });
+                match self.delete_picture_entry(entry) {
+                    Ok(()) => {},
+                    Err(err) => {
+                        eprintln!("{}", err)
+                    },
+                }
             }
+        Ok(())
+    }
+
+    fn redirect_picture_entry_files(&self, picture_entry: &PictureEntry, path: &Path) -> Result<()> {
+        let mut new_picture_file_path_buf:PathBuf = PathBuf::from(path);
+        let mut new_thumb_file_path_buf:PathBuf = PathBuf::from(path);
+        new_picture_file_path_buf.push(&file_name(&picture_entry.original_file_path()));
+        new_thumb_file_path_buf.push(&file_name(&picture_entry.thumbnail_file_path()));
+        let new_picture_file_path: String = new_picture_file_path_buf.display().to_string();
+        let new_thumb_file_path: String = new_thumb_file_path_buf.display().to_string();
+        if  new_picture_file_path != picture_entry.original_file_path() {
+            println!("redirecting {} to {}", picture_entry.original_file_path(), new_picture_file_path);
+            println!("redirecting {} to {}", picture_entry.thumbnail_file_path(), new_thumb_file_path);
+            let result = self.database.insert_new_picture_with_file_path(picture_entry, &new_picture_file_path)
+                .and_then(|_| copy_file_to_target_directory(&picture_entry.original_file_path(), &path.display().to_string()))
+                .and_then(|_| copy_file_to_target_directory(&picture_entry.thumbnail_file_path(),&path.display().to_string()))
+                .and_then(|_| self.delete_picture_entry(picture_entry));
+            match result {
+                Ok(_) => { },
+                Err(err) => {
+                    eprintln!("{}", err)
+                }
+            }
+        };
         Ok(())
     }
 
@@ -178,47 +212,14 @@ impl Catalog {
             Some(target) => {
                 for entry in self.picture_entries.clone().iter()
                     .filter(|entry| entry.selected && !entry.deleted && entry.label().is_some()) {
-                        let new_directory: String = target.clone() + "/" + &entry.label().unwrap();
+                        let new_directory: String = if target.clone().ends_with("/") {
+                            target.clone() + &entry.label().unwrap()
+                        } else {
+                            target.clone() + "/" + &entry.label().unwrap()
+                        };
                         match check_path(&new_directory, true) {
                             Ok(path) => {
-                                let new_file_path = new_directory.clone() + "/" + &file_name(&entry.original_file_path());
-                                let new_thumb_file_path = new_directory.clone() + "/" + &file_name(&entry.thumbnail_file_path());
-                                println!("redirecting {} to {}", entry.original_file_path(), new_file_path);
-                                println!("redirecting {} to {}", entry.thumbnail_file_path(), new_thumb_file_path);
-                                let picture_entry = entry.clone();
-                                let db_result = self.database.delete_picture(&entry.original_file_path())
-                                    .and_then(|_| {
-                                        let new_entry = make_picture_entry(
-                                            new_file_path.clone(),
-                                            picture_entry.file_size,
-                                            picture_entry.colors,
-                                            picture_entry.modified_time,
-                                            picture_entry.rank,
-                                            Some(picture_entry.palette),
-                                            picture_entry.label(),
-                                            false,
-                                            false,
-                                            false,
-                                            picture_entry.tags.clone()
-                                        );
-                                        self.database.insert_new_picture_entry(new_entry)
-                                    });
-                                match db_result {
-                                    Ok(_) => { },
-                                    Err(err) => {
-                                        eprintln!("{}", err)
-                                    },
-                                };
-                                let fs_result = copy_file_to_target_directory(&entry.original_file_path(), &new_directory)
-                                    .and_then(|_| {
-                                        copy_file_to_target_directory(&entry.thumbnail_file_path(), &new_directory)
-                                    });
-                                match fs_result {
-                                    Ok(_) => { },
-                                    Err(err) => {
-                                        eprintln!("{}", err)
-                                    }
-                                }
+                                self.redirect_picture_entry_files(entry, &path);
                             }
                             Err(err) => { 
                                 eprintln!("{}", err)
