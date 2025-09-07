@@ -10,7 +10,7 @@ const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";
 const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 
 #[derive(Parser, Clone, Debug)]
-#[command(infer_long_args = true, infer_subcommands = true)]
+#[command(version, infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
 pub struct Args {
     /// add picture data from the pictures in TARGET_DIR to the database
