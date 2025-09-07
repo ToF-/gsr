@@ -27,22 +27,22 @@ pub type Coords = (usize, usize);
 
 #[derive(Debug)]
 pub struct Catalog {
-    navigator: Navigator,
-    db_centric: bool,
-    picture_entries: Vec<PictureEntry>,
-    copied_label: Option<String>,
-    last_comment: Option<Comment>,
-    palette_on: bool,
-    full_size_on: bool,
-    expand_on: bool,
-    order: Option<Order>,
-    selected_count: usize,
-    previous_order: Option<Order>,
     args: Option<Args>,
-    discarded: Vec<usize>,
-    database: Database,
-    pub tags: HashSet<String>,
+    copied_label: Option<String>,
     current_candidates: Vec<String>,
+    database: Database,
+    db_centric: bool,
+    discarded: Vec<usize>,
+    expand_on: bool,
+    full_size_on: bool,
+    last_comment: Option<Comment>,
+    navigator: Navigator,
+    order: Option<Order>,
+    palette_on: bool,
+    picture_entries: Vec<PictureEntry>,
+    previous_order: Option<Order>,
+    selected_count: usize,
+    pub tags: HashSet<String>,
 }
 
 impl Catalog {

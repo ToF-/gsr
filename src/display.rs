@@ -36,12 +36,12 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
         if catalog.full_size_on() { "░" } else { "" },
         if let Some(kind) = editor.input_kind() {
             match kind {
-                InputKind::AddTagInput => format!("add tag:{} {}", editor.input(), catalog.current_candidates()),
-                InputKind::DeleteTagInput => format!("delete tag:{} {}", editor.input(), catalog.current_candidates()),
+                InputKind::AddTagInput => format!("add tag:{} {}", editor.input(), editor.current_candidates()),
+                InputKind::DeleteTagInput => format!("delete tag:{} {}", editor.input(), editor.current_candidates()),
                 InputKind::SearchInput => format!("search:{}", editor.input()),
-                InputKind::SearchLabelInput => format!("label search:{} {}", editor.input(), catalog.current_candidates()),
-                InputKind::LabelInput => format!("label:{} {}", editor.input(), catalog.current_candidates()),
-                InputKind::RelabelInput => format!("relabel:{} {}", editor.input(), catalog.current_candidates()),
+                InputKind::SearchLabelInput => format!("label search:{} {}", editor.input(), editor.current_candidates()),
+                InputKind::LabelInput => format!("label:{} {}", editor.input(), editor.current_candidates()),
+                InputKind::RelabelInput => format!("relabel:{} {}", editor.input(), editor.current_candidates()),
                 InputKind::IndexInput => format!("index:{}", editor.input()),
             }
         } else {
