@@ -131,17 +131,49 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
     let args = args.clone();
     let restriction = args.query.unwrap_or(String::from("true"));
     let pattern = args.pattern.clone().map_or(String::from(""), |s| String::from(" and File_Path like '%".to_owned() + &s  + "%';"));
+    let tag_select_set:HashSet<String> = match args.select {
+        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+        None => HashSet::new(),
+    };
+    let tag_include_set:HashSet<String> = match args.include {
+        Some(ref tag_list) =>  HashSet::from_iter(tag_list.iter().cloned()),
+        None => HashSet::new(),
+    };
     match database.select_pictures(&(restriction + &pattern)) {
         Ok(mut picture_entries) => {
-            for picture_entry in &mut picture_entries {
+            let mut result:PictureEntries = vec![];
+            for mut picture_entry in &mut picture_entries {
+                let file_path = picture_entry.file_path.clone();
                 match database.entry_tags(&picture_entry.file_path) {
-                    Ok(lags) => {
-                        picture_entry.tags = lags
+                    Ok(tags) => {
+                        picture_entry.tags = tags
                     },
                     Err(err) => return Err(anyhow!(err)),
+                    };
+                let entry_tags: HashSet<String>;
+                if tag_select_set.len() > 0 || tag_include_set.len() > 0 {
+                    match database.entry_tags(&file_path) {
+                        Ok(tags) => {
+                            entry_tags = HashSet::from_iter(tags.iter().cloned())
+                        },
+                        Err(err) => return Err(anyhow!(err)),
+                    }
+                } else {
+                    entry_tags = HashSet::new()
+                }
+                let matches_select = match tag_select_set.len() {
+                    0 => true,
+                    _ => entry_tags.intersection(&tag_select_set).count() > 0,
+                };
+                let matches_include = match tag_include_set.len() {
+                    0 => true,
+                    _ => tag_include_set.is_subset(&entry_tags) ,
+                };
+                if matches_select && matches_include {
+                    result.push(picture_entry.clone())
                 }
             };
-            Ok(picture_entries)
+            Ok(result)
         },
         Err(err) => return Err(anyhow!(err)),
     }
