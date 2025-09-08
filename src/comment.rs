@@ -19,7 +19,13 @@ pub enum Comment {
     /// Unmake the picture a cover for the directory
     Uncover,
     /// Mark the picture entry as selected.
-    Select,
+    ToggleSelect,
     /// Mark the picture entry as deleted.
-    Delete,
+    ToggleDelete,
+}
+
+impl std::fmt::Display for Comment {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }

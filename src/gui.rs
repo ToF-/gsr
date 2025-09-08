@@ -405,8 +405,8 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             gui.application_window.close()
                         },
                         Command::QuitWithConfirm => {
-                            catalog.redirect_files();
-                            catalog.delete_files();
+                            let _ = catalog.redirect_files();
+                            let _ = catalog.delete_files();
                             catalog.exit();
                             gui.application_window.close()
                         },

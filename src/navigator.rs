@@ -75,7 +75,6 @@ impl Navigator {
 
     pub fn move_to_index(&mut self, index: usize) {
         if index != self.index {
-            let old_page_index = self.page_index();
             self.index = index;
         }
     }
@@ -146,7 +145,7 @@ impl Navigator {
 
     pub fn start_set(&mut self) {
         match self.index() {
-            Some(index) => { self.start_index = Some(self.index) },
+            Some(index) => { self.start_index = Some(index) },
             None => {},
         }
     }
@@ -190,16 +189,6 @@ impl Navigator {
         Navigator {
             index: index,
             ..self.clone()
-        }
-    }
-    pub fn change_page_from_old(&self, old_page_index:usize) -> Self {
-        if self.page_index() != old_page_index {
-            Navigator {
-                page_changed: true,
-                ..self.clone()
-            }
-        } else {
-            self.clone()
         }
     }
 

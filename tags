@@ -72,7 +72,6 @@ cannot_move_beyond_length	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/
 cell_box_at	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^    pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {$/;"	f
 cells_per_row	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn cells_per_row(&self) -> usize {$/;"	f
 change_page	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn change_page(&mut self) {$/;"	f
-change_page_from_old	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn change_page_from_old(&self, old_page_index:usize) -> Self {$/;"	f
 check_database_and_files	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn check_database_and_files(directory: &str, database: &Database) -> Result<()> {$/;"	f
 check_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn check_file(source: &str) -> Result<PathBuf> {$/;"	f
 check_is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^    fn check_is_prefix_path() {$/;"	f
@@ -104,10 +103,8 @@ copy_picture_file_to_temp	/Users/christophethibaut/Coding/gsr/src/picture_entry.
 count_selected	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn count_selected(&mut self) {$/;"	f
 cover_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn cover_current_entry(&mut self) -> Result<()> {$/;"	f
 create_palette	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {$/;"	f
-current_candidates	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_candidates(&self) -> String {$/;"	f
 current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn current_entry(&self) -> Option<&PictureEntry> {$/;"	f
 database_operations	/Users/christophethibaut/Coding/gsr/src/main.rs	/^    fn database_operations(database: &mut Database, args: &Args) -> Result<()> {$/;"	f
-db_centric	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn db_centric(&self) -> bool {$/;"	f
 deduplicate_files	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn deduplicate_files(&mut self, target_dir: &str) -> Result<()> {$/;"	f
 default_extract_list_file	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn default_extract_list_file() -> Result<String> {$/;"	f
 default_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn default_shortcuts() -> Shortcuts {$/;"	f
@@ -142,11 +139,11 @@ export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn ex
 extract	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn extract(&self) {$/;"	f
 file_name	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_name(source: &str) -> String {$/;"	f
 file_path_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_path_directory(source: &str) -> String {$/;"	f
-file_path_directory_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_path_directory_directory(source: &str) -> String {$/;"	f
 file_path_in_directory_not_in_database	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_path_in_directory_not_in_database(directory: &str, database_file_paths: &Vec<String>) -> Result<Vec<String>> {$/;"	f
 file_paths_in_database_not_on_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_database_not_on_file_system(database_file_paths: &Vec<String>) -> Result<Vec<String>> {$/;"	f
 find_index_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_index_input_pattern(&mut self, pattern: &str) -> Option<usize> {$/;"	f
 find_index_label_search	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_index_label_search(&mut self, pattern: &str) -> Option<usize> {$/;"	f
+fmt	/Users/christophethibaut/Coding/gsr/src/comment.rs	/^    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {$/;"	f
 fmt	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {$/;"	f
 fmt	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {$/;"	f
 from	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn from(n: i64) -> Self {$/;"	f

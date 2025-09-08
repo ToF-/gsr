@@ -142,7 +142,7 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
     match database.select_pictures(&(restriction + &pattern)) {
         Ok(mut picture_entries) => {
             let mut result:PictureEntries = vec![];
-            for mut picture_entry in &mut picture_entries {
+            for picture_entry in &mut picture_entries {
                 let file_path = picture_entry.file_path.clone();
                 match database.entry_tags(&picture_entry.file_path) {
                     Ok(tags) => {

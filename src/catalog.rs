@@ -3,7 +3,6 @@ use anyhow::{anyhow, Result};
 use crate::args::Args;
 use crate::comment::Comment;
 use crate::database::Database;
-use crate::direction::Direction;
 use crate::display::title_display;
 use crate::editor::{Editor};
 use crate::loader::load_picture_entries_from_source;
@@ -12,8 +11,7 @@ use crate::order::Order;
 use crate::path::check_path;
 use crate::path::file_name;
 use crate::path::file_path_directory;
-use crate::path::file_path_directory_directory;
-use crate::picture_entry::{PictureEntries, PictureEntry, make_picture_entry};
+use crate::picture_entry::{PictureEntries, PictureEntry};
 use crate::picture_io::{append_to_extract_file, copy_file_to_target_directory, delete_file, check_or_create_thumbnail_file};
 use crate::rank::Rank;
 use rand::prelude::SliceRandom;
@@ -29,9 +27,7 @@ pub type Coords = (usize, usize);
 pub struct Catalog {
     args: Option<Args>,
     copied_label: Option<String>,
-    current_candidates: Vec<String>,
     database: Database,
-    db_centric: bool,
     discarded: Vec<usize>,
     expand_on: bool,
     full_size_on: bool,
@@ -52,7 +48,6 @@ impl Catalog {
     pub fn new() -> Self {
         Catalog {
             navigator: Navigator::new(),
-            db_centric: false,
             picture_entries : Vec::new(),
             copied_label: None,
             last_comment: None,
@@ -72,7 +67,6 @@ impl Catalog {
                 }
             },
             tags: HashSet::new(),
-            current_candidates: vec![],
         }
     }
 
@@ -219,7 +213,7 @@ impl Catalog {
                         };
                         match check_path(&new_directory, true) {
                             Ok(path) => {
-                                self.redirect_picture_entry_files(entry, &path);
+                                let _ = self.redirect_picture_entry_files(entry, &path);
                             }
                             Err(err) => { 
                                 eprintln!("{}", err)
@@ -250,10 +244,6 @@ impl Catalog {
     
     pub fn args(&self) -> Option<Args> {
         self.args.clone()
-    }
-
-    pub fn db_centric(&self) -> bool {
-        self.db_centric
     }
 
     pub fn selected_count(&self) -> usize {
@@ -319,10 +309,6 @@ impl Catalog {
 
     pub fn current_entry(&self) -> Option<&PictureEntry> {
         self.navigator.index().and_then(|index| { self.entry_at_index(index) } )
-    }
-
-    pub fn current_candidates(&self) -> String {
-        format!("{}", self.current_candidates.join(","))
     }
 
     pub fn find_index_input_pattern(&mut self, pattern: &str) -> Option<usize> {
@@ -521,7 +507,7 @@ impl Catalog {
                 new_picture_entry.selected = !new_picture_entry.selected;
                 match self.set_current_picture_entry(new_picture_entry) {
                     Ok(()) => {
-                        self.last_comment = Some(Comment::Select);
+                        self.last_comment = Some(Comment::ToggleSelect);
                         Ok(())
                     },
                     Err(err) => Err(anyhow!(err)),
@@ -537,7 +523,10 @@ impl Catalog {
                 let mut new_picture_entry = picture_entry.clone();
                 new_picture_entry.deleted = !new_picture_entry.deleted;
                 match self.set_current_picture_entry(new_picture_entry) {
-                    Ok(()) => Ok(()),
+                    Ok(()) => {
+                        self.last_comment = Some(Comment::ToggleDelete);
+                        Ok(())
+                    },
                     Err(err) => Err(anyhow!(err)),
                 }
             },
@@ -592,7 +581,7 @@ impl Catalog {
 
     pub fn start_set(&mut self) {
         self.navigator.start_set();
-        println!("start set:{}", self.navigator.start_index().unwrap())
+        println!("{}…", self.navigator.start_index().unwrap())
     }
 
     pub fn cancel_set(&mut self) {
@@ -700,8 +689,8 @@ impl Catalog {
             Some(Comment::Rank { rank }) => self.rank_current_entry(rank),
             Some(Comment::Cover) => self.cover_current_entry(),
             Some(Comment::Uncover) => self.uncover_current_entry(),
-            Some(Comment::Select) => self.toggle_select_current_entry(),
-            Some(Comment::Delete) => self.toggle_delete_current_entry(),
+            Some(Comment::ToggleSelect) => self.toggle_select_current_entry(),
+            Some(Comment::ToggleDelete) => self.toggle_delete_current_entry(),
         }
     }
 
@@ -753,11 +742,14 @@ impl Catalog {
     pub fn end_repeat_last_comment(&mut self) -> Result<()> {
         match self.navigator.index() {
             Some(index) => {
-                println!("end set: {}, last comment: {:?}", index, &self.last_comment);
                 match self.navigator.start_index() {
                     None => self.repeat_last_comment(),
                     Some(other) => {
                         let (start,end) = if other <= index { (other,index) } else { (index,other) };
+                        match &self.last_comment {
+                            None => {},
+                            Some(comment) => { println!("[{}…{}] {}", start, end, comment); },
+                        };
                         for i in start..end+1 {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
                             match &self.last_comment {
@@ -767,8 +759,8 @@ impl Catalog {
                                 Some(Comment::AddTag { label}) => entry.add_tag(&label),
                                 Some(Comment::DeleteTag { label}) => entry.delete_tag(&label),
                                 Some(Comment::Rank { rank }) => entry.set_rank(*rank),
-                                Some(Comment::Select) => { entry.selected = !entry.selected }
-                                Some(Comment::Delete) => { entry.deleted = !entry.deleted },
+                                Some(Comment::ToggleSelect) => { entry.selected = !entry.selected }
+                                Some(Comment::ToggleDelete) => { entry.deleted = !entry.deleted },
                                 Some(Comment::Cover) => { entry.cover = true },
                                 Some(Comment::Uncover) => { entry.cover = false },
                             };
