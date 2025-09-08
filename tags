@@ -193,7 +193,7 @@ last	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn last(&self)
 last	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn last(&self) -> usize {$/;"	f
 left_click_command_view_mode	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn left_click_command_view_mode(col: usize, row: usize, gui: &Gui, catalog: &mut Catalog) -> bool {$/;"	f
 length	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn length(&self) -> usize {$/;"	f
-load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_all_tags(&self) -> Result<HashSet<String>> {$/;"	f
+load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn load_all_tags(&self) -> Result<HashSet<String>> {$/;"	f
 load_directories	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {$/;"	f
 load_picture_entries_from_covers	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_covers(database: &mut Database) -> Result<PictureEntries> {$/;"	f
 load_picture_entries_from_db	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Result<PictureEntries> {$/;"	f
@@ -282,6 +282,7 @@ rusqlite_insert_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    
 rusqlite_insert_or_update_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<(),Error> {$/;"	f
 rusqlite_insert_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^fn rusqlite_insert_picture_entry(&self, picture_entry: PictureEntry) -> Result<usize,Error> {$/;"	f
 rusqlite_insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_insert_tag_label(&mut self, file_path: &str, label: &str) -> Result<(),Error> {$/;"	f
+rusqlite_load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_load_all_tags(&self) -> Result<HashSet<String>,Error> {$/;"	f
 rusqlite_select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_all_picture_file_paths(&self) -> Result<Vec<String>,Error> {$/;"	f
 rusqlite_select_cover_picture_entries	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_cover_picture_entries(&mut self) -> Result<PictureEntries, Error> {$/;"	f
 rusqlite_select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_pictures(&self, query: &str) -> Result<PictureEntries, Error> {$/;"	f

@@ -463,31 +463,37 @@ impl Database {
         }
     }
 
-pub fn load_all_tags(&self) -> Result<HashSet<String>> {
-    let mut result: HashSet<String> = HashSet::new();
-    let query = "SELECT DISTINCT Label FROM Tag UNION SELECT DISTINCT Label FROM Picture;";
-    match self.connection.prepare(query) {
-        Ok(mut statement) => {
-            match statement.query_map([], |row| {
-                Ok(row.get::<usize, String>(0).unwrap())
-            }) {
-                Ok(rows) => {
-                    for row in rows {
-                        match row {
-                            Ok(label) => {
-                                let _ = result.insert(label);
-                            },
-                            Err(err) => return Err(anyhow!(err)),
+    fn rusqlite_load_all_tags(&self) -> Result<HashSet<String>,Error> {
+        self.connection.prepare("SELECT DISTINCT Label FROM Tag UNION SELECT DISTINCT Label FROM Picture WHERE Label IS NOT NULL;")
+            .and_then(|mut statement| {
+                statement.query_map([], |row| {
+                    match row.get::<usize, String>(0) {
+                        Ok(s) => Ok(s),
+                        Err(err) => {
+                            eprintln!("{}", err);
+                            Ok(String::from(""))
                         }
+                    }
+                })
+                .and_then(|rows| {
+                    let mut result: HashSet<String> = HashSet::new();
+                    for row in rows {
+                        let label = row.unwrap();
+                        if label.len() > 0 {
+                            let _ = result.insert(label);
+                        };
                     };
                     Ok(result)
-                },
-                Err(err) => return Err(anyhow!(err)),
-            }
-        },
-        Err(err) => return Err(anyhow!(err)),
+                })
+            })
     }
-}
+
+    pub fn load_all_tags(&self) -> Result<HashSet<String>> {
+        match self.rusqlite_load_all_tags() {
+            Ok(result) => Ok(result),
+            Err(err) => Err(anyhow!(err)),
+        }
+    }
 
 pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {
     let mut dir_map: HashMap<String,usize> = HashMap::new();
