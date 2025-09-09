@@ -137,19 +137,15 @@ pub fn default_shortcuts() -> Shortcuts {
 }
 
 pub fn load_shortcuts() -> Result<Shortcuts> {
-    if let Ok(key_file_name) = &env::var(KEY_CMD_FILE_VAR) {
+    if let Ok(key_file_name) = &env::var(KEY_CMD_FILE_VAR) { 
         match read_to_string(key_file_name) {
             Ok(content) => match serde_json::from_str(&content) {
                     Err(err) => Err(anyhow!(err)),
                     Ok(shortcuts) => Ok(shortcuts)
             },
             Err(err) => {
-                println!("the key map file: {} can't be read. Create a default key map file in the current directory before leaving?", key_file_name);
-                let mut response = String::new();
-                let stdin = io::stdin();
-                stdin.read_line(&mut response).expect("can't read from stdin");
-                match response.chars().next() {
-                    Some(ch) if ch == 'y' || ch == 'Y' => {
+                match prompt_yes_no(&format!("the key map file: {} can't be read. Create a default key map file in the current directory before leaving?", key_file_name)) {
+                    Ok(Some('y')) | Ok(Some('Y')) => {
                         let shortcuts = default_shortcuts();
                         match export_shortcuts(&shortcuts) {
                             Ok(()) => { 
@@ -159,14 +155,23 @@ pub fn load_shortcuts() -> Result<Shortcuts> {
                             Err(err) => Err(anyhow!(err)),
                         }
                     },
-                    _ => Err(anyhow!(err)),
+                    Ok(_) => Err(anyhow!("variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json")),
+                    Err(err) => Err(anyhow!(err)),
                 }
-            },
+            }
         }
-    }
-    else {
+    } else {
         Err(anyhow!("variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json"))
     }
+}
+
+ pub fn prompt_yes_no(message: &str) -> Result<Option<char>> {
+     let mut response = String::new();
+     let stdin = io::stdin();
+     match stdin.read_line(&mut response) {
+         Ok(_) => Ok(response.chars().next()),
+         Err(err) => Err(anyhow!(err)),
+     }
 }
 
 pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {

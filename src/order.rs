@@ -5,7 +5,7 @@ pub enum Order {
     Colors, Date, Label, Name, Palette, Size, Value, Random,
 }
 
-pub fn order_from_string(s: &str) -> Option<Order> {
+pub fn from(s: &str) -> Option<Order> {
     match s {
             "c" => Some(Order::Colors),
             "d" => Some(Order::Date),

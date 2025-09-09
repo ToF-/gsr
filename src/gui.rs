@@ -10,7 +10,7 @@ use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::gdk::Key;
 use crate::direction::Direction;
 use crate::Args;
-use crate::order::order_from_string;
+use crate::order;
 use crate::Catalog;
 use crate::picture_entry::PictureEntry;
 use crate::picture_io::check_or_create_thumbnail_file;
@@ -319,7 +319,7 @@ fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {
         None => refresh = false,
         Some(key_name) => match key_name.as_str() {
             "Escape" => catalog.cancel_sort_selection(),
-            s => match order_from_string(s) {
+            s => match order::from(s) {
                 Some(order) => catalog.sort_by(order),
                 None => {},
             },
