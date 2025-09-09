@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Result};
-use std::io;
+use crate::prompt::prompt_yes_no;
 use std::fs::File;
 use std::path::Path;
 use std::collections::HashMap;
@@ -143,7 +143,7 @@ pub fn load_shortcuts() -> Result<Shortcuts> {
                     Err(err) => Err(anyhow!(err)),
                     Ok(shortcuts) => Ok(shortcuts)
             },
-            Err(err) => {
+            Err(_) => {
                 match prompt_yes_no(&format!("the key map file: {} can't be read. Create a default key map file in the current directory before leaving?", key_file_name)) {
                     Ok(Some('y')) | Ok(Some('Y')) => {
                         let shortcuts = default_shortcuts();
@@ -163,15 +163,6 @@ pub fn load_shortcuts() -> Result<Shortcuts> {
     } else {
         Err(anyhow!("variable GALLSHKEY is not defined. Maybe it should be defined to ~/.gallshkey.json"))
     }
-}
-
- pub fn prompt_yes_no(message: &str) -> Result<Option<char>> {
-     let mut response = String::new();
-     let stdin = io::stdin();
-     match stdin.read_line(&mut response) {
-         Ok(_) => Ok(response.chars().next()),
-         Err(err) => Err(anyhow!(err)),
-     }
 }
 
 pub fn export_shortcuts(shortcuts: &Shortcuts) -> Result<()> {

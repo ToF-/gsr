@@ -146,6 +146,7 @@ find_index_label_search	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^   
 fmt	/Users/christophethibaut/Coding/gsr/src/comment.rs	/^    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {$/;"	f
 fmt	/Users/christophethibaut/Coding/gsr/src/order.rs	/^    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {$/;"	f
 fmt	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {$/;"	f
+from	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub fn from(s: &str) -> Option<Order> {$/;"	f
 from	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn from(n: i64) -> Self {$/;"	f
 from_and_to_i64	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn from_and_to_i64() {$/;"	f
 from_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn from_file(file_path: &str) -> Result<Self> {$/;"	f
@@ -228,7 +229,6 @@ new	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^    pub fn new() -> Self
 new	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn new() -> Self {$/;"	f
 new_page_size	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn new_page_size(&self) -> Option<usize> {$/;"	f
 order	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn order(&self) -> Option<Order> {$/;"	f
-order_from_string	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub fn order_from_string(s: &str) -> Option<Order> {$/;"	f
 original_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_name(&self) -> String {$/;"	f
 original_file_name_is_the_file_path_without_folders	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn original_file_name_is_the_file_path_without_folders() {$/;"	f
 original_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn original_file_path(&self) -> String {$/;"	f
@@ -257,6 +257,7 @@ print_directories_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    p
 print_info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_info(&self, editor: &Editor) {$/;"	f
 print_labels_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_labels_all(&mut self) -> Result<()> {$/;"	f
 process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {$/;"	f
+prompt_yes_no	/Users/christophethibaut/Coding/gsr/src/prompt.rs	/^pub fn prompt_yes_no(message: &str) -> Result<Option<char>> {$/;"	f
 rank_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn rank_current_entry(&mut self, rank: Rank) -> Result<()> {$/;"	f
 read_file_info	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_file_info(file_path: &str) -> Result<(FileSize, SystemTime)> {$/;"	f
 read_image_data	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_image_data(file_path: &str) -> Result<ImageData> {$/;"	f

@@ -24,7 +24,7 @@ pub fn check_database_and_files(directory: &str, database: &Database) -> Result<
                 },
                 Err(err) => return Err(anyhow!(err)),
             };
-            match file_path_in_directory_not_in_database(directory, &database_file_paths) {
+            match file_paths_in_directory_not_in_database(directory, &database_file_paths) {
                 Ok(file_system_file_paths) => {
                     if file_system_file_paths.len() > 0 {
                         println!("the following picture files are not in the database:");
@@ -41,7 +41,7 @@ pub fn check_database_and_files(directory: &str, database: &Database) -> Result<
     }
 }
 
-pub fn file_paths_in_database_not_on_file_system(database_file_paths: &Vec<String>) -> Result<Vec<String>> {
+pub fn file_paths_in_database_not_on_file_system(database_file_paths: &HashSet<String>) -> Result<Vec<String>> {
     let mut result = vec![];
     for file_path in database_file_paths {
         let path = PathBuf::from(file_path);
@@ -52,7 +52,7 @@ pub fn file_paths_in_database_not_on_file_system(database_file_paths: &Vec<Strin
     Ok(result)
 }
 
-pub fn file_path_in_directory_not_in_database(directory: &str, database_file_paths: &Vec<String>) -> Result<Vec<String>> {
+pub fn file_paths_in_directory_not_in_database(directory: &str, database_file_paths: &HashSet<String>) -> Result<HashSet<String>> {
     let mut database_set: HashSet<String> = HashSet::new();
     for file_path in database_file_paths {
         let _ = database_set.insert(file_path.clone());
@@ -66,12 +66,8 @@ pub fn file_path_in_directory_not_in_database(directory: &str, database_file_pat
         },
         Err(err) => return Err(anyhow!(err))
     };
-    let difference = file_system_set.difference(&database_set);
-    let mut result: Vec<String> = vec![];
-    for file_path in difference.collect::<Vec<_>>().iter() {
-        result.push(file_path.to_string())
-    }
-    Ok(result)
+    let difference: HashSet<_> = file_system_set.difference(&database_set).map(|s| s.to_string()).collect();
+    Ok(difference)
 }
 
 pub fn load_single_picture_entry(database: &Database, file_path: &str) -> Result<PictureEntries> {

@@ -1,20 +1,20 @@
-use crate::path::file_name;
-use std::path::{Path,PathBuf};
-use crate::path::get_picture_file_paths;
-use rusqlite::{Row, Error};
-use crate::path::{is_prefix_path, standard_directory,file_path_directory};
-use std::collections::HashSet;
-use std::collections::HashMap;
-use crate::picture_entry::make_picture_entry;
-use std::io;
-use std::time::Duration;
-use crate::picture_entry::{PictureEntry, PictureEntries};
-use crate::palette::{palette_to_blob,blob_to_palette};
-use rusqlite::{params, Connection};
-use std::time::UNIX_EPOCH;
 use anyhow::{anyhow, Result};
-use std::env;
+use crate::palette::{palette_to_blob,blob_to_palette};
+use crate::path::file_name;
+use crate::path::get_picture_file_paths;
+use crate::path::{is_prefix_path, standard_directory,file_path_directory};
+use crate::picture_entry::make_picture_entry;
+use crate::picture_entry::{PictureEntry, PictureEntries};
+use crate::prompt::prompt_yes_no;
 use crate::rank::Rank;
+use rusqlite::{Row, Error};
+use rusqlite::{params, Connection};
+use std::collections::HashMap;
+use std::collections::HashSet;
+use std::env;
+use std::path::{Path,PathBuf};
+use std::time::Duration;
+use std::time::UNIX_EPOCH;
 
 const DATABASE_CONNECTION: &str = "GALLSHDB";
 
@@ -302,21 +302,21 @@ impl Database {
                 HashSet::new(),))
     }
 
-    fn rusqlite_select_all_picture_file_paths(&self) -> Result<Vec<String>,Error> {
+    fn rusqlite_select_all_picture_file_paths(&self) -> Result<HashSet<String>,Error> {
         self.connection.prepare("SELECT File_Path FROM Picture;")
             .and_then(|mut statement| { statement.query([])
                 .and_then(|mut rows| {
-                    let mut result:Vec<String> = vec![];
+                    let mut result:HashSet<String> = HashSet::new();
                     while let Some(row) = rows.next()? {
                         let file_path:String = row.get(0)?;
-                        result.push(file_path.clone())
+                        let _ = result.insert(file_path.clone());
                     };
                     Ok(result)
                 })
             })
     }
 
-    pub fn select_all_picture_file_paths(&self) -> Result<Vec<String>> {
+    pub fn select_all_picture_file_paths(&self) -> Result<HashSet<String>> {
         match self.rusqlite_select_all_picture_file_paths() {
             Ok(result) => Ok(result),
             Err(err) => Err(anyhow!(err)),
@@ -412,52 +412,33 @@ impl Database {
     pub fn insert_difference_from_directory(&mut self, directory: &str, in_std_dir:bool) -> Result<PictureEntries> {
         let path = Path::new(directory);
         if path.has_root() {
-            match get_picture_file_paths(directory) {
-                Ok(file_paths) => {
+            get_picture_file_paths(directory)
+                .and_then(|file_paths| {
                     let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
-                    let mut database_set: HashSet<String> = HashSet::new();
-                    let query = "SELECT file_path from Picture;";
-                    match self.connection.prepare(query) {
-                        Ok(mut statement) => match statement.query_map([], |row| Ok(row.get(0).unwrap())) {
-                            Ok(rows) => {
-                                for row in rows {
-                                    match row {
-                                        Ok(file_path) => {
-                                            let _ = database_set.insert(file_path);
-                                        },
-                                        Err(err) => return Err(anyhow!(err)),
-                                    }
-                                };
-                                let difference = directory_set.difference(&database_set).filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), &s));
-                                if difference.clone().count() > 0 {
-                                    println!("pictures in this selection that are not in the database:");
-                                    for x in difference.clone() {
-                                        println!("{x}");
-                                    }
-                                    println!("insert image data for these {} pictures in the database ?", difference.clone().count());
-                                    let mut response = String::new();
-                                    let stdin = io::stdin();
-                                    stdin.read_line(&mut response).expect("can't read from stdin");
-                                    match response.chars().next() {
-                                        Some(ch) if ch == 'y' || ch == 'Y' => {
-                                            match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
-                                                Ok(picture_entries) => Ok(picture_entries),
-                                                Err(err) => return Err(anyhow!(err)),
-                                            }
-                                        },
-                                        Some(_)| None => Ok(vec![]),
-                                    }
-                                } else {
-                                    Ok(vec![])
+                    self.select_all_picture_file_paths()
+                        .and_then(|mut database_set| {
+                            let difference = directory_set.difference(&database_set)
+                                .filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), &s));
+                            if difference.clone().count() > 0 {
+                                println!("pictures in this selection that are not in the database:");
+                                for x in difference.clone() {
+                                    println!("{x}");
                                 }
-                            },
-                            Err(err) => return Err(anyhow!(err)),
-                        },
-                        Err(err) => return Err(anyhow!(err)),
-                    }
-                },
-                Err(err) => Err(anyhow!(err)),
-            }
+                                match prompt_yes_no(&format!("insert image data for these {} pictures in the database ?", difference.clone().count())) {
+                                    Ok(Some('y')) | Ok(Some('Y')) => {
+                                        match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
+                                            Ok(picture_entries) => Ok(picture_entries),
+                                            Err(err) => return Err(anyhow!(err)),
+                                        }
+                                    },
+                                    Ok(_) => Ok(vec![]),
+                                    Err(err) => Err(anyhow!(err)),
+                                }
+                            } else {
+                                Ok(vec![])
+                            }
+                        })
+                })
         } else {
             Err(anyhow!(format!("the path {} is relative and cannot be used as a picture file path", path.display())))
         }

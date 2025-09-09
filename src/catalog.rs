@@ -622,10 +622,15 @@ impl Catalog {
     pub fn apply_label_all(&mut self, label:&str) -> Result<()> {
         for i in 0..self.picture_entries.len() {
             self.navigator = self.navigator.set_index(i);
-            self.last_comment = Some(Comment::Label { label: label.to_string() });
-            match self.label_current_entry(label) {
-                Ok(()) => {},
-                Err(err) => return Err(err),
+            match self.current_entry() {
+                Some(entry) => match entry.label() {
+                        Some(label) => {},
+                        None => match self.label_current_entry(label) {
+                            Ok(()) => {},
+                            Err(err) => return Err(err),
+                        }
+                    },
+                None => {},
             }
         }
         Ok(())

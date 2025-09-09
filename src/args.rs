@@ -75,8 +75,8 @@ pub struct Args {
     #[arg(long)]
     pub info: bool,
 
-    /// label all pictures in the set
-    #[arg(short, long)]
+    /// label all unlabeled pictures in the set with LABEL
+    #[arg(short, long, value_name="LABEL")]
     pub label: Option<String>,
 
     /// move selected files to TARGET_DIR
