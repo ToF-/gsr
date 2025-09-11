@@ -42,7 +42,7 @@ Rank	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^pub enum Rank {$/;"	g
 Shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub type Shortcuts = HashMap<String, Command>;$/;"	T
 THUMB_SUFFIX	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const THUMB_SUFFIX: &str = "THUMB";$/;"	c
 TMP_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub const TMP_ENV_VAR: &str = "GALLSHTMP";$/;"	c
-VALID_EXTENSIONS	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const VALID_EXTENSIONS: [&'static str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];$/;"	c
+VALID_EXTENSIONS	/Users/christophethibaut/Coding/gsr/src/path.rs	/^const VALID_EXTENSIONS: [&str; 6] = ["jpg", "jpeg", "png", "JPG", "JPEG", "PNG"];$/;"	c
 WIDTH_ENV_VAR	/Users/christophethibaut/Coding/gsr/src/args.rs	/^const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";$/;"	c
 add_picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn add_picture_entries(&mut self, entries: &Vec<PictureEntry>) {$/;"	f
 add_tag	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn add_tag(&mut self, tag: &str) {$/;"	f
@@ -202,7 +202,7 @@ load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load
 load_single_picture_entry	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_single_picture_entry(database: &Database, file_path: &str) -> Result<PictureEntries> {$/;"	f
 load_single_picture_entry_from_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_single_picture_entry_from_file_system(file_path: &str) -> Result<PictureEntries> {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
-make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, cover: bool, tags: HashSet<String>) -> PictureEntry {$/;"	f
+make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool, tags: HashSet<String>) -> PictureEntry {$/;"	f
 make_picture_entry_from_file_and_image_data_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn make_picture_entry_from_file_and_image_data_file() {$/;"	f
 make_picture_entry_from_file_create_image_data_file_if_need_be	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn make_picture_entry_from_file_create_image_data_file_if_need_be() {$/;"	f
 move_next_page	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn move_next_page(&mut self) {$/;"	f

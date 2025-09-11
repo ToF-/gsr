@@ -1,126 +1,105 @@
     Checking gsr v1.1.0 (/Users/christophethibaut/Coding/gsr)
-warning: this function has too many arguments (11/7)
-  --> src/picture_entry.rs:30:1
-   |
-30 | pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, cover: bool, tags: HashSet<String>) -> PictureEntry {
-   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-   |
-   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#too_many_arguments
-   = note: `#[warn(clippy::too_many_arguments)]` on by default
-
-warning: match can be simplified with `.unwrap_or_default()`
-  --> src/picture_entry.rs:37:18
-   |
-37 |           palette: match palette_option {
-   |  __________________^
-38 | |             Some(palette) => palette,
-39 | |             None => [0;9],
-40 | |         },
-   | |_________^ help: replace it with: `palette_option.unwrap_or_default()`
-   |
-   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_unwrap_or_default
-   = note: `#[warn(clippy::manual_unwrap_or_default)]` on by default
-
 warning: the borrowed expression implements the required traits
-  --> src/picture_entry.rs:97:37
+  --> src/picture_entry.rs:87:37
    |
-97 |         if !self.file_path.contains(&THUMB_SUFFIX) {
+87 |         if !self.file_path.contains(&THUMB_SUFFIX) {
    |                                     ^^^^^^^^^^^^^ help: change this to: `THUMB_SUFFIX`
    |
    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrows_for_generic_args
    = note: `#[warn(clippy::needless_borrows_for_generic_args)]` on by default
 
 warning: this expression creates a reference which is immediately dereferenced by the compiler
-   --> src/picture_entry.rs:106:25
-    |
-106 |                 None => &file_stem,
-    |                         ^^^^^^^^^^ help: change this to: `file_stem`
-    |
-    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
-    = note: `#[warn(clippy::needless_borrow)]` on by default
+  --> src/picture_entry.rs:96:25
+   |
+96 |                 None => &file_stem,
+   |                         ^^^^^^^^^^ help: change this to: `file_stem`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+   = note: `#[warn(clippy::needless_borrow)]` on by default
 
 warning: the borrowed expression implements the required traits
-   --> src/picture_entry.rs:115:36
+   --> src/picture_entry.rs:105:36
     |
-115 |         if self.file_path.contains(&THUMB_SUFFIX) {
+105 |         if self.file_path.contains(&THUMB_SUFFIX) {
     |                                    ^^^^^^^^^^^^^ help: change this to: `THUMB_SUFFIX`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrows_for_generic_args
 
 warning: length comparison to zero
-   --> src/picture_entry.rs:159:12
+   --> src/picture_entry.rs:149:12
     |
-159 |         if self.label.len() > 0 {
+149 |         if self.label.len() > 0 {
     |            ^^^^^^^^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!self.label.is_empty()`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
     = note: `#[warn(clippy::len_zero)]` on by default
 
 warning: length comparison to zero
-   --> src/picture_entry.rs:180:12
+   --> src/picture_entry.rs:170:12
     |
-180 |         if tag.len() > 0 {
+170 |         if tag.len() > 0 {
     |            ^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!tag.is_empty()`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
 
 warning: using `clone` on type `Rank` which implements the `Copy` trait
-   --> src/picture_entry.rs:202:20
+   --> src/picture_entry.rs:192:20
     |
-202 |         let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
+192 |         let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
     |                    ^^^^^^^^^^^^^^^^^ help: try removing the `clone` call: `self.rank`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#clone_on_copy
     = note: `#[warn(clippy::clone_on_copy)]` on by default
 
 warning: using `clone` on type `Rank` which implements the `Copy` trait
-   --> src/picture_entry.rs:202:54
+   --> src/picture_entry.rs:192:54
     |
-202 |         let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
+192 |         let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
     |                                                      ^^^^^^^^^^^^^^^^^^ help: try removing the `clone` call: `other.rank`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#clone_on_copy
 
 warning: using `Result.and_then(|x| Ok(y))`, which is more succinctly expressed as `map(|x| y)`
-   --> src/picture_entry.rs:225:25
+   --> src/picture_entry.rs:215:25
     |
-225 | /                         copy_file_to_target_directory(&self.image_data_file_path(), target_dir)
-226 | |                             .and_then(|r3| {
-227 | |                                 Ok(r1+r2+r3)
-228 | |                             })
+215 | /                         copy_file_to_target_directory(&self.image_data_file_path(), target_dir)
+216 | |                             .and_then(|r3| {
+217 | |                                 Ok(r1+r2+r3)
+218 | |                             })
     | |______________________________^ help: try: `copy_file_to_target_directory(&self.image_data_file_path(), target_dir).map(|r3| r1+r2+r3)`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#bind_instead_of_map
     = note: `#[warn(clippy::bind_instead_of_map)]` on by default
 
 warning: length comparison to zero
-   --> src/picture_entry.rs:242:16
+   --> src/picture_entry.rs:232:16
     |
-242 |             if self.label.len() > 0 {
+232 |             if self.label.len() > 0 {
     |                ^^^^^^^^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!self.label.is_empty()`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
 
 warning: useless use of `format!`
-   --> src/picture_entry.rs:243:17
+   --> src/picture_entry.rs:233:17
     |
-243 |                 format!("{}", self.label)
+233 |                 format!("{}", self.label)
     |                 ^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider using `.to_string()`: `self.label.to_string()`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#useless_format
     = note: `#[warn(clippy::useless_format)]` on by default
 
 warning: if let can be simplified with `.unwrap_or_default()`
-   --> src/picture_entry.rs:265:13
+   --> src/picture_entry.rs:255:13
     |
-265 | /             if let Some(s) = self.label() {
-266 | |                 s
-267 | |             } else {
-268 | |                 String::from("")
-269 | |             },
+255 | /             if let Some(s) = self.label() {
+256 | |                 s
+257 | |             } else {
+258 | |                 String::from("")
+259 | |             },
     | |_____________^ help: replace it with: `self.label().unwrap_or_default()`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_unwrap_or_default
+    = note: `#[warn(clippy::manual_unwrap_or_default)]` on by default
 
 warning: an implementation of `From` is preferred since it gives you `Into<_>` for free where the reverse isn't true
   --> src/rank.rs:21:1
@@ -226,5 +205,5 @@ warning: this expression creates a reference which is immediately dereferenced b
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
 
-warning: `gsr` (bin "gsr") generated 22 warnings (run `cargo clippy --fix --bin "gsr"` to apply 21 suggestions)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.71s
+warning: `gsr` (bin "gsr") generated 20 warnings (run `cargo clippy --fix --bin "gsr"` to apply 20 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.84s

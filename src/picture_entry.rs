@@ -61,10 +61,8 @@ impl PictureEntry {
                 match read_or_create_image_data(file_path) {
                     Ok(image_data) => Ok(make_picture_entry(file_path.to_string(),
                             file_size,
-                            image_data.colors,
                             modified_time,
                             image_data,
-                            false,
                             false,
                             HashSet::new())),
                     Err(err) => Err(anyhow!(err)),
