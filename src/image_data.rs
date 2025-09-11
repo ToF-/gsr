@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use crate::palette::Palette;
 use serde::{Deserialize, Serialize};
 use crate::rank::Rank;
@@ -11,4 +12,5 @@ pub struct ImageData {
     pub palette: Palette,
     pub label: String,
     pub cover: bool,
+    pub tags: HashSet<String>,
 }

@@ -443,7 +443,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             gui.editor.begin_input(InputKind::AddTag, catalog.tags.clone());
                         }
                         Command::DeleteTag => {
-                            gui.editor.begin_input(InputKind::DeleteTag, catalog.current_entry().unwrap().tags.clone());
+                            gui.editor.begin_input(InputKind::DeleteTag, catalog.current_entry().unwrap().image_data.tags.clone());
                         }
                         Command::Label => {
                             gui.editor.begin_input(InputKind::Label, catalog.tags.clone());

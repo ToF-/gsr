@@ -19,18 +19,16 @@ pub struct PictureEntry {
     pub file_size: u64,
     pub modified_time: SystemTime,
     pub deleted: bool,
-    pub tags: HashSet<String>,
     pub image_data: ImageData,
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool, tags: HashSet<String>) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureEntry {
     let data = image_data.clone();
     PictureEntry {
         file_path,
         file_size,
         modified_time,
         deleted,
-        tags,
         image_data: data,
     }
 }
@@ -48,17 +46,15 @@ impl PictureEntry {
     pub fn from_file(file_path: &str) -> Result<Self> {
         println!("retrieving picture from file {}", file_path);
         match read_file_info(file_path) {
-            Ok((file_size, modified_time)) => {
-                match read_or_create_image_data(file_path) {
-                    Ok(image_data) => Ok(make_picture_entry(file_path.to_string(),
-                            file_size,
-                            modified_time,
-                            image_data,
-                            false,
-                            HashSet::new())),
-                    Err(err) => Err(anyhow!(err)),
-                }
-            }
+            Ok((file_size, modified_time)) => match read_or_create_image_data(file_path) {
+                Ok(image_data) => Ok(make_picture_entry(
+                        file_path.to_string(),
+                        file_size,
+                        modified_time,
+                        image_data,
+                        false)),
+                Err(err) => Err(anyhow!(err)),
+            },
             Err(err) => Err(err),
         }
     }
@@ -159,12 +155,12 @@ impl PictureEntry {
 
     pub fn add_tag(&mut self, tag: &str) {
         if !tag.is_empty() {
-            self.tags.insert(tag.to_string());
+            self.image_data.tags.insert(tag.to_string());
         }
     }
 
     pub fn delete_tag(&mut self, tag : &str) {
-        self.tags.remove(tag);
+        self.image_data.tags.remove(tag);
     }
 
     pub fn set_label(&mut self, label: &str) {
@@ -243,7 +239,7 @@ impl PictureEntry {
             self.image_data.rank.show(),
             self.label().unwrap_or_default(),
             if self.deleted { "🗑" } else { ""},
-            Self::display_tags(self.tags))
+            Self::display_tags(self.image_data.tags))
     }
 }
 

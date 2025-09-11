@@ -237,7 +237,7 @@ impl Database {
                  .and_then(|_| {
                      self.rusqlite_delete_tags_for_file_path(&entry.file_path)
                          .and_then(|_| {
-                             for tag in entry.tags.iter() {
+                             for tag in entry.image_data.tags.iter() {
                                  match self.rusqlite_insert_tag_label(&entry.file_path, tag) {
                                      Ok(()) => {},
                                      Err(err) => return Err(err)
@@ -291,13 +291,14 @@ impl Database {
                     cover: {
                         let result:bool = row.get(9)?;
                         result
-                    }
+                    },
+                    tags: HashSet::new(),
                 },
                 {
                     let result:bool = row.get(8)?;
                     result
                 },
-                HashSet::new(),))
+                ))
     }
 
     fn rusqlite_select_all_picture_file_paths(&self) -> Result<HashSet<String>,Error> {
@@ -587,10 +588,9 @@ pub fn insert_new_picture_with_file_path(&self, picture_entry: &PictureEntry, fi
             palette: picture_entry.image_data.palette,
             label: picture_entry.label().unwrap_or_default(),
             cover: false,
+            tags: picture_entry.image_data.tags.clone(),
         },
-        false,
-        picture_entry.tags.clone()
-    );
+        false);
     self.insert_new_picture_entry(new_entry)
 }
 
@@ -602,7 +602,7 @@ pub fn retrieve_or_insert_picture_entry(&self, file_path: &str) -> Result<Option
                 Ok(Some(row)) => match Self::sql_to_picture_entry(row) {
                     Ok(mut entry) => match self.entry_tags(&entry.file_path) {
                         Ok(labels) => {
-                            entry.tags = labels;
+                            entry.image_data.tags = labels;
                             Ok(Some(entry))
                         },
                         Err(err) => Err(anyhow!(err)),

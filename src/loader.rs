@@ -41,15 +41,11 @@ pub fn check_database_and_files(directory: &str, database: &Database) -> Result<
     }
 }
 
-pub fn file_paths_in_database_not_on_file_system(database_file_paths: &HashSet<String>) -> Result<Vec<String>> {
-    let mut result = vec![];
-    for file_path in database_file_paths {
+pub fn file_paths_in_database_not_on_file_system(database_file_paths: &HashSet<String>) -> Result<HashSet<String>> {
+    Ok(database_file_paths.iter().filter(|file_path| {
         let path = PathBuf::from(file_path);
-        if !path.exists() {
-            result.push(file_path.clone())
-        }
-    };
-    Ok(result)
+        ! path.exists()
+    }).map(|file_path| file_path.clone()).collect())
 }
 
 pub fn file_paths_in_directory_not_in_database(directory: &str, database_file_paths: &HashSet<String>) -> Result<HashSet<String>> {
@@ -142,7 +138,7 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
                 let file_path = picture_entry.file_path.clone();
                 match database.entry_tags(&picture_entry.file_path) {
                     Ok(tags) => {
-                        picture_entry.tags = tags
+                        picture_entry.image_data.tags = tags
                     },
                     Err(err) => return Err(anyhow!(err)),
                     };

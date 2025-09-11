@@ -139,7 +139,7 @@ export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn ex
 extract	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn extract(&self) {$/;"	f
 file_name	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_name(source: &str) -> String {$/;"	f
 file_path_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_path_directory(source: &str) -> String {$/;"	f
-file_paths_in_database_not_on_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_database_not_on_file_system(database_file_paths: &HashSet<String>) -> Result<Vec<String>> {$/;"	f
+file_paths_in_database_not_on_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_database_not_on_file_system(database_file_paths: &HashSet<String>) -> Result<HashSet<String>> {$/;"	f
 file_paths_in_directory_not_in_database	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_directory_not_in_database(directory: &str, database_file_paths: &HashSet<String>) -> Result<HashSet<String>> {$/;"	f
 find_index_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_index_input_pattern(&mut self, pattern: &str) -> Option<usize> {$/;"	f
 find_index_label_search	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_index_label_search(&mut self, pattern: &str) -> Option<usize> {$/;"	f
@@ -201,7 +201,7 @@ load_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn load
 load_single_picture_entry	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_single_picture_entry(database: &Database, file_path: &str) -> Result<PictureEntries> {$/;"	f
 load_single_picture_entry_from_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn load_single_picture_entry_from_file_system(file_path: &str) -> Result<PictureEntries> {$/;"	f
 main	/Users/christophethibaut/Coding/gsr/src/main.rs	/^fn main() {$/;"	f
-make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool, tags: HashSet<String>) -> PictureEntry {$/;"	f
+make_picture_entry	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureEntry {$/;"	f
 make_picture_entry_from_file_and_image_data_file	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn make_picture_entry_from_file_and_image_data_file() {$/;"	f
 make_picture_entry_from_file_create_image_data_file_if_need_be	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn make_picture_entry_from_file_create_image_data_file_if_need_be() {$/;"	f
 move_next_page	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn move_next_page(&mut self) {$/;"	f

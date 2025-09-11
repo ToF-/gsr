@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs::remove_file;
 use thumbnailer::ThumbnailSize;
 use thumbnailer::create_thumbnails;
@@ -43,6 +44,7 @@ pub fn read_or_create_image_data(file_path: &str) -> Result<ImageData> {
                         palette,
                         label: String::from(""),
                         cover: false,
+                        tags: HashSet::new(),
                     };
                     match write_image_data(&image_data, &image_data_file_path) {
                         Ok(()) => Ok(image_data),
