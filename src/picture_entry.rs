@@ -18,12 +18,7 @@ pub struct PictureEntry {
     pub file_path: String,
     pub file_size: u64,
     pub modified_time: SystemTime,
-    pub rank: Rank,
-    pub palette: [u32;9],
-        label: String,
-    pub selected: bool,
     pub deleted: bool,
-    pub cover: bool,
     pub tags: HashSet<String>,
     pub image_data: ImageData,
 }
@@ -34,12 +29,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: Syst
         file_path,
         file_size,
         modified_time,
-        rank: image_data.rank,
-        palette: image_data.palette,
-        label: image_data.label,
-        selected: image_data.selected,
         deleted,
-        cover: image_data.cover,
         tags,
         image_data: data,
     }
@@ -147,8 +137,8 @@ impl PictureEntry {
     }
 
     pub fn label(&self) -> Option<String> {
-        if !self.label.is_empty() {
-            Some(self.label.clone())
+        if !self.image_data.label.is_empty() {
+            Some(self.image_data.label.clone())
         } else {
             None
         }
@@ -178,19 +168,19 @@ impl PictureEntry {
     }
 
     pub fn set_label(&mut self, label: &str) {
-        self.label = label.to_string()
+        self.image_data.label = label.to_string()
     }
 
     pub fn unlabel(&mut self) {
-        self.label = String::from("");
+        self.image_data.label = String::from("");
     }
 
     pub fn set_rank(&mut self, rank: Rank) {
-        self.rank = rank
+        self.image_data.rank = rank
     }
 
     pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {
-        let cmp = (self.rank as usize).cmp(&(other.rank as usize));
+        let cmp = (self.image_data.rank as usize).cmp(&(other.image_data.rank as usize));
         if cmp == Equal {
             self.original_file_path().cmp(&other.original_file_path())
         } else {
@@ -226,10 +216,10 @@ impl PictureEntry {
     pub fn label_display(&self, has_focus: bool) -> String {
         format!("{}{}{}{}{}",
             if has_focus { "▄" } else { "" },
-            self.rank.show(),
-            if self.selected { "△" } else { "" },
-            if !self.label.is_empty() {
-                self.label.to_string()
+            self.image_data.rank.show(),
+            if self.image_data.selected { "△" } else { "" },
+            if !self.image_data.label.is_empty() {
+                self.image_data.label.to_string()
             } else { String::from("") } ,
             if self.deleted { "🗑" } else { "" },
         )
@@ -245,12 +235,12 @@ impl PictureEntry {
 
     pub fn title_display(self) -> String {
         format!("{} {} {} [{} {} {}] {} {} {}",
-            if self.cover { "🌟" } else { "" },
+            if self.image_data.cover { "🌟" } else { "" },
             self.original_file_name(),
-            if self.selected { "△" } else { "" },
+            if self.image_data.selected { "△" } else { "" },
             self.file_size,
             self.image_data.colors,
-            self.rank.show(),
+            self.image_data.rank.show(),
             self.label().unwrap_or_default(),
             if self.deleted { "🗑" } else { ""},
             Self::display_tags(self.tags))

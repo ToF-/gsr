@@ -57,7 +57,7 @@ pub fn info(catalog: &Catalog) {
     let mut parents: HashMap<String,usize> = HashMap::new();
     for entry in catalog.picture_entries() {
         total += 1.0;
-        match entry.rank {
+        match entry.image_data.rank {
             Rank::ThreeStars => { three_stars += 1.0 },
             Rank::TwoStars => { two_stars += 1.0 },
             Rank::OneStar => { one_stars += 1.0 }

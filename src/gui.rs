@@ -524,7 +524,7 @@ fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {
     let picture = &gui.single_view_picture;
     let entry = catalog.current_entry().unwrap();
     let opacity = if entry.deleted { 0.25 }
-    else if entry.selected { 0.50 } else { 1.0 };
+    else if entry.image_data.selected { 0.50 } else { 1.0 };
     if catalog.expand_on() {
         picture.set_valign(Align::Fill);
         picture.set_halign(Align::Fill);
@@ -541,7 +541,7 @@ fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {
         }
     }
     if catalog.palette_on() {
-        let colors = entry.palette;
+        let colors = entry.image_data.palette;
         let palette_area = create_palette(colors);
         view_box.insert_child_after(&palette_area, Some(picture));
     }
@@ -681,7 +681,7 @@ fn setup_picture_cell(cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<R
 fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {
     let picture = gtk::Picture::new();
     let opacity = if entry.deleted { 0.25 }
-    else if entry.selected { 0.50 } else { 1.0 };
+    else if entry.image_data.selected { 0.50 } else { 1.0 };
     picture.set_valign(Align::Center);
     picture.set_halign(Align::Center);
     picture.set_opacity(opacity);

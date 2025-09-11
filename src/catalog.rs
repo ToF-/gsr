@@ -202,7 +202,7 @@ impl Catalog {
         match self.args.clone().unwrap().redirect {
             Some(target) => {
                 for entry in self.picture_entries.clone().iter()
-                    .filter(|entry| entry.selected && !entry.deleted && entry.label().is_some()) {
+                    .filter(|entry| entry.image_data.selected && !entry.deleted && entry.label().is_some()) {
                         let new_directory: String = if target.clone().ends_with("/") {
                             target.clone() + &entry.label().unwrap()
                         } else {
@@ -389,10 +389,10 @@ impl Catalog {
         match self.current_entry() {
             Some(picture_entry) => {
                 let mut new_picture_entry = picture_entry.clone();
-                new_picture_entry.cover = true;
+                new_picture_entry.image_data.cover = true;
                 let dir_path = file_path_directory(&picture_entry.file_path);
                 let file_name = file_name(&picture_entry.file_path);
-                let rank = picture_entry.rank;
+                let rank = picture_entry.image_data.rank;
                 match self.database.insert_or_update_cover(&dir_path, &file_name, rank) {
                     Ok(()) => {
                         self.last_comment = Some(Comment::Cover);
@@ -408,7 +408,7 @@ impl Catalog {
         match self.current_entry() {
             Some(picture_entry) => {
                 let mut new_picture_entry = picture_entry.clone();
-                new_picture_entry.cover = false;
+                new_picture_entry.image_data.cover = false;
                 let dir_path = file_path_directory(&picture_entry.file_path);
                 let file_name = file_name(&picture_entry.file_path);
                 match self.database.delete_cover(&dir_path, &file_name) {
@@ -501,7 +501,7 @@ impl Catalog {
         match self.current_entry() {
             Some(picture_entry) => {
                 let mut new_picture_entry = picture_entry.clone();
-                new_picture_entry.selected = !new_picture_entry.selected;
+                new_picture_entry.image_data.selected = !new_picture_entry.image_data.selected;
                 match self.set_current_picture_entry(new_picture_entry) {
                     Ok(()) => {
                         self.last_comment = Some(Comment::ToggleSelect);
@@ -696,7 +696,7 @@ impl Catalog {
     pub fn set_selected_labels_with_input(&mut self, label: &str) -> Result<()> {
         for index in 0..self.picture_entries.len() {
             let entry = &mut self.picture_entries[index];
-            if entry.selected {
+            if entry.image_data.selected {
                 entry.set_label(label);
                 match self.database.update_picture_entry(entry) {
                     Ok(()) => {},
@@ -758,10 +758,10 @@ impl Catalog {
                                 Some(Comment::AddTag { label}) => entry.add_tag(label),
                                 Some(Comment::DeleteTag { label}) => entry.delete_tag(label),
                                 Some(Comment::Rank { rank }) => entry.set_rank(*rank),
-                                Some(Comment::ToggleSelect) => { entry.selected = !entry.selected }
+                                Some(Comment::ToggleSelect) => { entry.image_data.selected = !entry.image_data.selected }
                                 Some(Comment::ToggleDelete) => { entry.deleted = !entry.deleted },
-                                Some(Comment::Cover) => { entry.cover = true },
-                                Some(Comment::Uncover) => { entry.cover = false },
+                                Some(Comment::Cover) => { entry.image_data.cover = true },
+                                Some(Comment::Uncover) => { entry.image_data.cover = false },
                             };
                             if self.last_comment.is_some() {
                                 match self.database.update_picture_entry(&entry.clone()) {
@@ -786,7 +786,7 @@ impl Catalog {
                 let end = start + self.page_length();
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
-                    entry.selected = false;
+                    entry.image_data.selected = false;
                     match self.database.update_picture_entry(entry) {
                         Ok(()) => {},
                         Err(err) => return Err(anyhow!(err)),
@@ -806,7 +806,7 @@ impl Catalog {
                 let end = self.navigator.length();
                 for i in start..end {
                     let entry: &mut PictureEntry = &mut self.picture_entries[i];
-                    entry.selected = false;
+                    entry.image_data.selected = false;
                     match self.database.update_picture_entry(entry) {
                         Ok(()) => {},
                         Err(err) => return Err(anyhow!(err)),
@@ -820,7 +820,7 @@ impl Catalog {
     }
 
     pub fn count_selected(&mut self) {
-        self.selected_count = self.picture_entries.clone().iter().filter(|entry| entry.selected).count()
+        self.selected_count = self.picture_entries.clone().iter().filter(|entry| entry.image_data.selected).count()
     }
 
     pub fn sort_by(&mut self, order: Order) {
@@ -833,7 +833,7 @@ impl Catalog {
                 Order::Size => self.picture_entries.sort_by(|a, b| { a.file_size.cmp(&b.file_size)} ),
                 Order::Value => self.picture_entries.sort_by(|a, b|  { a.cmp_rank(b) }),
                 Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(b) }),
-                Order::Palette => self.picture_entries.sort_by(|a, b| { a.palette.cmp(&b.palette) }),
+                Order::Palette => self.picture_entries.sort_by(|a, b| { a.image_data.palette.cmp(&b.image_data.palette) }),
                 Order::Random => self.picture_entries.shuffle(&mut thread_rng()),
             };
             self.order = Some(order);

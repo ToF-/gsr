@@ -227,12 +227,12 @@ impl Database {
              entry.file_size as i64,
              entry.image_data.colors as i64,
              entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-             entry.rank as i64,
-             palette_to_blob(&entry.palette),
+             entry.image_data.rank as i64,
+             palette_to_blob(&entry.image_data.palette),
              if entry.label().is_some() { entry.label().unwrap() } else { String::from("") },
-             entry.selected as i64,
+             entry.image_data.selected as i64,
              entry.deleted as i64,
-             entry.cover,
+             entry.image_data.cover,
              &*entry.file_path])
                  .and_then(|_| {
                      self.rusqlite_delete_tags_for_file_path(&entry.file_path)
@@ -548,12 +548,12 @@ fn rusqlite_insert_picture_entry(&self, picture_entry: PictureEntry) -> Result<u
      picture_entry.file_size as i64,
      picture_entry.image_data.colors as i64,
      picture_entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
-     picture_entry.rank as i64,
+     picture_entry.image_data.rank as i64,
      picture_entry.label(),
-     picture_entry.selected as i64,
-     picture_entry.selected as i64,
-     picture_entry.cover as i64,
-     palette_to_blob(&picture_entry.palette)])
+     picture_entry.image_data.selected as i64,
+     picture_entry.deleted as i64,
+     picture_entry.image_data.cover as i64,
+     palette_to_blob(&picture_entry.image_data.palette)])
 }
 
 pub fn insert_new_picture_entry(&self, picture_entry: PictureEntry) -> Result<()> {
@@ -582,9 +582,9 @@ pub fn insert_new_picture_with_file_path(&self, picture_entry: &PictureEntry, fi
         picture_entry.modified_time,
         ImageData {
             colors: picture_entry.image_data.colors,
-            rank: picture_entry.rank,
+            rank: picture_entry.image_data.rank,
             selected: false,
-            palette: picture_entry.palette,
+            palette: picture_entry.image_data.palette,
             label: picture_entry.label().unwrap_or_default(),
             cover: false,
         },
