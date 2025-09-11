@@ -15,13 +15,13 @@ pub fn directory_display(catalog: &Catalog, file_path: &str) -> String {
 
 pub fn editor_input_display(editor: &Editor) -> String {
     match editor.input_kind() {
-            Some(InputKind::AddTagInput) => format!("add tag:{} {}", editor.input(), editor.candidates()),
-            Some(InputKind::DeleteTagInput) => format!("delete tag:{} {}", editor.input(), editor.candidates()),
-            Some(InputKind::SearchInput) => format!("search:{}", editor.input()),
-            Some(InputKind::SearchLabelInput) => format!("label search:{} {}", editor.input(), editor.candidates()),
-            Some(InputKind::LabelInput) => format!("label:{} {}", editor.input(), editor.candidates()),
-            Some(InputKind::RelabelInput) => format!("relabel:{} {}", editor.input(), editor.candidates()),
-            Some(InputKind::IndexInput) => format!("index:{}", editor.input()),
+            Some(InputKind::AddTag) => format!("add tag:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::DeleteTag) => format!("delete tag:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::Search) => format!("search:{}", editor.input()),
+            Some(InputKind::SearchLabel) => format!("label search:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::Label) => format!("label:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::Relabel) => format!("relabel:{} {}", editor.input(), editor.candidates()),
+            Some(InputKind::Index) => format!("index:{}", editor.input()),
             None => String::from(""),
     }
 }
@@ -34,7 +34,7 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
         directory_display(catalog, file_path),
         catalog.selected_count(),
         if catalog.navigator().start_index().is_some() { "…" } else { "" },
-        if let Some(order) = catalog.order().clone() { order.to_string() } else { "??".to_string() },
+        if let Some(order) = catalog.order() { order.to_string() } else { "??".to_string() },
         if catalog.navigator().page_limit_on() { "[" } else { "" },
         catalog.index().unwrap(),
         catalog.last(),
@@ -66,30 +66,29 @@ pub fn info(catalog: &Catalog) {
         if entry.label().is_some() {
             labelled += 1.0;
             if let Some(number) = labels.get_mut(&entry.label().unwrap()) {
-                *number = *number + 1.0
+                *number += 1.0
             } else {
                 labels.insert(entry.label().unwrap().clone(), 1.0);
             }
         };
         let parent:String = entry.parent_path();
         if let Some(count) = parents.get_mut(&parent) {
-            *count = *count + 1
+            *count += 1
         } else {
             parents.insert(parent, 1);
         }
     }
     println!("total: {}", total);
-    println!("{}: {} ({:.2}%)", Rank::ThreeStars.to_string(), three_stars, three_stars / total * 100.0);
-    println!("{}: {} ({:.2}%)", Rank::TwoStars.to_string(), two_stars, two_stars / total * 100.0);
-    println!("{}: {} ({:.2}%)", Rank::OneStar.to_string(), one_stars, one_stars / total * 100.0);
-    println!("{}: {} ({:.2}%)", Rank::NoStar.to_string(), no_stars, no_stars / total * 100.0);
+    println!("{}: {} ({:.2}%)", Rank::ThreeStars, three_stars, three_stars / total * 100.0);
+    println!("{}: {} ({:.2}%)", Rank::TwoStars, two_stars, two_stars / total * 100.0);
+    println!("{}: {} ({:.2}%)", Rank::OneStar, one_stars, one_stars / total * 100.0);
+    println!("{}: {} ({:.2}%)", Rank::NoStar, no_stars, no_stars / total * 100.0);
     println!("labelled: {} ({:.2}%)", labelled, labelled / total * 100.0);
     let mut all_labels = Vec::from_iter(labels.keys());
     all_labels.sort();
     for key in all_labels.iter() {
-        if let Some(val) = labels.get(&key as &str) {
+        if let Some(val) = labels.get(key as &str) {
             println!("{key}:{val}")
-        } else {
         };
     }
     let mut all_parents :Vec<(usize,String)> = Vec::new();

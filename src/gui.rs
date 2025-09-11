@@ -39,9 +39,10 @@ impl Gui {
     }
 
     pub fn cell_box_at(&self, col: i32, row: i32) -> gtk::Box {
-        let widget = self.multiple_view_grid.child_at(col, row).expect(&format!("cannot find child at {} {}", col, row));
-        let cell_box = widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box");
-        cell_box
+        let widget = self.multiple_view_grid.child_at(col, row)
+            .unwrap_or_else(||
+                panic!("cannot find child at {} {}", col, row));
+        widget.downcast::<gtk::Box>().expect("cannot downcast widget to Box")
     }
 }
 
@@ -128,7 +129,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
             cell_box.set_halign(Align::Center);
             cell_box.set_hexpand(true);
             cell_box.set_vexpand(true);
-            setup_picture_cell(&cell_box, col, row, &catalog_rc);
+            setup_picture_cell(&cell_box, col, row, catalog_rc);
             multiple_view_grid.attach(&cell_box, col, row, 1, 1);
             assert!(multiple_view_grid.child_at(col, row).unwrap() == cell_box);
         }
@@ -148,14 +149,14 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     application_window.set_child(Some(&view_stack));
 
     let gui = Gui {
-        application_window: application_window,
-        single_view_scrolled_window: single_view_scrolled_window,
-        multiple_view_scrolled_window: multiple_view_scrolled_window,
-        multiple_view_grid: multiple_view_grid,
-        view_stack: view_stack,
+        application_window,
+        single_view_scrolled_window,
+        multiple_view_scrolled_window,
+        multiple_view_grid,
+        view_stack,
         single_view_box: view_box,
         single_view_picture: picture,
-        cells_per_row: cells_per_row,
+        cells_per_row,
         shortcuts: shortcuts.clone(),
         editor: Editor::new(),
     };
@@ -319,11 +320,8 @@ fn sort_selection_process_key(key: Key, catalog: &mut Catalog) -> bool {
         None => refresh = false,
         Some(key_name) => match key_name.as_str() {
             "Escape" => catalog.cancel_sort_selection(),
-            s => match order::from(s) {
-                Some(order) => catalog.sort_by(order),
-                None => {},
-            },
-        }
+            s => if let Some(order) = order::from(s) { catalog.sort_by(order) },
+        },
     };
     refresh
 }
@@ -369,7 +367,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             catalog.toggle_full_size()
                         },
                         Command::GotoIndex => {
-                            gui.editor.begin_input(InputKind::IndexInput, catalog.tags.clone());
+                            gui.editor.begin_input(InputKind::Index, catalog.tags.clone());
                         },
                         Command::GridTwo => {
                             catalog.set_new_page_size(2);
@@ -394,7 +392,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         Command::Random => catalog.mut_navigator().move_to_random_index(),
                         Command::Info => catalog.print_info(&gui.editor),
                         Command::Jump => { 
-                            gui.editor.begin_input(InputKind::SearchLabelInput, catalog.tags.clone());
+                            gui.editor.begin_input(InputKind::SearchLabel, catalog.tags.clone());
                         },
                         Command::ExportCommands => result = export_shortcuts(&gui.shortcuts),
                         Command::NextPage => catalog.mut_navigator().move_next_page(),
@@ -412,7 +410,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                         },
                         Command::Repeat => result = catalog.end_repeat_last_comment(),
                         Command::Search => {
-                            gui.editor.begin_input(InputKind::SearchInput, catalog.tags.clone());
+                            gui.editor.begin_input(InputKind::Search, catalog.tags.clone());
                         }
                         Command::Uncover => result = catalog.uncover_current_entry(),
                         Command::UnSelectPage => result = catalog.unselect_page(),
@@ -442,16 +440,16 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
                             catalog.count_selected()
                         },
                         Command::AddTag => {
-                            gui.editor.begin_input(InputKind::AddTagInput, catalog.tags.clone());
+                            gui.editor.begin_input(InputKind::AddTag, catalog.tags.clone());
                         }
                         Command::DeleteTag => {
-                            gui.editor.begin_input(InputKind::DeleteTagInput, catalog.current_entry().unwrap().tags.clone());
+                            gui.editor.begin_input(InputKind::DeleteTag, catalog.current_entry().unwrap().tags.clone());
                         }
                         Command::Label => {
-                            gui.editor.begin_input(InputKind::LabelInput, catalog.tags.clone());
+                            gui.editor.begin_input(InputKind::Label, catalog.tags.clone());
                         }
                         Command::Relabel => {
-                            gui.editor.begin_input(InputKind::RelabelInput, catalog.tags.clone());
+                            gui.editor.begin_input(InputKind::Relabel, catalog.tags.clone());
                         }
                         Command::Right => {
                             refresh = arrow_command(Direction::Right, gui, catalog)
@@ -490,7 +488,7 @@ fn create_palette(colors: [u32;9]) -> gtk::DrawingArea {
 fn draw_palette(ctx: &Context, width: i32, height: i32, colors: &[u32;9]) {
     const COLOR_MAX: f64 = 9.0;
     let square_size: f64 = height as f64;
-    let offset: f64 = (width as f64 - (COLOR_MAX as f64 * square_size)) / 2.0;
+    let offset: f64 = (width as f64 - (COLOR_MAX * square_size)) / 2.0;
     let surface = ImageSurface::create(Format::ARgb32, width, height).expect("can't create surface");
     let context = Context::new(&surface).expect("can't create context");
     for (i,w) in colors.iter().enumerate() {
@@ -544,7 +542,7 @@ fn set_picture_for_single_view(gui: &Gui, catalog: &Catalog) {
     }
     if catalog.palette_on() {
         let colors = entry.palette;
-        let palette_area = create_palette(colors.clone());
+        let palette_area = create_palette(colors);
         view_box.insert_child_after(&palette_area, Some(picture));
     }
 }
@@ -559,8 +557,8 @@ fn set_picture_for_cell_at(gui: &Gui, catalog: &Catalog, col: usize, row: usize)
     if let Some(index) = catalog.index_from_position((col,row)) {
         if !catalog.discarded().contains(&index) {
             let entry = catalog.entry_at_index(index).unwrap();
-            let picture = picture_for_entry(&entry, &catalog);
-            let label = label_for_entry(&entry, index == catalog.index().unwrap());
+            let picture = picture_for_entry(entry, catalog);
+            let label = label_for_entry(entry, index == catalog.index().unwrap());
             cell_box.append(&picture);
             cell_box.append(&label);
         }
@@ -575,7 +573,7 @@ fn set_label_for_cell_index(gui: &Gui, catalog: &Catalog, index: usize, has_focu
         cell_box.remove(&child)
     };
     let entry = catalog.entry_at_index(index).unwrap();
-    let label = label_for_entry(&entry, has_focus);
+    let label = label_for_entry(entry, has_focus);
     cell_box.append(&label);
 }
 
@@ -671,8 +669,8 @@ fn setup_picture_cell(cell_box: &gtk::Box, col: i32, row: i32, catalog_rc: &Rc<R
                     cell_box.remove(&child)
                 };
                 let entry = catalog.entry_at_index(index).unwrap();
-                let picture = picture_for_entry(&entry, &catalog);
-                let label = label_for_entry(&entry, index == catalog.index().unwrap());
+                let picture = picture_for_entry(entry, &catalog);
+                let label = label_for_entry(entry, index == catalog.index().unwrap());
                 cell_box.append(&picture);
                 cell_box.append(&label);
             }

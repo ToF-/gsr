@@ -79,7 +79,7 @@ impl Database {
     /// create the database from the given connection_string.
     fn from_path(connection_string: &str) -> Result<Self> {
         match Connection::open(connection_string) {
-            Ok(connection) => Ok(Database { connection: connection, }),
+            Ok(connection) => Ok(Database { connection }),
             Err(err) => Err(anyhow!(err)),
         }
     }
@@ -143,7 +143,7 @@ impl Database {
                          File_Name TEXT NOT NULL,            \n\
                          Rank INTEGER,                       \n\
                          PRIMARY KEY (Dir_Path, File_Name));", [])
-                            .and_then(|_| Ok(()))
+                            .map(|_|  ())
                     })
             })
     }
@@ -175,7 +175,6 @@ impl Database {
     fn rusqlite_delete_cover(&self, dir_path: &str, file_name: &str) -> Result<usize,Error> {
         self.connection.execute("DELETE FROM Cover WHERE Dir_path = ?1 AND File_Name = ?2;",
             params![dir_path, file_name])
-            .and_then(|count| Ok(count))
     }
 
     fn rusqlite_insert_cover(&self, dir_path: &str, file_name: &str, rank: Rank) -> Result<usize,Error> {
@@ -184,14 +183,13 @@ impl Database {
              (Dir_Path, File_Name, Rank) \n\
              VALUES (?1, ?2, ?3);", 
             params![dir_path, file_name, rank as i64])
-        .and_then(|count| Ok(count))
     }
 
     fn rusqlite_insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<(),Error> {
         self.rusqlite_delete_cover(dir_path, file_name)
             .and_then(|_| {
                 self.rusqlite_insert_cover(dir_path, file_name, rank)
-                    .and_then(|_| Ok(()) )
+                    .map(|_| ())
             })
     }
 
@@ -199,7 +197,7 @@ impl Database {
         self.connection.execute(
             "DELETE FROM Tag WHERE File_Path = ?1;",
             params![file_path])
-            .and_then(|_| Ok(()))
+            .map(|_| ())
     }
 
     fn rusqlite_insert_tag_label(&mut self, file_path: &str, label: &str) -> Result<(),Error> {
@@ -208,7 +206,7 @@ impl Database {
             (File_Path, Label)    \n\
             VALUES (?1, ?2);",
             params![file_path, label])
-            .and_then(|_| Ok(()))
+            .map(|_| ())
     }
 
     fn rusqlite_update_image_data(&mut self, entry: &PictureEntry) -> Result<(),Error> {
@@ -273,15 +271,12 @@ impl Database {
                 {
                     let blob: Vec<u8> = row.get(5)?;
                     let mut bytes: [u8;36] = [0;36];
-                    for i in 0..36 { bytes[i] = blob[i] };
+                    bytes.copy_from_slice(&blob[..36]);
                     Some(blob_to_palette(&bytes))
                 },
                 {
-                    let label:String = match row.get(6) {
-                        Ok(s) => s,
-                        _ => String::from(""),
-                    };
-                    if label.trim().len() > 0 {
+                    let label:String = row.get(6).unwrap_or_default();
+                    if !label.trim().is_empty() {
                         Some(label.trim().to_string())
                     } else {
                         None
@@ -331,7 +326,7 @@ impl Database {
                 self.connection.execute(
                     "DELETE FROM Tag  \n\
                      WHERE File_Path = ?1;", params![file_path.to_string()])
-                    .and_then(|_| Ok(()))
+                    .map(|_| ())
             })
     }
 
@@ -347,23 +342,24 @@ impl Database {
             .and_then(|file_paths| {
                 for file_path in file_paths {
                     let path = PathBuf::from(&file_path);
-                    if !path.exists() {
-                        let result = self.rusqlite_delete_picture(&file_path)
-                            .and_then(|_| {
+                    let _ = if !path.exists() {
+                        match self.rusqlite_delete_picture(&file_path) {
+                            Ok(_) => {
                                 self.rusqlite_delete_tags_for_file_path(&file_path)
                                     .and_then(|_| {
                                         let directory = file_path_directory(&file_path);
                                         let file_name = file_name(&file_path);
                                         self.rusqlite_delete_cover(&directory, &file_name)
-                                            .and_then(|_| Ok(()))
+                                            .map(|_| ())
                                     })
-                            });
-                        if result.is_err() {
-                            return result;
-                        };
-                        count += 1;
+                            },
+                            Err(e) => return Err(e),
+                        }
+                    } else {
+                        Ok(())
                     };
-                };
+                    count += 1;
+                }
                 Ok(())
             });
         match result {
@@ -416,9 +412,9 @@ impl Database {
                 .and_then(|file_paths| {
                     let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
                     self.select_all_picture_file_paths()
-                        .and_then(|mut database_set| {
+                        .and_then(|database_set| {
                             let difference = directory_set.difference(&database_set)
-                                .filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), &s));
+                                .filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), s));
                             if difference.clone().count() > 0 {
                                 println!("pictures in this selection that are not in the database:");
                                 for x in difference.clone() {
@@ -426,9 +422,9 @@ impl Database {
                                 }
                                 match prompt_yes_no(&format!("insert image data for these {} pictures in the database ?", difference.clone().count())) {
                                     Ok(Some('y')) | Ok(Some('Y')) => {
-                                        match self.populate(Some(HashSet::from_iter(difference.into_iter()))) {
+                                        match self.populate(Some(HashSet::from_iter(difference))) {
                                             Ok(picture_entries) => Ok(picture_entries),
-                                            Err(err) => return Err(anyhow!(err)),
+                                            Err(err) => Err(anyhow!(err)),
                                         }
                                     },
                                     Ok(_) => Ok(vec![]),
@@ -456,15 +452,15 @@ impl Database {
                         }
                     }
                 })
-                .and_then(|rows| {
+                .map(|rows| {
                     let mut result: HashSet<String> = HashSet::new();
                     for row in rows {
                         let label = row.unwrap();
-                        if label.len() > 0 {
+                        if !label.is_empty() {
                             let _ = result.insert(label);
                         };
                     };
-                    Ok(result)
+                    result
                 })
             })
     }
@@ -494,7 +490,7 @@ pub fn load_directories(&self) -> Result<Vec<(String,usize)>> {
                             Err(err) => return Err(anyhow!(err)),
                         }
                     };
-                    let mut result:Vec<(String,usize)> = Vec::from_iter(dir_map.iter().map(|pair| (pair.0.clone(), pair.1.clone())));
+                    let mut result:Vec<(String,usize)> = Vec::from_iter(dir_map.iter().map(|pair| (pair.0.clone(), *pair.1)));
                     result.sort();
                     Ok(result)
                 },
@@ -523,10 +519,10 @@ pub fn entry_tags(&self, file_path: &str) -> Result<HashSet<String>> {
                     };
                     Ok(result)
                 },
-                Err(err) => return Err(anyhow!(err)),
+                Err(err) => Err(anyhow!(err)),
             }
         },
-        Err(err) => return Err(anyhow!(err)),
+        Err(err) => Err(anyhow!(err)),
     }
 }
 
@@ -609,10 +605,10 @@ pub fn retrieve_or_insert_picture_entry(&self, file_path: &str) -> Result<Option
                     Err(err) => Err(anyhow!(err)),
                 },
                 Ok(None) => {
-                    if standard_directory() != "" && file_path_directory(file_path) == standard_directory() {
+                    if !standard_directory().is_empty() && file_path_directory(file_path) == standard_directory() {
                         match self.insert_picture_entry(file_path) {
                             Ok(picture_entry) => Ok(Some(picture_entry)),
-                            Err(err) => return Err(anyhow!(err)),
+                            Err(err) => Err(anyhow!(err)),
                         }
                     } else {
                         Ok(None)

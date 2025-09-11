@@ -4,7 +4,7 @@ use std::collections::HashSet;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum InputKind {
-    AddTagInput, DeleteTagInput, SearchInput, SearchLabelInput, LabelInput, RelabelInput, IndexInput, }
+   AddTag, DeleteTag, Search, SearchLabel, Label, Relabel, Index, }
 
 pub struct Editor {
     input: Option<String>,
@@ -62,29 +62,29 @@ impl Editor {
         let input = &self.input.clone().unwrap();
         if let Some(kind) = self.input_kind.clone() {
             match kind {
-                InputKind::AddTagInput => {
+                InputKind::AddTag => {
                     let _ = catalog.tag_current_entry(input);
                 },
-                InputKind::DeleteTagInput => {
+                InputKind::DeleteTag => {
                     let _ = catalog.untag_current_entry(input);
                 },
-                InputKind::SearchInput => {
+                InputKind::Search => {
                     catalog.move_to_input_pattern(input);
                 },
-                InputKind::SearchLabelInput => {
+                InputKind::SearchLabel => {
                     catalog.move_to_label_pattern(input);
                 },
-                InputKind::IndexInput => {
+                InputKind::Index => {
                     if let Ok(index) = input.parse::<usize>() {
                         if index < catalog.navigator().length() && catalog.navigator().can_move_to_index(index) {
                             catalog.mut_navigator().move_to_index(index)
                         }
                     }
                 },
-                InputKind::LabelInput => {
+                InputKind::Label => {
                     let _ = catalog.label_current_entry(input);
                 },
-                InputKind::RelabelInput => {
+                InputKind::Relabel => {
                     let _ = catalog.set_selected_labels_with_input(input);
                 },
             }
@@ -105,21 +105,9 @@ impl Editor {
     pub fn append(&mut self, ch: char) {
         if let Some(kind) = self.input_kind.clone() {
             let ch_is_ok: bool = match kind {
-                InputKind::IndexInput => {
-                    match ch {
-                        '0'..='9' => true,
-                        _ => false,
-                    }
-                },
-                InputKind::AddTagInput|InputKind::DeleteTagInput|InputKind::LabelInput|InputKind::RelabelInput|InputKind::SearchLabelInput => {
-                    match ch {
-                        'a'..='z' => true,
-                        '0'..='9' => true,
-                        '-'|'_' => true,
-                        _ => false,
-                    }
-                },
-                InputKind::SearchInput => true,
+                InputKind::Index => ch.is_ascii_digit(),
+                InputKind::AddTag | InputKind::DeleteTag | InputKind::Label | InputKind::Relabel | InputKind::SearchLabel => matches!(ch, 'a'..='z' | '0'..='9' | '-' | '_'),
+                InputKind::Search => true,
             };
             if ch_is_ok {
                 self.input = self.input.clone().map( |s| {
@@ -134,20 +122,17 @@ impl Editor {
 
     pub fn complete(&mut self) {
         if let Some(kind) = self.input_kind.clone(){
-            if [InputKind::AddTagInput,InputKind::DeleteTagInput,InputKind::LabelInput,InputKind::RelabelInput,InputKind::SearchLabelInput].contains(&kind) {
-                match &self.input {
-                    Some(prefix) => {
-                        let candidates = candidates(prefix, &self.tags);
-                        match candidates.len() {
-                            0 => { self.candidates = vec![] } ,
-                            1 => {
-                                self.input = Some(candidates[0].clone());
-                                self.candidates = vec![];
-                            },
-                            _ => { self.candidates = candidates.clone() },
-                        }
-                    },
-                    None => {},
+            if [InputKind::AddTag,InputKind::DeleteTag,InputKind::Label,InputKind::Relabel,InputKind::SearchLabel].contains(&kind) {
+                if let Some(prefix) = &self.input {
+                    let candidates = candidates(prefix, &self.tags);
+                    match candidates.len() {
+                        0 => { self.candidates = vec![] } ,
+                        1 => {
+                            self.input = Some(candidates[0].clone());
+                            self.candidates = vec![];
+                        },
+                        _ => { self.candidates = candidates.clone() },
+                    }
                 };
                 self.completion = true
             }
@@ -161,7 +146,7 @@ impl Editor {
     fn editing_input() {
         let mut editor = Editor::new();
         assert_eq!(false, editor.editing());
-        editor.begin_input(InputKind::LabelInput, HashSet::new());
+        editor.begin_input(InputKind::Label, HashSet::new());
         assert_eq!(true, editor.editing());
         editor.append('f');
         editor.append('o');

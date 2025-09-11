@@ -37,10 +37,10 @@ pub fn read_or_create_image_data(file_path: &str) -> Result<ImageData> {
             match get_palette_from_picture(file_path) {
                 Ok((palette, colors)) => {
                     let image_data = ImageData{
-                        colors: colors,
+                        colors,
                         rank: Rank::NoStar,
                         selected: false,
-                        palette: palette,
+                        palette,
                         label: String::from(""),
                         cover: false,
                     };

@@ -139,8 +139,8 @@ export_shortcuts	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^pub fn ex
 extract	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn extract(&self) {$/;"	f
 file_name	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_name(source: &str) -> String {$/;"	f
 file_path_directory	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn file_path_directory(source: &str) -> String {$/;"	f
-file_path_in_directory_not_in_database	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_path_in_directory_not_in_database(directory: &str, database_file_paths: &Vec<String>) -> Result<Vec<String>> {$/;"	f
-file_paths_in_database_not_on_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_database_not_on_file_system(database_file_paths: &Vec<String>) -> Result<Vec<String>> {$/;"	f
+file_paths_in_database_not_on_file_system	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_database_not_on_file_system(database_file_paths: &HashSet<String>) -> Result<Vec<String>> {$/;"	f
+file_paths_in_directory_not_in_database	/Users/christophethibaut/Coding/gsr/src/loader.rs	/^pub fn file_paths_in_directory_not_in_database(directory: &str, database_file_paths: &HashSet<String>) -> Result<HashSet<String>> {$/;"	f
 find_index_input_pattern	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_index_input_pattern(&mut self, pattern: &str) -> Option<usize> {$/;"	f
 find_index_label_search	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn find_index_label_search(&mut self, pattern: &str) -> Option<usize> {$/;"	f
 fmt	/Users/christophethibaut/Coding/gsr/src/comment.rs	/^    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {$/;"	f
@@ -281,13 +281,13 @@ rusqlite_insert_or_update_cover	/Users/christophethibaut/Coding/gsr/src/database
 rusqlite_insert_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^fn rusqlite_insert_picture_entry(&self, picture_entry: PictureEntry) -> Result<usize,Error> {$/;"	f
 rusqlite_insert_tag_label	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_insert_tag_label(&mut self, file_path: &str, label: &str) -> Result<(),Error> {$/;"	f
 rusqlite_load_all_tags	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_load_all_tags(&self) -> Result<HashSet<String>,Error> {$/;"	f
-rusqlite_select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_all_picture_file_paths(&self) -> Result<Vec<String>,Error> {$/;"	f
+rusqlite_select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_all_picture_file_paths(&self) -> Result<HashSet<String>,Error> {$/;"	f
 rusqlite_select_cover_picture_entries	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_cover_picture_entries(&mut self) -> Result<PictureEntries, Error> {$/;"	f
 rusqlite_select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_select_pictures(&self, query: &str) -> Result<PictureEntries, Error> {$/;"	f
 rusqlite_to_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_to_picture_entry(row: &Row) -> Result<PictureEntry,Error> {$/;"	f
 rusqlite_update_image_data	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn rusqlite_update_image_data(&mut self, entry: &PictureEntry) -> Result<(),Error> {$/;"	f
 sample_mode_process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn sample_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool {$/;"	f
-select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_all_picture_file_paths(&self) -> Result<Vec<String>> {$/;"	f
+select_all_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_all_picture_file_paths(&self) -> Result<HashSet<String>> {$/;"	f
 select_cover_picture_entries	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_cover_picture_entries(&mut self) -> Result<PictureEntries> {$/;"	f
 select_pictures	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn select_pictures(&self, query: &str) -> Result<PictureEntries> {$/;"	f
 selected_count	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn selected_count(&self) -> usize {$/;"	f

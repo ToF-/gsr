@@ -81,10 +81,7 @@ impl Catalog {
         catalog.args = Some(args.clone());
         catalog.set_page_size(catalog.args.clone().unwrap().grid.unwrap());
         let picture_entries = load_picture_entries_from_source(&mut catalog.database, args);
-        let add_result = Catalog::set_picture_entries(&mut catalog, picture_entries);
-        if let Err(err) = add_result {
-            return Err(err)
-        };
+        Catalog::set_picture_entries(&mut catalog, picture_entries)?;
         catalog.count_selected();
         if catalog.navigator().length() == 0 {
             return Err(anyhow!("no picture to show"))
@@ -180,8 +177,8 @@ impl Catalog {
     fn redirect_picture_entry_files(&self, picture_entry: &PictureEntry, path: &Path) -> Result<()> {
         let mut new_picture_file_path_buf:PathBuf = PathBuf::from(path);
         let mut new_thumb_file_path_buf:PathBuf = PathBuf::from(path);
-        new_picture_file_path_buf.push(&file_name(&picture_entry.original_file_path()));
-        new_thumb_file_path_buf.push(&file_name(&picture_entry.thumbnail_file_path()));
+        new_picture_file_path_buf.push(file_name(&picture_entry.original_file_path()));
+        new_thumb_file_path_buf.push(file_name(&picture_entry.thumbnail_file_path()));
         let new_picture_file_path: String = new_picture_file_path_buf.display().to_string();
         let new_thumb_file_path: String = new_thumb_file_path_buf.display().to_string();
         if  new_picture_file_path != picture_entry.original_file_path() {
@@ -313,7 +310,7 @@ impl Catalog {
 
     pub fn find_index_input_pattern(&mut self, pattern: &str) -> Option<usize> {
         self.picture_entries.iter().position(|entry|
-            entry.original_file_path().contains(&*pattern))
+            entry.original_file_path().contains(pattern))
     }
 
     pub fn find_index_label_search(&mut self, pattern: &str) -> Option<usize> {
@@ -343,7 +340,7 @@ impl Catalog {
         let file_path = entry.original_file_path();
         if let Some(args) = &self.args {
             if let Some(extract_file_path) = &args.extract {
-                match append_to_extract_file(&file_path, &extract_file_path) {
+                match append_to_extract_file(&file_path, extract_file_path) {
                     Ok(_) => {
                         println!("appended {} in {}", file_path, extract_file_path)
                     },
@@ -452,7 +449,7 @@ impl Catalog {
                     new_picture_entry.set_label(&label);
                     match self.set_current_picture_entry(new_picture_entry) {
                         Ok(()) => {
-                            self.last_comment = Some(Comment::Label { label: label } );
+                            self.last_comment = Some(Comment::Label { label } );
                             Ok(())
                         },
                         Err(err) => Err(anyhow!(err)),
@@ -535,12 +532,12 @@ impl Catalog {
     }
 
     pub fn begin_sort_selection(&mut self) {
-        self.previous_order = self.order.clone();
+        self.previous_order = self.order;
         self.order = None
     }
 
     pub fn cancel_sort_selection(&mut self) {
-        self.order = self.previous_order.clone()
+        self.order = self.previous_order
     }
 
     pub fn toggle_expand(&mut self) {
@@ -561,21 +558,19 @@ impl Catalog {
     }
 
     pub fn move_to_input_pattern(&mut self, pattern: &str) {
-        match self.find_index_input_pattern(pattern) {
-            Some(index) => if self.navigator.can_move_to_index(index) {
+        if let Some(index) = self.find_index_input_pattern(pattern) {
+            if self.navigator.can_move_to_index(index) {
                 self.navigator.move_to_index(index)
-            },
-            None => {},
+            }
         }
     }
 
     pub fn move_to_label_pattern(&mut self, pattern: &str) {
         println!("move_to_label_pattern({})", pattern);
-        match self.find_index_label_search(pattern) {
-            Some(index) => if self.navigator.can_move_to_index(index) {
+        if let Some(index) = self.find_index_label_search(pattern) {
+            if self.navigator.can_move_to_index(index) {
                 self.navigator.move_to_index(index)
-            },
-            None => {},
+            }
         }
     }
 
@@ -597,7 +592,7 @@ impl Catalog {
                 new_picture_entry.set_rank(rank);
                 match self.set_current_picture_entry(new_picture_entry) {
                     Ok(()) => {
-                        self.last_comment = Some(Comment::Rank { rank: rank });
+                        self.last_comment = Some(Comment::Rank { rank });
                         Ok(())
                     },
                     Err(err) => Err(anyhow!(err)),
@@ -622,15 +617,14 @@ impl Catalog {
     pub fn apply_label_all(&mut self, label:&str) -> Result<()> {
         for i in 0..self.picture_entries.len() {
             self.navigator = self.navigator.set_index(i);
-            match self.current_entry() {
-                Some(entry) => match entry.label() {
-                        Some(label) => {},
-                        None => match self.label_current_entry(label) {
-                            Ok(()) => {},
-                            Err(err) => return Err(err),
-                        }
-                    },
-                None => {},
+            if let Some(entry) = self.current_entry() {
+                match entry.label() {
+                    Some(_) => {},
+                    None => match self.label_current_entry(label) {
+                        Ok(()) => {},
+                        Err(err) => return Err(err),
+                    }
+                }
             }
         }
         Ok(())
@@ -759,10 +753,10 @@ impl Catalog {
                             let entry: &mut PictureEntry = &mut self.picture_entries[i];
                             match &self.last_comment {
                                 None => {},
-                                Some(Comment::Label { label }) => entry.set_label(&label),
+                                Some(Comment::Label { label }) => entry.set_label(label),
                                 Some(Comment::Unlabel) => entry.unlabel(),
-                                Some(Comment::AddTag { label}) => entry.add_tag(&label),
-                                Some(Comment::DeleteTag { label}) => entry.delete_tag(&label),
+                                Some(Comment::AddTag { label}) => entry.add_tag(label),
+                                Some(Comment::DeleteTag { label}) => entry.delete_tag(label),
                                 Some(Comment::Rank { rank }) => entry.set_rank(*rank),
                                 Some(Comment::ToggleSelect) => { entry.selected = !entry.selected }
                                 Some(Comment::ToggleDelete) => { entry.deleted = !entry.deleted },
@@ -837,8 +831,8 @@ impl Catalog {
                 Order::Date => self.picture_entries.sort_by(|a, b| { a.modified_time.cmp(&b.modified_time) }),
                 Order::Name => self.picture_entries.sort_by(|a, b| { a.original_file_path().cmp(&b.original_file_path()) }),
                 Order::Size => self.picture_entries.sort_by(|a, b| { a.file_size.cmp(&b.file_size)} ),
-                Order::Value => self.picture_entries.sort_by(|a, b|  { a.cmp_rank(&b) }),
-                Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(&b) }),
+                Order::Value => self.picture_entries.sort_by(|a, b|  { a.cmp_rank(b) }),
+                Order::Label => self.picture_entries.sort_by(|a, b| { a.cmp_label(b) }),
                 Order::Palette => self.picture_entries.sort_by(|a, b| { a.palette.cmp(&b.palette) }),
                 Order::Random => self.picture_entries.shuffle(&mut thread_rng()),
             };

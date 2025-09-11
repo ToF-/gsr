@@ -29,11 +29,11 @@ pub struct PictureEntry {
 
 pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, cover: bool, tags: HashSet<String>) -> PictureEntry {
     PictureEntry {
-        file_path: file_path,
-        file_size: file_size,
-        colors: colors,
-        modified_time: modified_time,
-        rank: rank,
+        file_path,
+        file_size,
+        colors,
+        modified_time,
+        rank,
         palette: match palette_option {
             Some(palette) => palette,
             None => [0;9],
@@ -42,10 +42,10 @@ pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modi
             Some(label) => label.clone(),
             None => String::new(),
         },
-        selected: selected,
-        deleted: deleted,
-        cover: cover,
-        tags: tags,
+        selected,
+        deleted,
+        cover,
+        tags,
     }
 }
 
