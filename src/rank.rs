@@ -15,18 +15,6 @@ impl Rank {
             "".to_string()
         }
     }
-
-}
-
-impl Into<i64> for Rank {
-    fn into(self) -> i64 {
-        match self {
-            Rank::ThreeStars => 0,
-            Rank::TwoStars => 1,
-            Rank::OneStar => 2,
-            Rank::NoStar => 3,
-        }
-    }
 }
 
 impl From<i64> for Rank {

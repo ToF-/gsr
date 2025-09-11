@@ -84,7 +84,7 @@ impl PictureEntry {
     }
 
     pub fn original_file_path(&self) -> String {
-        if !self.file_path.contains(&THUMB_SUFFIX) {
+        if !self.file_path.contains(THUMB_SUFFIX) {
             self.file_path.clone()
         } else {
             let path = PathBuf::from(self.file_path.clone());
@@ -93,7 +93,7 @@ impl PictureEntry {
             let file_stem = path.file_stem().unwrap().to_str().unwrap();
             let new_file_stem = match file_stem.strip_suffix("THUMB") {
                 Some(s) => s,
-                None => &file_stem,
+                None => file_stem,
             };
             let new_file_name = format!("{}.{}", new_file_stem, extension.to_str().unwrap());
             let new_path = parent.join(new_file_name);
@@ -102,7 +102,7 @@ impl PictureEntry {
     }
 
     pub fn thumbnail_file_path(&self) -> String {
-        if self.file_path.contains(&THUMB_SUFFIX) {
+        if self.file_path.contains(THUMB_SUFFIX) {
             self.file_path.to_string()
         } else {
             let path = PathBuf::from(self.file_path.clone());
@@ -146,7 +146,7 @@ impl PictureEntry {
     }
 
     pub fn label(&self) -> Option<String> {
-        if self.label.len() > 0 {
+        if !self.label.is_empty() {
             Some(self.label.clone())
         } else {
             None
@@ -167,7 +167,7 @@ impl PictureEntry {
     }
 
     pub fn add_tag(&mut self, tag: &str) {
-        if tag.len() > 0 {
+        if !tag.is_empty() {
             self.tags.insert(tag.to_string());
         }
     }
@@ -189,7 +189,7 @@ impl PictureEntry {
     }
 
     pub fn cmp_rank(&self, other: &PictureEntry) -> Ordering {
-        let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
+        let cmp = (self.rank as usize).cmp(&(other.rank as usize));
         if cmp == Equal {
             self.original_file_path().cmp(&other.original_file_path())
         } else {
@@ -213,9 +213,7 @@ impl PictureEntry {
                 copy_file_to_target_directory(&self.thumbnail_file_path(), target_dir)
                     .and_then(|r2| {
                         copy_file_to_target_directory(&self.image_data_file_path(), target_dir)
-                            .and_then(|r3| {
-                                Ok(r1+r2+r3)
-                            })
+                            .map(|r3| r1 + r2 + r3)
                     })
             })
     }
@@ -229,8 +227,8 @@ impl PictureEntry {
             if has_focus { "▄" } else { "" },
             self.rank.show(),
             if self.selected { "△" } else { "" },
-            if self.label.len() > 0 {
-                format!("{}", self.label)
+            if !self.label.is_empty() {
+                self.label.to_string()
             } else { String::from("") } ,
             if self.deleted { "🗑" } else { "" },
         )
@@ -252,11 +250,7 @@ impl PictureEntry {
             self.file_size,
             self.colors,
             self.rank.show(),
-            if let Some(s) = self.label() {
-                s
-            } else {
-                String::from("")
-            },
+            self.label().unwrap_or_default(),
             if self.deleted { "🗑" } else { ""},
             Self::display_tags(self.tags))
     }

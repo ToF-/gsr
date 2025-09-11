@@ -94,7 +94,7 @@ fn main() {
                                     Err(err) => return Err(anyhow!(err)),
                                 }
                             };
-                            catalog.sort_by(args.order.clone());
+                            catalog.sort_by(args.order);
                             let catalog_rc = Rc::new(RefCell::new(catalog));
                             let mut exit: bool = false;
                             while !exit {
@@ -119,11 +119,8 @@ fn main() {
                                     Ok(mut catalog) => 
                                         if catalog.navigator().done() {
                                             exit = true
-                                        } else {
-                                            match catalog.navigator().new_page_size() {
-                                                Some(size) => { catalog.set_page_size(size) },
-                                                None => {},
-                                            }
+                                        } else if let Some(size) = catalog.navigator().new_page_size() {
+                                                catalog.set_page_size(size)
                                         },
                                     Err(err) => return Err(err.into()),
                                 }
@@ -143,7 +140,7 @@ fn main() {
 
     fn database_operations(database: &mut Database, args: &Args) -> Result<()> {
         if args.check {
-            match check_database_and_files(&directory(args.clone().directory), &database) {
+            match check_database_and_files(&directory(args.clone().directory), database) {
                 Ok(()) => {},
                 Err(err) => return Err(anyhow!(err)),
             }
@@ -159,17 +156,17 @@ fn main() {
         };
         match args.from {
             Some(ref ext_directory) => match args.add {
-                Some(ref abs_directory) => match copy_all_picture_files(&ext_directory, &abs_directory) {
+                Some(ref abs_directory) => match copy_all_picture_files(ext_directory, abs_directory) {
                     Ok(()) => {},
                     Err(err) => return Err(anyhow!(err)),
                 },
-                None => match copy_all_picture_files(&ext_directory, &directory(args.clone().directory)) {
+                None => match copy_all_picture_files(ext_directory, &directory(args.clone().directory)) {
                     Ok(()) => {},
                     Err(err) => return Err(anyhow!(err)),
                 }
             },
-            None => match args.add {
-                Some(ref abs_directory) => match load_picture_entries_from_directory_into_db(database, &abs_directory, false) {
+            None => if let Some(ref abs_directory) = args.add {
+                match load_picture_entries_from_directory_into_db(database, abs_directory, false) {
                     Ok(pictures_entries) => {
                         println!("the following pictures have been inserted in the database:");
                         for picture_entry in pictures_entries {
@@ -178,8 +175,7 @@ fn main() {
                     },
                     Err(err) => return Err(anyhow!(err)),
                 }
-                None => {},
-            }
+            },
         };
         Ok(())
     }
