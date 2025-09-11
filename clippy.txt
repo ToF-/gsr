@@ -1,0 +1,432 @@
+    Checking gsr v1.1.0 (/Users/christophethibaut/Coding/gsr)
+warning: redundant pattern matching, consider using `is_some()`
+   --> src/loader.rs:198:45
+    |
+198 |   ...                   Ok(reg_expr) => match reg_expr.captures(&file_path) {
+    |  _______________________________________^
+199 | | ...                       Some(_) => true,
+200 | | ...                       None => false,
+201 | | ...                   },
+    | |_______________________^ help: try: `reg_expr.captures(&file_path).is_some()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#redundant_pattern_matching
+    = note: `#[warn(clippy::redundant_pattern_matching)]` on by default
+
+warning: length comparison to zero
+   --> src/loader.rs:207:20
+    |
+207 |                 if tag_select_set.len() > 0 || tag_include_set.len() > 0 {
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!tag_select_set.is_empty()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
+    = note: `#[warn(clippy::len_zero)]` on by default
+
+warning: length comparison to zero
+   --> src/loader.rs:207:48
+    |
+207 |                 if tag_select_set.len() > 0 || tag_include_set.len() > 0 {
+    |                                                ^^^^^^^^^^^^^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!tag_include_set.is_empty()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
+
+warning: casting to the same type is unnecessary (`usize` -> `usize`)
+  --> src/navigator.rs:44:21
+   |
+44 |         let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size()) as usize;
+   |                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `(self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size())`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#unnecessary_cast
+   = note: `#[warn(clippy::unnecessary_cast)]` on by default
+
+warning: casting to the same type is unnecessary (`usize` -> `usize`)
+  --> src/navigator.rs:44:42
+   |
+44 |         let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size()) as usize;
+   |                                          ^^^^^^^^^^^^^^^^^ help: try: `coords.0`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#unnecessary_cast
+
+warning: casting to the same type is unnecessary (`usize` -> `usize`)
+  --> src/navigator.rs:44:62
+   |
+44 |         let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size()) as usize;
+   |                                                              ^^^^^^^^^^^^^^^^^ help: try: `coords.1`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#unnecessary_cast
+
+warning: implicitly performing saturating subtraction
+   --> src/navigator.rs:122:36
+    |
+122 |                 Direction::Left => if index > 0 { index -= 1 },
+    |                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `index = index.saturating_sub(1);`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#implicit_saturating_sub
+    = note: `#[warn(clippy::implicit_saturating_sub)]` on by default
+
+warning: you seem to be trying to use `match` for destructuring a single pattern. Consider using `if let`
+   --> src/navigator.rs:147:9
+    |
+147 | /         match self.index() {
+148 | |             Some(index) => { self.start_index = Some(index) },
+149 | |             None => {},
+150 | |         }
+    | |_________^ help: try: `if let Some(index) = self.index() { self.start_index = Some(index) }`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#single_match
+    = note: `#[warn(clippy::single_match)]` on by default
+
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+  --> src/palette.rs:11:34
+   |
+11 |     let colors = get_palette_rgb(&pixels);
+   |                                  ^^^^^^^ help: change this to: `pixels`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+   = note: `#[warn(clippy::needless_borrow)]` on by default
+
+warning: unneeded `return` statement
+  --> src/palette.rs:30:5
+   |
+30 |     return result;
+   |     ^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_return
+   = note: `#[warn(clippy::needless_return)]` on by default
+help: remove `return`
+   |
+30 -     return result;
+30 +     result
+   |
+
+warning: the loop variable `i` is only used to index `palette`
+  --> src/palette.rs:22:14
+   |
+22 |     for i in 0..9 {
+   |              ^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_range_loop
+   = note: `#[warn(clippy::needless_range_loop)]` on by default
+help: consider using an iterator
+   |
+22 |     for <item> in palette.iter().take(9) {
+   |         ~~~~~~    ~~~~~~~~~~~~~~~~~~~~~~
+
+warning: manual implementation of an assign operation
+  --> src/palette.rs:27:13
+   |
+27 |             value = value >> 8;
+   |             ^^^^^^^^^^^^^^^^^^ help: replace it with: `value >>= 8`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#assign_op_pattern
+   = note: `#[warn(clippy::assign_op_pattern)]` on by default
+
+warning: the loop variable `i` is used to index `result`
+  --> src/palette.rs:35:14
+   |
+35 |     for i in 0..9 {
+   |              ^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_range_loop
+help: consider using an iterator and enumerate()
+   |
+35 |     for (i, <item>) in result.iter_mut().enumerate() {
+   |         ~~~~~~~~~~~    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+warning: manual implementation of an assign operation
+  --> src/palette.rs:38:13
+   |
+38 |             result[i] = result[i] | ((blob[pos] as u32) << (j*8));
+   |             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: replace it with: `result[i] |= ((blob[pos] as u32) << (j*8))`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#assign_op_pattern
+
+warning: match expression looks like `matches!` macro
+  --> src/path.rs:59:39
+   |
+59 |                   let not_a_thumbnail = match path.to_str().map(|f| f.contains(THUMB_SUFFIX)) {
+   |  _______________________________________^
+60 | |                     Some(false) => true,
+61 | |                     _ => false,
+62 | |                 };
+   | |_________________^ help: try: `matches!(path.to_str().map(|f| f.contains(THUMB_SUFFIX)), Some(false))`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#match_like_matches_macro
+   = note: `#[warn(clippy::match_like_matches_macro)]` on by default
+
+warning: match expression looks like `matches!` macro
+   --> src/path.rs:99:43
+    |
+99  |                       let not_a_thumbnail = match path.to_str().map(|f| f.contains(THUMB_SUFFIX)) {
+    |  ___________________________________________^
+100 | |                         Some(false) => true,
+101 | |                         _ => false,
+102 | |                     };
+    | |_____________________^ help: try: `matches!(path.to_str().map(|f| f.contains(THUMB_SUFFIX)), Some(false))`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#match_like_matches_macro
+
+warning: this expression borrows a value the compiler would automatically borrow
+   --> src/path.rs:104:41
+    |
+104 |                         file_paths.push((&path.display()).to_string())
+    |                                         ^^^^^^^^^^^^^^^^^ help: change this to: `path.display()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: function call inside of `expect`
+   --> src/path.rs:144:19
+    |
+144 |     path.parent().expect(&format!("can't get file_path parent of {}", source)).display().to_string()
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: try: `unwrap_or_else(|| panic!("can't get file_path parent of {}", source))`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#expect_fun_call
+    = note: `#[warn(clippy::expect_fun_call)]` on by default
+
+warning: useless conversion to the same type: `std::string::String`
+   --> src/path.rs:173:9
+    |
+173 |         String::from(directory_arg)
+    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider removing `String::from()`: `directory_arg`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#useless_conversion
+    = note: `#[warn(clippy::useless_conversion)]` on by default
+
+warning: this function has too many arguments (11/7)
+  --> src/picture_entry.rs:30:1
+   |
+30 | pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, cover: bool, tags: HashSet<String>) -> PictureEntr...
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#too_many_arguments
+   = note: `#[warn(clippy::too_many_arguments)]` on by default
+
+warning: this pattern reimplements `Option::unwrap_or`
+  --> src/picture_entry.rs:37:18
+   |
+37 |           palette: match palette_option {
+   |  __________________^
+38 | |             Some(palette) => palette,
+39 | |             None => [0;9],
+40 | |         },
+   | |_________^ help: replace with: `palette_option.unwrap_or([0;9])`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_unwrap_or
+   = note: `#[warn(clippy::manual_unwrap_or)]` on by default
+
+warning: match can be simplified with `.unwrap_or_default()`
+  --> src/picture_entry.rs:37:18
+   |
+37 |           palette: match palette_option {
+   |  __________________^
+38 | |             Some(palette) => palette,
+39 | |             None => [0;9],
+40 | |         },
+   | |_________^ help: replace it with: `palette_option.unwrap_or_default()`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_unwrap_or_default
+   = note: `#[warn(clippy::manual_unwrap_or_default)]` on by default
+
+warning: the borrowed expression implements the required traits
+  --> src/picture_entry.rs:97:37
+   |
+97 |         if !self.file_path.contains(&THUMB_SUFFIX) {
+   |                                     ^^^^^^^^^^^^^ help: change this to: `THUMB_SUFFIX`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrows_for_generic_args
+   = note: `#[warn(clippy::needless_borrows_for_generic_args)]` on by default
+
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+   --> src/picture_entry.rs:106:25
+    |
+106 |                 None => &file_stem,
+    |                         ^^^^^^^^^^ help: change this to: `file_stem`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: the borrowed expression implements the required traits
+   --> src/picture_entry.rs:115:36
+    |
+115 |         if self.file_path.contains(&THUMB_SUFFIX) {
+    |                                    ^^^^^^^^^^^^^ help: change this to: `THUMB_SUFFIX`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrows_for_generic_args
+
+warning: length comparison to zero
+   --> src/picture_entry.rs:159:12
+    |
+159 |         if self.label.len() > 0 {
+    |            ^^^^^^^^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!self.label.is_empty()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
+
+warning: length comparison to zero
+   --> src/picture_entry.rs:180:12
+    |
+180 |         if tag.len() > 0 {
+    |            ^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!tag.is_empty()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
+
+warning: using `clone` on type `Rank` which implements the `Copy` trait
+   --> src/picture_entry.rs:202:20
+    |
+202 |         let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
+    |                    ^^^^^^^^^^^^^^^^^ help: try removing the `clone` call: `self.rank`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#clone_on_copy
+    = note: `#[warn(clippy::clone_on_copy)]` on by default
+
+warning: using `clone` on type `Rank` which implements the `Copy` trait
+   --> src/picture_entry.rs:202:54
+    |
+202 |         let cmp = (self.rank.clone() as usize).cmp(&(other.rank.clone() as usize));
+    |                                                      ^^^^^^^^^^^^^^^^^^ help: try removing the `clone` call: `other.rank`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#clone_on_copy
+
+warning: using `Result.and_then(|x| Ok(y))`, which is more succinctly expressed as `map(|x| y)`
+   --> src/picture_entry.rs:225:25
+    |
+225 | /                         copy_file_to_target_directory(&self.image_data_file_path(), target_dir)
+226 | |                             .and_then(|r3| {
+227 | |                                 Ok(r1+r2+r3)
+228 | |                             })
+    | |______________________________^ help: try: `copy_file_to_target_directory(&self.image_data_file_path(), target_dir).map(|r3| r1+r2+r3)`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#bind_instead_of_map
+    = note: `#[warn(clippy::bind_instead_of_map)]` on by default
+
+warning: length comparison to zero
+   --> src/picture_entry.rs:242:16
+    |
+242 |             if self.label.len() > 0 {
+    |                ^^^^^^^^^^^^^^^^^^^^ help: using `!is_empty` is clearer and more explicit: `!self.label.is_empty()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#len_zero
+
+warning: useless use of `format!`
+   --> src/picture_entry.rs:243:17
+    |
+243 |                 format!("{}", self.label)
+    |                 ^^^^^^^^^^^^^^^^^^^^^^^^^ help: consider using `.to_string()`: `self.label.to_string()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#useless_format
+    = note: `#[warn(clippy::useless_format)]` on by default
+
+warning: if let can be simplified with `.unwrap_or_default()`
+   --> src/picture_entry.rs:265:13
+    |
+265 | /             if let Some(s) = self.label() {
+266 | |                 s
+267 | |             } else {
+268 | |                 String::from("")
+269 | |             },
+    | |_____________^ help: replace it with: `self.label().unwrap_or_default()`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#manual_unwrap_or_default
+
+warning: an implementation of `From` is preferred since it gives you `Into<_>` for free where the reverse isn't true
+  --> src/rank.rs:21:1
+   |
+21 | impl Into<i64> for Rank {
+   | ^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = help: `impl From<Local> for Foreign` is allowed by the orphan rules, for more information see
+           https://doc.rust-lang.org/reference/items/implementations.html#trait-implementation-coherence
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#from_over_into
+   = note: `#[warn(clippy::from_over_into)]` on by default
+help: replace the `Into` implementation with `From<rank::Rank>`
+   |
+21 ~ impl From<Rank> for i64 {
+22 ~     fn from(val: Rank) -> Self {
+23 ~         match val {
+   |
+
+warning: using `clone` on type `Order` which implements the `Copy` trait
+  --> src/main.rs:97:45
+   |
+97 | ...                   catalog.sort_by(args.order.clone());
+   |                                       ^^^^^^^^^^^^^^^^^^ help: try removing the `clone` call: `args.order`
+   |
+   = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#clone_on_copy
+
+warning: you seem to be trying to use `match` for destructuring a single pattern. Consider using `if let`
+   --> src/main.rs:123:45
+    |
+123 | / ...                   match catalog.navigator().new_page_size() {
+124 | | ...                       Some(size) => { catalog.set_page_size(size) },
+125 | | ...                       None => {},
+126 | | ...                   }
+    | |_______________________^ help: try: `if let Some(size) = catalog.navigator().new_page_size() { catalog.set_page_size(size) }`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#single_match
+
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+   --> src/main.rs:146:80
+    |
+146 |             match check_database_and_files(&directory(args.clone().directory), &database) {
+    |                                                                                ^^^^^^^^^ help: change this to: `database`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+   --> src/main.rs:162:73
+    |
+162 |                 Some(ref abs_directory) => match copy_all_picture_files(&ext_directory, &abs_directory) {
+    |                                                                         ^^^^^^^^^^^^^^ help: change this to: `ext_directory`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+   --> src/main.rs:162:89
+    |
+162 |                 Some(ref abs_directory) => match copy_all_picture_files(&ext_directory, &abs_directory) {
+    |                                                                                         ^^^^^^^^^^^^^^ help: change this to: `abs_directory`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+   --> src/main.rs:166:54
+    |
+166 |                 None => match copy_all_picture_files(&ext_directory, &directory(args.clone().directory)) {
+    |                                                      ^^^^^^^^^^^^^^ help: change this to: `ext_directory`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: you seem to be trying to use `match` for destructuring a single pattern. Consider using `if let`
+   --> src/main.rs:171:21
+    |
+171 |               None => match args.add {
+    |  _____________________^
+172 | |                 Some(ref abs_directory) => match load_picture_entries_from_directory_into_db(database, &abs_directory, false) {
+173 | |                     Ok(pictures_entries) => {
+174 | |                         println!("the following pictures have been inserted in the database:");
+...   |
+181 | |                 None => {},
+182 | |             }
+    | |_____________^
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#single_match
+help: try
+    |
+171 ~             None => if let Some(ref abs_directory) = args.add { match load_picture_entries_from_directory_into_db(database, &abs_directory, false) {
+172 +                 Ok(pictures_entries) => {
+173 +                     println!("the following pictures have been inserted in the database:");
+174 +                     for picture_entry in pictures_entries {
+175 +                         println!("{}", picture_entry.file_path)
+176 +                     }
+177 +                 },
+178 +                 Err(err) => return Err(anyhow!(err)),
+179 +             } }
+    |
+
+warning: this expression creates a reference which is immediately dereferenced by the compiler
+   --> src/main.rs:172:104
+    |
+172 |                 Some(ref abs_directory) => match load_picture_entries_from_directory_into_db(database, &abs_directory, false) {
+    |                                                                                                        ^^^^^^^^^^^^^^ help: change this to: `abs_directory`
+    |
+    = help: for further information visit https://rust-lang.github.io/rust-clippy/master/index.html#needless_borrow
+
+warning: `gsr` (bin "gsr") generated 42 warnings (run `cargo clippy --fix --bin "gsr"` to apply 37 suggestions)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.28s

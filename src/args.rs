@@ -75,8 +75,8 @@ pub struct Args {
     #[arg(long)]
     pub info: bool,
 
-    /// label all pictures in the set
-    #[arg(short, long)]
+    /// label all unlabeled pictures in the set with LABEL
+    #[arg(short, long, value_name="LABEL")]
     pub label: Option<String>,
 
     /// move selected files to TARGET_DIR
@@ -142,7 +142,7 @@ impl Args {
 
             add: match &self.add {
                 None => None,
-                Some(dir) => match check_path(&dir, ABSOLUTE_PATH) {
+                Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
                     Err(err) => return Err(err),
                 }
@@ -154,7 +154,7 @@ impl Args {
 
             copy_selection: match &self.copy_selection {
                 None => None,
-                Some(dir) => match check_path(&dir, ABSOLUTE_PATH) {
+                Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
                     Err(err) => return Err(err),
                 },
@@ -163,8 +163,8 @@ impl Args {
             date: self.date,
 
             deduplicate: {
-                match self.deduplicate.clone() {
-                    Some(dir) => match check_path(&dir, ! ABSOLUTE_PATH) {
+                match &self.deduplicate {
+                    Some(dir) => match check_path(dir, ! ABSOLUTE_PATH) {
                         Ok(_) => Some(dir.to_string()),
                         Err(err) => return Err(err),
                     },
@@ -174,7 +174,7 @@ impl Args {
 
             directory: {
                 match &self.directory {
-                    Some(dir) => match check_path(&dir, ! ABSOLUTE_PATH) {
+                    Some(dir) => match check_path(dir, ! ABSOLUTE_PATH) {
                         Ok(_) => Some(dir.to_string()),
                         Err(err) => return Err(err),
                     }
@@ -194,7 +194,7 @@ impl Args {
                         Err(err) => return Err(err),
                     }
                 },
-                Some(path) => match check_reading_list_file(&path) {
+                Some(path) => match check_reading_list_file(path) {
                     Ok(_) => Some(path.to_string()),
                     Err(err) => return Err(err),
                 },
@@ -202,7 +202,7 @@ impl Args {
 
             file: match &self.file {
                 None => None,
-                Some(path) => match check_file(&path) {
+                Some(path) => match check_file(path) {
                     Ok(_) => Some(path.to_string()),
                     Err(err) => return Err(err),
                 },
@@ -210,7 +210,7 @@ impl Args {
 
             from: match &self.from {
                 None => None,
-                Some(dir) => match check_path(&dir, ! ABSOLUTE_PATH) {
+                Some(dir) => match check_path(dir, ! ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
                     Err(err) => return Err(err),
                 }
@@ -226,9 +226,9 @@ impl Args {
             height: Some(dimension(self.height, HEIGHT_ENV_VAR, "height", DEFAULT_HEIGHT)),
 
             include: match self.include.clone() {
-                Some(list) => if list.len() > 0 {
-                    let tags:Vec<String> = list[0].split(' ').map(|s| s.into()).filter(|s:&String| s.len() > 0).collect();
-                    if tags.len() > 0 {
+                Some(list) => if !list.is_empty() {
+                    let tags:Vec<String> = list[0].split(' ').map(|s| s.into()).filter(|s:&String| !s.is_empty()).collect();
+                    if !tags.is_empty() {
                         Some(tags)
                     } else {
                         None
@@ -246,7 +246,7 @@ impl Args {
 
             move_selection: match &self.move_selection {
                 None => None,
-                Some(dir) => match check_path(&dir, ABSOLUTE_PATH) {
+                Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
                     Err(err) => return Err(err),
                 },
@@ -261,7 +261,7 @@ impl Args {
             } else if self.date {
                 Order::Date
             } else {
-                self.order.clone()
+                self.order
             },
 
             pattern: self.pattern.clone(),
@@ -272,7 +272,7 @@ impl Args {
 
             redirect: match &self.redirect {
                 None => None,
-                Some(path) => match check_path(&path, true) {
+                Some(path) => match check_path(path, true) {
                     Ok(_) => Some(path.to_string()),
                     Err(err) => return Err(err),
                 },
@@ -281,9 +281,9 @@ impl Args {
             seconds: self.seconds,
 
             select: match self.select.clone() {
-                Some(list) => if list.len() > 0 {
-                    let tags:Vec<String> = list[0].split(' ').map(|s| s.into()).filter(|s:&String| s.len() > 0).collect();
-                    if tags.len() > 0 {
+                Some(list) => if !list.is_empty() {
+                    let tags:Vec<String> = list[0].split(' ').map(|s| s.into()).filter(|s:&String| !s.is_empty()).collect();
+                    if !tags.is_empty() {
                         Some(tags)
                     } else {
                         None

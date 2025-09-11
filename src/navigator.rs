@@ -187,7 +187,7 @@ impl Navigator {
 
     pub fn set_index(&self, index: usize) -> Self {
         Navigator {
-            index: index,
+            index,
             ..self.clone()
         }
     }

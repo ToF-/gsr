@@ -10,7 +10,7 @@ pub fn get_palette(image: &DynamicImage) -> Palette {
     let pixels: &[u8] = image.as_bytes();
     let colors = get_palette_rgb(&pixels);
     colors.iter().enumerate().for_each(|(i,c)| {
-        palette[i] = (c.r as u32) << 16 | (c.g as u32) << 8 | c.b as u32;
+        palette[i] = ((c.r as u32) << 16) | ((c.g as u32) << 8) | c.b as u32;
     });
     palette.sort();
     palette
@@ -35,7 +35,7 @@ pub fn blob_to_palette(blob: &[u8;36]) -> Palette {
     for i in 0..9 {
         for j in 0..4 {
             let pos:usize = i * 4 + j;
-            result[i] = result[i] | (blob[pos] as u32) << j*8;
+            result[i] = result[i] | ((blob[pos] as u32) << (j*8));
         }
     }
     result

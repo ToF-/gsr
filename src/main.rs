@@ -18,24 +18,25 @@ use std::rc::Rc;
 use crate::commands::load_shortcuts;
 use crate::database::Database;
 
-mod comment;
-mod navigator;
 mod args;
 mod catalog;
 mod commands;
+mod comment;
 mod completion;
 mod database;
 mod direction;
 mod display;
 mod editor;
 mod gui;
-mod loader;
 mod image_data;
+mod loader;
+mod navigator;
 mod order;
 mod palette;
 mod path;
 mod picture_entry;
 mod picture_io;
+mod prompt;
 mod rank;
 
 fn main() {
