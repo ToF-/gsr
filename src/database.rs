@@ -225,7 +225,7 @@ impl Database {
              WHERE File_Path = ?10;",
              params![
              entry.file_size as i64,
-             entry.colors as i64,
+             entry.image_data.colors as i64,
              entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
              entry.rank as i64,
              palette_to_blob(&entry.palette),
@@ -546,7 +546,7 @@ fn rusqlite_insert_picture_entry(&self, picture_entry: PictureEntry) -> Result<u
      params![
      picture_entry.file_path,
      picture_entry.file_size as i64,
-     picture_entry.colors as i64,
+     picture_entry.image_data.colors as i64,
      picture_entry.modified_time.duration_since(UNIX_EPOCH).unwrap().as_secs() as i64,
      picture_entry.rank as i64,
      picture_entry.label(),
@@ -581,7 +581,7 @@ pub fn insert_new_picture_with_file_path(&self, picture_entry: &PictureEntry, fi
         picture_entry.file_size,
         picture_entry.modified_time,
         ImageData {
-            colors: picture_entry.colors,
+            colors: picture_entry.image_data.colors,
             rank: picture_entry.rank,
             selected: false,
             palette: picture_entry.palette,

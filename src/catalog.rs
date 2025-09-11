@@ -827,7 +827,7 @@ impl Catalog {
         if let Some(entry) = self.current_entry() {
             let original_file_path = entry.original_file_path();
             match order {
-                Order::Colors => self.picture_entries.sort_by(|a, b| { a.colors.cmp(&b.colors) }),
+                Order::Colors => self.picture_entries.sort_by(|a, b| { a.image_data.colors.cmp(&b.image_data.colors) }),
                 Order::Date => self.picture_entries.sort_by(|a, b| { a.modified_time.cmp(&b.modified_time) }),
                 Order::Name => self.picture_entries.sort_by(|a, b| { a.original_file_path().cmp(&b.original_file_path()) }),
                 Order::Size => self.picture_entries.sort_by(|a, b| { a.file_size.cmp(&b.file_size)} ),

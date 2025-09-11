@@ -180,7 +180,6 @@ insert_new_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^p
 insert_new_picture_with_file_path	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_new_picture_with_file_path(&self, picture_entry: &PictureEntry, file_path: &str) -> Result<()> {$/;"	f
 insert_or_update_cover	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    pub fn insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<()> {$/;"	f
 insert_picture_entry	/Users/christophethibaut/Coding/gsr/src/database.rs	/^pub fn insert_picture_entry(&self, file_path: &str) -> Result<PictureEntry> {$/;"	f
-into	/Users/christophethibaut/Coding/gsr/src/rank.rs	/^    fn into(self) -> i64 {$/;"	f
 is_prefix_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn is_prefix_path(prefix: &str, path: &str) -> bool {$/;"	f
 label	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn label(&self) -> Option<String> {$/;"	f
 label_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn label_current_entry(&mut self, label: &str) -> Result<()> {$/;"	f

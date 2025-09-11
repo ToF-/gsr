@@ -1,2 +1,2 @@
-    Checking gsr v1.1.0 (/Users/christophethibaut/Coding/gsr)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.71s
+    Checking gsr v1.1.1 (/Users/christophethibaut/Coding/gsr)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.70s

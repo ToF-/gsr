@@ -17,7 +17,6 @@ pub type PictureEntries = Vec<PictureEntry>;
 pub struct PictureEntry {
     pub file_path: String,
     pub file_size: u64,
-    pub colors: usize,
     pub modified_time: SystemTime,
     pub rank: Rank,
     pub palette: [u32;9],
@@ -26,13 +25,14 @@ pub struct PictureEntry {
     pub deleted: bool,
     pub cover: bool,
     pub tags: HashSet<String>,
+    pub image_data: ImageData,
 }
 
 pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool, tags: HashSet<String>) -> PictureEntry {
+    let data = image_data.clone();
     PictureEntry {
         file_path,
         file_size,
-        colors: image_data.colors,
         modified_time,
         rank: image_data.rank,
         palette: image_data.palette,
@@ -41,6 +41,7 @@ pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: Syst
         deleted,
         cover: image_data.cover,
         tags,
+        image_data: data,
     }
 }
 
@@ -248,7 +249,7 @@ impl PictureEntry {
             self.original_file_name(),
             if self.selected { "△" } else { "" },
             self.file_size,
-            self.colors,
+            self.image_data.colors,
             self.rank.show(),
             self.label().unwrap_or_default(),
             if self.deleted { "🗑" } else { ""},
