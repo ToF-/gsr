@@ -195,16 +195,13 @@ pub fn load_picture_entries_from_directory(database: &mut Database, directory: &
                     None => true,
                     Some(ref pattern) => {
                         match Regex::new(pattern) {
-                            Ok(reg_expr) => match reg_expr.captures(&file_path) {
-                                Some(_) => true,
-                                None => false,
-                            },
+                            Ok(reg_expr) => reg_expr.captures(&file_path).is_some(),
                             Err(err) => return Err(anyhow!(err)),
                         }
                     },
                 };
                 let entry_tags: HashSet<String>;
-                if tag_select_set.len() > 0 || tag_include_set.len() > 0 {
+                if !tag_select_set.is_empty() || !tag_include_set.is_empty() {
                     match database.entry_tags(&file_path) {
                         Ok(tags) => {
                             entry_tags = HashSet::from_iter(tags.iter().cloned())

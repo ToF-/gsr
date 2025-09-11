@@ -1,3 +1,4 @@
+use crate::image_data::ImageData;
 use itertools::Itertools;
 use std::collections::HashSet;
 use crate::Database;
@@ -27,24 +28,18 @@ pub struct PictureEntry {
     pub tags: HashSet<String>,
 }
 
-pub fn make_picture_entry(file_path: String, file_size: u64, colors: usize, modified_time: SystemTime, rank: Rank, palette_option: Option<[u32;9]>, label_option: Option<String>, selected: bool, deleted: bool, cover: bool, tags: HashSet<String>) -> PictureEntry {
+pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool, tags: HashSet<String>) -> PictureEntry {
     PictureEntry {
         file_path,
         file_size,
-        colors,
+        colors: image_data.colors,
         modified_time,
-        rank,
-        palette: match palette_option {
-            Some(palette) => palette,
-            None => [0;9],
-        },
-        label: match label_option {
-            Some(label) => label.clone(),
-            None => String::new(),
-        },
-        selected,
+        rank: image_data.rank,
+        palette: image_data.palette,
+        label: image_data.label,
+        selected: image_data.selected,
         deleted,
-        cover,
+        cover: image_data.cover,
         tags,
     }
 }
@@ -68,10 +63,7 @@ impl PictureEntry {
                             file_size,
                             image_data.colors,
                             modified_time,
-                            image_data.rank,
-                            Some(image_data.palette),
-                            Some(image_data.label),
-                            image_data.selected,
+                            image_data,
                             false,
                             false,
                             HashSet::new())),

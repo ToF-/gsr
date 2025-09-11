@@ -8,7 +8,7 @@ pub type Colors = usize;
 pub fn get_palette(image: &DynamicImage) -> Palette {
     let mut palette: Palette = [0;9];
     let pixels: &[u8] = image.as_bytes();
-    let colors = get_palette_rgb(&pixels);
+    let colors = get_palette_rgb(pixels);
     colors.iter().enumerate().for_each(|(i,c)| {
         palette[i] = ((c.r as u32) << 16) | ((c.g as u32) << 8) | c.b as u32;
     });
@@ -19,23 +19,23 @@ pub fn get_palette(image: &DynamicImage) -> Palette {
 pub fn palette_to_blob(palette: &Palette) -> [u8;36] {
     let mut result: [u8;36] = [0; 36];
     let mut pos: usize = 0;
-    for i in 0..9 {
-        let mut value: u32 = palette[i];
+    for item in palette.iter().take(9) {
+        let mut value: u32 = *item;
         for _ in 0..4 {
             result[pos] = (value & 255) as u8;
             pos += 1;
-            value = value >> 8;
+            value >>= 8;
         }
     }
-    return result;
+    result
 }
 
 pub fn blob_to_palette(blob: &[u8;36]) -> Palette {
     let mut result: Palette = [0;9];
-    for i in 0..9 {
+    for (i, _) in result.clone().iter().enumerate() {
         for j in 0..4 {
             let pos:usize = i * 4 + j;
-            result[i] = result[i] | ((blob[pos] as u32) << (j*8));
+            result[i] |= (blob[pos] as u32) << (j*8);
         }
     }
     result

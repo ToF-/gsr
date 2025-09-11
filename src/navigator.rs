@@ -41,7 +41,7 @@ impl Navigator {
     }
 
     pub fn index_from_position(self, coords: Coords) -> Option<usize> {
-        let index = (self.page_index() + coords.0 as usize + coords.1 as usize * self.page_size()) as usize;
+        let index = self.page_index() + coords.0 + coords.1 * self.page_size();
         if index < self.length {
             Some(index)
         } else {
@@ -119,7 +119,7 @@ impl Navigator {
             let mut index = self.index().expect("incorrect index value");
             match direction {
                 Direction::Right => if index + 1 < self.length() { index += 1 },
-                Direction::Left => if index > 0 { index -= 1 },
+                Direction::Left => index = index.saturating_sub(1),
                 Direction::Down => if index + self.page_size() < self.length() { index += self.page_size() } else { index = 0 },
                 Direction::Up => {
                     if index >= self.page_size() {
@@ -144,9 +144,8 @@ impl Navigator {
     }
 
     pub fn start_set(&mut self) {
-        match self.index() {
-            Some(index) => { self.start_index = Some(index) },
-            None => {},
+        if let Some(index) = self.index() {
+             self.start_index = Some(index) 
         }
     }
 

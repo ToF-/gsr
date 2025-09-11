@@ -56,10 +56,7 @@ pub fn check_file(source: &str) -> Result<PathBuf> {
                     Some(extension) => VALID_EXTENSIONS.contains(&extension.to_str().unwrap()),
                     None => false,
                 };
-                let not_a_thumbnail = match path.to_str().map(|f| f.contains(THUMB_SUFFIX)) {
-                    Some(false) => true,
-                    _ => false,
-                };
+                let not_a_thumbnail = matches!(path.to_str().map(|f| f.contains(THUMB_SUFFIX)), Some(false));
                 if path.is_file() && valid_extension && not_a_thumbnail {
                     Ok(path)
                 } else {
@@ -96,12 +93,9 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
                         Some(extension) => VALID_EXTENSIONS.contains(&extension.to_str().unwrap()),
                         None => false,
                     };
-                    let not_a_thumbnail = match path.to_str().map(|f| f.contains(THUMB_SUFFIX)) {
-                        Some(false) => true,
-                        _ => false,
-                    };
+                    let not_a_thumbnail = matches!(path.to_str().map(|f| f.contains(THUMB_SUFFIX)), Some(false));
                     if path.is_file() && valid_extension && not_a_thumbnail {
-                        file_paths.push((&path.display()).to_string())
+                        file_paths.push((path.display()).to_string())
                     }
                 };
             Ok(file_paths.clone())
@@ -141,7 +135,8 @@ pub fn is_prefix_path(prefix: &str, path: &str) -> bool {
 
 pub fn file_path_directory(source: &str) -> String {
     let path = Path::new(source);
-    path.parent().expect(&format!("can't get file_path parent of {}", source)).display().to_string()
+    path.parent().unwrap_or_else(|| panic!("can't get file_path parent of {}", source))
+        .display().to_string()
 }
 
 pub fn file_name(source: &str) -> String {
@@ -170,7 +165,7 @@ pub fn standard_directory() -> String {
 pub fn directory(directory: Option<String>) -> String {
     let gallshdir = env::var(DIR_ENV_VAR);
     if let Some(directory_arg) = directory {
-        String::from(directory_arg)
+        directory_arg
     } else if let Ok(standard_dir) = &gallshdir {
         String::from(standard_dir)
     } else {

@@ -1,3 +1,4 @@
+use crate::image_data::ImageData;
 use anyhow::{anyhow, Result};
 use crate::palette::{palette_to_blob,blob_to_palette};
 use crate::path::file_name;
@@ -256,42 +257,44 @@ impl Database {
     }
 
     fn rusqlite_to_picture_entry(row: &Row) -> Result<PictureEntry,Error> {
-            Ok(make_picture_entry(
+        Ok(make_picture_entry(
                 row.get(0)?,
                 row.get(1)?,
-                row.get(2)?,
                 {
                     let mt:i64 = row.get(3)?;
                     UNIX_EPOCH + Duration::new(mt as u64, 0)
                 },
-                {
-                    let r:i64 = row.get(4)?;
-                    Rank::from(r)
-                },
-                {
-                    let blob: Vec<u8> = row.get(5)?;
-                    let mut bytes: [u8;36] = [0;36];
-                    bytes.copy_from_slice(&blob[..36]);
-                    Some(blob_to_palette(&bytes))
-                },
-                {
-                    let label:String = row.get(6).unwrap_or_default();
-                    if !label.trim().is_empty() {
-                        Some(label.trim().to_string())
-                    } else {
-                        None
+                ImageData {
+                    colors: row.get(2)?,
+                    rank: {
+                        let r:i64 = row.get(4)?;
+                        Rank::from(r)
+                    },
+                    palette: {
+                        let blob: Vec<u8> = row.get(5)?;
+                        let mut bytes: [u8;36] = [0;36];
+                        bytes.copy_from_slice(&blob[..36]);
+                        blob_to_palette(&bytes)
+                    },
+                    label: {
+                        let label:String = row.get(6).unwrap_or_default();
+                        if !label.trim().is_empty() {
+                            label.trim().to_string()
+                        } else {
+                            String::new()
+                        }
+                    },
+                    selected: {
+                        let result:bool = row.get(7)?;
+                        result
+                    },
+                    cover: {
+                        let result:bool = row.get(9)?;
+                        result
                     }
                 },
                 {
-                    let result:bool = row.get(7)?;
-                    result
-                },
-                {
                     let result:bool = row.get(8)?;
-                    result
-                },
-                {
-                    let result:bool = row.get(9)?;
                     result
                 },
                 HashSet::new(),))
@@ -576,13 +579,15 @@ pub fn insert_new_picture_with_file_path(&self, picture_entry: &PictureEntry, fi
     let new_entry = make_picture_entry(
         file_path.to_string(),
         picture_entry.file_size,
-        picture_entry.colors,
         picture_entry.modified_time,
-        picture_entry.rank,
-        Some(picture_entry.palette),
-        picture_entry.label(),
-        false,
-        false,
+        ImageData {
+            colors: picture_entry.colors,
+            rank: picture_entry.rank,
+            selected: false,
+            palette: picture_entry.palette,
+            label: picture_entry.label().unwrap_or_default(),
+            cover: false,
+        },
         false,
         picture_entry.tags.clone()
     );
