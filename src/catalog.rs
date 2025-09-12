@@ -174,6 +174,42 @@ impl Catalog {
         Ok(())
     }
 
+    pub fn extract(&self) {
+        let entry = self.current_entry().unwrap();
+        let file_path = entry.original_file_path();
+        if let Some(args) = &self.args {
+            if let Some(extract_file_path) = &args.list_extract {
+                match append_to_extract_file(&file_path, extract_file_path) {
+                    Ok(_) => {
+                        println!("appended {} in {}", file_path, extract_file_path)
+                    },
+                    Err(err) => {
+                        eprintln!("{}", err)
+                    },
+                }
+            } else {
+                eprintln!("no extract file path info");
+            }
+        } else {
+            eprintln!("no args value");
+        }
+
+    }
+
+    pub fn extract_file_names(&self) -> Result<()> {
+        if let Some(list_file) = self.args.clone().unwrap().list_extract {
+            println!("extracting selected picture file names to {}", list_file);
+            for entry in self.picture_entries.clone().iter()
+                .filter(|entry| entry.image_data.selected) {
+                    match append_to_extract_file(&entry.original_file_path(), &list_file) {
+                        Ok(_) => {},
+                        Err(err) => return Err(anyhow!(err)),
+                    }
+                }
+        };
+        Ok(())
+    }
+
     fn redirect_picture_entry_files(&self, picture_entry: &PictureEntry, path: &Path) -> Result<()> {
         let mut new_picture_file_path_buf:PathBuf = PathBuf::from(path);
         let mut new_thumb_file_path_buf:PathBuf = PathBuf::from(path);
@@ -333,28 +369,6 @@ impl Catalog {
             Ok(_) => Ok(()),
             Err(err) => Err(anyhow!(err)),
         }
-    }
-
-    pub fn extract(&self) {
-        let entry = self.current_entry().unwrap();
-        let file_path = entry.original_file_path();
-        if let Some(args) = &self.args {
-            if let Some(extract_file_path) = &args.list_extract {
-                match append_to_extract_file(&file_path, extract_file_path) {
-                    Ok(_) => {
-                        println!("appended {} in {}", file_path, extract_file_path)
-                    },
-                    Err(err) => {
-                        eprintln!("{}", err)
-                    },
-                }
-            } else {
-                eprintln!("no extract file path info");
-            }
-        } else {
-            eprintln!("no args value");
-        }
-
     }
 
     pub fn print_info(&self, editor: &Editor) {
