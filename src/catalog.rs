@@ -339,7 +339,7 @@ impl Catalog {
         let entry = self.current_entry().unwrap();
         let file_path = entry.original_file_path();
         if let Some(args) = &self.args {
-            if let Some(extract_file_path) = &args.extract {
+            if let Some(extract_file_path) = &args.list_extract {
                 match append_to_extract_file(&file_path, extract_file_path) {
                     Ok(_) => {
                         println!("appended {} in {}", file_path, extract_file_path)

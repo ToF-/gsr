@@ -154,8 +154,8 @@ fn main() {
                 Err(err) => return Err(anyhow!(err)),
             }
         };
-        match args.from {
-            Some(ref ext_directory) => match args.add {
+        match args.from_files {
+            Some(ref ext_directory) => match args.add_files {
                 Some(ref abs_directory) => match copy_all_picture_files(ext_directory, abs_directory) {
                     Ok(()) => {},
                     Err(err) => return Err(anyhow!(err)),
@@ -165,7 +165,7 @@ fn main() {
                     Err(err) => return Err(anyhow!(err)),
                 }
             },
-            None => if let Some(ref abs_directory) = args.add {
+            None => if let Some(ref abs_directory) = args.add_files {
                 match load_picture_entries_from_directory_into_db(database, abs_directory, false) {
                     Ok(pictures_entries) => {
                         println!("the following pictures have been inserted in the database:");

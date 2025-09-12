@@ -109,8 +109,8 @@ pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) ->
         load_single_picture_entry(database, file)
     } else if args.covers {
         load_picture_entries_from_covers(database)
-    } else if args.directory.is_some() && args.add.is_some() && args.from.is_some() {
-        load_picture_entries_from_directory_into_db(database, &args.clone().add.unwrap(), true)
+    } else if args.directory.is_some() && args.add_files.is_some() && args.from_files.is_some() {
+        load_picture_entries_from_directory_into_db(database, &args.clone().add_files.unwrap(), true)
     } else if args.directory.is_some() {
         load_picture_entries_from_directory(database, &args.directory.clone().unwrap(), &args)
     } else  {

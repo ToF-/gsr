@@ -13,47 +13,32 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 #[command(version, infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
 pub struct Args {
-    /// add picture data from the pictures in TARGET_DIR to the database
-    #[arg(long, value_name = "TARGET_DIR")]
-    pub add: Option<String>,
-
-    /// checks default directory for new pictures
-    #[arg(long, default_value_t = false)]
-    pub check: bool,
-
-    /// show only cover pictures of each directory
-    #[arg(long, default_value_t = false)]
-    pub covers: bool,
-    /// create the schema for the database
-    #[arg(long, default_value_t = false)]
-    pub create_schema: bool,
-
-     /// Directory to search (default is set with variable GALLSHDIR)
-    pub directory: Option<String>,
-
-    /// move all duplicate files to TARGET_DIR
-    #[arg(long, value_name = "TARGET_DIR")]
-    pub deduplicate: Option<String>,
-
-    /// copy selected files to TARGET_DIR
-    #[arg(short, long, value_name = "TARGET_DIR")]
-    pub copy_selection: Option<String>,
+    /// display pictures in order
+    #[arg(short, long, value_name="ORDER", ignore_case(true), default_value_t = Order::Random)]
+    pub order: Order,
 
     /// order pictures by Date
     #[arg(short, long, default_value_t = false)]
     pub date: bool,
 
-    /// list all directories of pictures in the database
+    /// order pictures by Name
+    #[arg(short, long, default_value_t = false)]
+    pub name: bool,
+
+    /// order pictures by Value
+    #[arg(short, long, default_value_t = false)]
+    pub value: bool,
+
+     /// Directory to search (default is set with variable GALLSHDIR)
+    pub directory: Option<String>,
+
+    /// show only cover pictures of each directory
     #[arg(long, default_value_t = false)]
-    pub directories: bool,
+    pub covers: bool,
 
-    /// extract list
-    #[arg(short, long, value_name="FILE_NAME")]
-    pub extract: Option<String>,
-
-    /// import pictures from SOURCE_DIR in TARGET_DIR specified with add
-    #[arg(long, value_name="SOURCE_DIR")]
-    pub from: Option<String>,
+    /// extract list of selected files to FILE
+    #[arg(short, long, value_name="FILE")]
+    pub list_extract: Option<String>,
 
     /// display only FILE_NAME
     #[arg(short, long, value_name="FILE_NAME")]
@@ -67,44 +52,33 @@ pub struct Args {
     #[arg(long, value_name="N")]
     pub height: Option<i32>,
 
+    /// window width (defaults = GALLSHWIDTH)
+    #[arg(short, long, value_name="N")]
+    pub width: Option<i32>,
+    
     /// select pictures having all the tags in the given list
     #[arg(long, value_name="TAG_LIST")]
     pub include: Option<Vec<String>>,
+
+    /// list all directories of pictures in the database
+    #[arg(long, default_value_t = false)]
+    pub directories: bool,
 
     /// show information about this folder
     #[arg(long)]
     pub info: bool,
 
-    /// label all unlabeled pictures in the set with LABEL
-    #[arg(short, long, value_name="LABEL")]
-    pub label: Option<String>,
-
-    /// move selected files to TARGET_DIR
-    #[arg(short, long, value_name = "TARGET_DIR")]
-    pub move_selection: Option<String>,
-
-    /// order pictures by Name
-    #[arg(short, long, default_value_t = false)]
-    pub name: bool,
-
-    /// display pictures in order
-    #[arg(short, long, value_name="ORDER", ignore_case(true), default_value_t = Order::Random)]
-    pub order: Order,
+    /// list all the tags attached to pictures
+    #[arg(long, default_value_t = false)]
+    pub tags: bool,
 
     /// display files that only contain STRING in their name
     #[arg(short, long, value_name="STRING")]
     pub pattern: Option<String>,
 
-    /// remove entries from the database when file no longer exits
-    #[arg(long, default_value_t = false)]
-    pub purge: bool,
     /// display files that match the query QUERY
     #[arg(short, long, value_name="QUERY")]
     pub query: Option<String>,
-
-    /// retarget selected pictures with labels to directory TARGET/<LABEL>
-    #[arg(short, long, value_name="TARGET_DIR")]
-    pub redirect: Option<String>,
 
     /// wait N seconds between each picture
     #[arg(short, long, value_name="N")]
@@ -114,25 +88,51 @@ pub struct Args {
     #[arg(long, value_name="TAG_LIST")]
     pub select: Option<Vec<String>>,
 
-    /// list all the tags attached to pictures
-    #[arg(long, default_value_t = false)]
-    pub tags: bool,
-
     /// show thumbnails only
     #[arg(short, long, default_value_t = false)]
     pub thumbnails: bool,
 
+    /// label all unlabeled pictures in the set with LABEL
+    #[arg(long, value_name="LABEL")]
+    pub label: Option<String>,
+
+
+    /// add picture files data in DIRECTORY to the database
+    #[arg(long, value_name = "DIRECTORY")]
+    pub add_files: Option<String>,
+
+    /// import pictures from DIRECTORY in directory specified with add-files
+    #[arg(long, value_name="DIRECTORY")]
+    pub from_files: Option<String>,
+
+    /// checks default directory for new pictures
+    #[arg(long, default_value_t = false)]
+    pub check: bool,
+
+    /// create the schema for the database
+    #[arg(long, default_value_t = false)]
+    pub create_schema: bool,
+
+    /// move all duplicate files to TARGET_DIR
+    #[arg(value_name = "TARGET_DIR")]
+    pub deduplicate: Option<String>,
+
+    /// move selected files to TARGET_DIR
+    #[arg(long, value_name = "TARGET_DIR")]
+    pub move_selection: Option<String>,
+
+    /// remove entries from the database when file no longer exits
+    #[arg(long, default_value_t = false)]
+    pub purge: bool,
+
+    /// retarget selected pictures with labels to directory TARGET/<LABEL>
+    #[arg(long, value_name="TARGET_DIR")]
+    pub redirect: Option<String>,
+
     /// update picture data and thumbnails files
-    #[arg(short, long, default_value_t = false)]
+    #[arg(long, default_value_t = false)]
     pub update: bool,
 
-    /// order pictures by Value
-    #[arg(short, long, default_value_t = false)]
-    pub value: bool,
-
-    /// window width (defaults = GALLSHWIDTH)
-    #[arg(short, long, value_name="N")]
-    pub width: Option<i32>,
 }
 
 impl Args {
@@ -140,7 +140,7 @@ impl Args {
     pub fn checked_args(&mut self) -> Result<Args> {
         let result: Args = Args {
 
-            add: match &self.add {
+            add_files: match &self.add_files {
                 None => None,
                 Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
@@ -151,14 +151,6 @@ impl Args {
 
             covers: self.covers,
             create_schema: self.create_schema,
-
-            copy_selection: match &self.copy_selection {
-                None => None,
-                Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
-                    Ok(_) => Some(dir.to_string()),
-                    Err(err) => return Err(err),
-                },
-            },
 
             date: self.date,
 
@@ -184,7 +176,7 @@ impl Args {
 
             directories: self.directories,
 
-            extract: match &self.extract {
+            list_extract: match &self.list_extract {
                 None => {
                     match default_extract_list_file() {
                         Ok(file_name) => match check_reading_list_file(&file_name) {
@@ -208,7 +200,7 @@ impl Args {
                 },
             },
 
-            from: match &self.from {
+            from_files: match &self.from_files {
                 None => None,
                 Some(dir) => match check_path(dir, ! ABSOLUTE_PATH) {
                     Ok(_) => Some(dir.to_string()),
