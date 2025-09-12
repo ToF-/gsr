@@ -10,8 +10,13 @@ const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";
 const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 
 #[derive(Parser, Clone, Debug)]
-#[command(version, infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
+#[command(about("a picture viewer from terminal"), author("ToF"), version, infer_long_args = true, infer_subcommands = true, help_template("\
+{before-help}{name} {version} {about} by {author-with-newline}
+{usage-heading} {usage}
+
+{all-args}{after-help}
+"))]
 pub struct Args {
      /// Directory to search (default is set with variable GALLSHDIR)
     pub directory: Option<String>,
