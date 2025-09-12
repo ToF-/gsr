@@ -13,6 +13,33 @@ const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
 #[command(version, infer_long_args = true, infer_subcommands = true)]
 /// Gallery Show
 pub struct Args {
+     /// Directory to search (default is set with variable GALLSHDIR)
+    pub directory: Option<String>,
+
+    /// display only FILE_NAME
+    #[arg(short, long, value_name="FILE_NAME")]
+    pub file: Option<String>,
+
+    /// display files that only contain STRING in their name
+    #[arg(short, long, value_name="STRING")]
+    pub pattern: Option<String>,
+
+    /// display files that match the query QUERY
+    #[arg(short, long, value_name="QUERY")]
+    pub query: Option<String>,
+
+    /// select pictures having tags in the given list
+    #[arg(long, value_name="TAG_LIST")]
+    pub select: Option<Vec<String>>,
+
+    /// select pictures having all the tags in the given list
+    #[arg(long, value_name="TAG_LIST")]
+    pub include: Option<Vec<String>>,
+
+    /// list all directories of pictures in the database
+    #[arg(long, default_value_t = false)]
+
+    pub directories: bool,
     /// display pictures in order
     #[arg(short, long, value_name="ORDER", ignore_case(true), default_value_t = Order::Random)]
     pub order: Order,
@@ -29,9 +56,6 @@ pub struct Args {
     #[arg(short, long, default_value_t = false)]
     pub value: bool,
 
-     /// Directory to search (default is set with variable GALLSHDIR)
-    pub directory: Option<String>,
-
     /// show only cover pictures of each directory
     #[arg(long, default_value_t = false)]
     pub covers: bool,
@@ -39,30 +63,6 @@ pub struct Args {
     /// extract list of selected files to FILE
     #[arg(short, long, value_name="FILE")]
     pub list_extract: Option<String>,
-
-    /// display only FILE_NAME
-    #[arg(short, long, value_name="FILE_NAME")]
-    pub file: Option<String>,
-
-    /// display N x N pictures per page
-    #[arg(short, long, value_name="N")]
-    pub grid: Option<usize>,
-
-    /// window height (default = GALLSHHEIGHT)
-    #[arg(long, value_name="N")]
-    pub height: Option<i32>,
-
-    /// window width (defaults = GALLSHWIDTH)
-    #[arg(short, long, value_name="N")]
-    pub width: Option<i32>,
-    
-    /// select pictures having all the tags in the given list
-    #[arg(long, value_name="TAG_LIST")]
-    pub include: Option<Vec<String>>,
-
-    /// list all directories of pictures in the database
-    #[arg(long, default_value_t = false)]
-    pub directories: bool,
 
     /// show information about this folder
     #[arg(long)]
@@ -72,36 +72,35 @@ pub struct Args {
     #[arg(long, default_value_t = false)]
     pub tags: bool,
 
-    /// display files that only contain STRING in their name
-    #[arg(short, long, value_name="STRING")]
-    pub pattern: Option<String>,
+    /// display N x N pictures per page
+    #[arg(short, long, value_name="N")]
+    pub grid: Option<usize>,
 
-    /// display files that match the query QUERY
-    #[arg(short, long, value_name="QUERY")]
-    pub query: Option<String>,
+    /// show thumbnails only, in a 10x10 grid
+    #[arg(short, long, default_value_t = false)]
+    pub thumbnails: bool,
+
+    /// window height (default = GALLSHHEIGHT)
+    #[arg(long, value_name="N")]
+    pub height: Option<i32>,
+
+    /// window width (defaults = GALLSHWIDTH)
+    #[arg(short, long, value_name="N")]
+    pub width: Option<i32>,
 
     /// wait N seconds between each picture
     #[arg(short, long, value_name="N")]
     pub seconds: Option<u64>,
 
-    /// select pictures having tags in the given list
-    #[arg(long, value_name="TAG_LIST")]
-    pub select: Option<Vec<String>>,
-
-    /// show thumbnails only
-    #[arg(short, long, default_value_t = false)]
-    pub thumbnails: bool,
-
     /// label all unlabeled pictures in the set with LABEL
     #[arg(long, value_name="LABEL")]
     pub label: Option<String>,
-
 
     /// add picture files data in DIRECTORY to the database
     #[arg(long, value_name = "DIRECTORY")]
     pub add_files: Option<String>,
 
-    /// import pictures from DIRECTORY in directory specified with add-files
+    /// import pictures from DIRECTORY in directory specified with add-files, in a 10x10 grid
     #[arg(long, value_name="DIRECTORY")]
     pub from_files: Option<String>,
 
