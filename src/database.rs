@@ -349,25 +349,23 @@ impl Database {
                     let _ = if !path.exists() {
                         match self.rusqlite_delete_picture(&file_path) {
                             Ok(_) => {
-                                self.rusqlite_delete_tags_for_file_path(&file_path)
+                                let _ = self.rusqlite_delete_tags_for_file_path(&file_path)
                                     .and_then(|_| {
                                         let directory = file_path_directory(&file_path);
                                         let file_name = file_name(&file_path);
                                         self.rusqlite_delete_cover(&directory, &file_name)
                                             .map(|_| ())
-                                    })
+                                    });
+                                count += 1;
                             },
                             Err(e) => return Err(e),
                         }
-                    } else {
-                        Ok(())
                     };
-                    count += 1;
-                }
-                Ok(())
+                };
+                Ok(count)
             });
         match result {
-            Ok(()) => Ok (count),
+            Ok(count) => Ok (count),
             Err(err) => Err(anyhow!(err)),
         }
     }

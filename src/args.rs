@@ -1,5 +1,6 @@
+use crate::args::Operation::AddFiles;
 use anyhow::Result;
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::env;
 use crate::order::Order;
 use crate::path::{ABSOLUTE_PATH, check_file, check_reading_list_file, check_path, default_extract_list_file};
@@ -8,6 +9,16 @@ const DEFAULT_WIDTH: i32   = 1000;
 const DEFAULT_HEIGHT: i32  = 1000;
 const WIDTH_ENV_VAR :&str  = "GALLSHWIDTH";
 const HEIGHT_ENV_VAR :&str = "GALLSHHEIGHT";
+
+#[derive(Subcommand, Clone, Debug)]
+pub enum Operation {
+    /// add picture files data in DIRECTORY to the database (default directory is $GALLSHDIR)
+    AddFiles {
+        /// with an option
+        #[arg(long, value_name="DIRECTORY")]
+        source_dir: Option<String>,
+    },
+}
 
 #[derive(Parser, Clone, Debug)]
 /// Gallery Show
@@ -97,6 +108,9 @@ pub struct Args {
     #[arg(short, long, value_name="N")]
     pub seconds: Option<u64>,
 
+    #[command(subcommand)]
+    pub operation: Option<Operation>,
+
     /// label all unlabeled pictures in the set with LABEL
     #[arg(long, value_name="LABEL")]
     pub label: Option<String>,
@@ -141,16 +155,27 @@ pub struct Args {
 
 impl Args {
 
+
     pub fn checked_args(&mut self) -> Result<Args> {
         let result: Args = Args {
-
-            add_files: match &self.add_files {
+            operation: self.operation.clone(),
+            add_files: match self.operation.clone() {
                 None => None,
-                Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
-                    Ok(_) => Some(dir.to_string()),
-                    Err(err) => return Err(err),
+                Some(operation) => {
+                    match operation {
+                        AddFiles { source_dir }  => source_dir,
+
+                        //  match source => {
+                        //  Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
+                        //      Ok(_) => Some(AddFiles { source_dir: Some(dir.to_string()), }),
+                        //      Err(err) => return Err(err),
+                        //  }
+                        //  None => Some(AddFiles { source_dir: None }),
+                        // },
+                    }
                 }
             },
+
             check: self.check,
 
             covers: self.covers,
