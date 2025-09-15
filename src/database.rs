@@ -413,11 +413,11 @@ impl Database {
         if path.has_root() {
             get_picture_file_paths(directory)
                 .and_then(|file_paths| {
-                    println!("{:?}", file_paths);
+                    println!("{} pictures in directory", file_paths.len());
                     let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
                     self.select_all_picture_file_paths()
                         .and_then(|database_set| {
-                            println!("database_set.count:{}", database_set.len());
+                            println!("{} pictures in database", database_set.len());
                             let difference = directory_set.difference(&database_set)
                                 .filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), s));
                             if difference.clone().count() > 0 {
@@ -436,6 +436,7 @@ impl Database {
                                     Err(err) => Err(anyhow!(err)),
                                 }
                             } else {
+                                println!("no picture to add");
                                 Ok(vec![])
                             }
                         })

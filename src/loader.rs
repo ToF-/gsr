@@ -1,14 +1,13 @@
-use crate::args::Operation;
-use regex::Regex;
-use std::path::PathBuf;
-use crate::picture_entry::PictureEntry;
-use std::collections::HashSet;
-use crate::path::get_picture_file_paths;
-use crate::args::Args;
 use anyhow::{anyhow,Result};
 use crate::Database;
-use crate::path::check_file;
+use crate::args::Args;
+use crate::args::Operation;
+use crate::path::{check_file, get_picture_file_paths, standard_directory};
+use crate::picture_entry::PictureEntry;
 use crate::picture_entry::{PictureEntries};
+use regex::Regex;
+use std::collections::HashSet;
+use std::path::PathBuf;
 
 pub fn check_database_and_files(directory: &str, database: &Database) -> Result<()> {
     println!("checking database and files");
@@ -112,8 +111,11 @@ pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) ->
         load_single_picture_entry(database, file)
     } else if args.covers {
         load_picture_entries_from_covers(database)
-    } else if let Some(Operation::AddFiles { source_dir } ) = args.operation {
-        load_picture_entries_from_directory_into_db(database, &source_dir, true)
+    } else if let Some(Operation::AddFiles { source_dir }) = args.operation {
+        match source_dir {
+            Some(directory) => { load_picture_entries_from_directory_into_db(database, &directory, true) },
+            None => { load_picture_entries_from_directory_into_db(database, &standard_directory(), true) },
+        }
     } else if args.directory.is_some() {
         load_picture_entries_from_directory(database, &args.directory.clone().unwrap(), &args)
     } else  {

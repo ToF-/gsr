@@ -3,7 +3,7 @@ use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
 use std::env;
 use crate::order::Order;
-use crate::path::{ABSOLUTE_PATH, check_file, check_reading_list_file, check_path, default_extract_list_file};
+use crate::path::{ABSOLUTE_PATH, check_file, check_reading_list_file, check_path, default_extract_list_file, standard_directory};
 
 const DEFAULT_WIDTH: i32   = 1000;
 const DEFAULT_HEIGHT: i32  = 1000;
@@ -16,7 +16,7 @@ pub enum Operation {
     AddFiles {
         /// with an option
         #[arg(long, value_name="DIRECTORY")]
-        source_dir: String,
+        source_dir: Option<String>,
     },
 }
 
@@ -156,14 +156,15 @@ impl Args {
         let result: Args = Args {
             operation: match self.operation.clone() {
                 None => None,
-                Some(operation) => {
-                    match operation {
-                        AddFiles { source_dir }  => match check_path(&source_dir, ABSOLUTE_PATH) {
-                            Ok(_) => Some(AddFiles { source_dir: source_dir.to_string(), }),
+                Some(operation) => match operation {
+                    AddFiles { source_dir }  => match source_dir {
+                        Some(directory) => match check_path(&directory, ABSOLUTE_PATH) {
+                            Ok(_) => Some(AddFiles { source_dir: Some(directory) }),
                             Err(err) => return Err(err),
                         },
+                        None => Some(AddFiles { source_dir: Some(standard_directory()) }),
                     }
-                }
+                },
             },
 
             check: self.check,

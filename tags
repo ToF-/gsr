@@ -32,6 +32,7 @@ InputKind	/Users/christophethibaut/Coding/gsr/src/editor.rs	/^pub enum InputKind
 KEY_CMD_FILE_VAR	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^const KEY_CMD_FILE_VAR: &str = "GALLSHKEY";$/;"	c
 KEY_MAP_FILE	/Users/christophethibaut/Coding/gsr/src/commands.rs	/^const KEY_MAP_FILE: &str = ".\/gallshkey.json";$/;"	c
 Navigator	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^pub struct Navigator {$/;"	s
+Operation	/Users/christophethibaut/Coding/gsr/src/args.rs	/^pub enum Operation {$/;"	g
 Order	/Users/christophethibaut/Coding/gsr/src/order.rs	/^pub enum Order {$/;"	g
 PGM	/Users/christophethibaut/Coding/gsr/src/args.rs	/^    const PGM: &str = "gsr";$/;"	c
 PGM	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    const PGM: &str = "gsr";$/;"	c
