@@ -210,15 +210,16 @@ impl PictureEntry {
     }
 
     pub fn label_display(&self, has_focus: bool) -> String {
-        format!("{}{}{}{}{}",
+        format!("{}  {} {} {}  {}  {}",
+            if self.image_data.cover { "🌟"} else { "" },
             if has_focus { "▄" } else { "" },
             self.image_data.rank.show(),
-            if self.image_data.selected { "△" } else { "" },
+            if self.image_data.selected { "✅" } else { "" },
             if !self.image_data.label.is_empty() {
                 self.image_data.label.to_string()
             } else { String::from("") } ,
             if self.deleted { "🗑" } else { "" },
-        )
+        ).trim().to_string()
 
     }
 
@@ -233,7 +234,7 @@ impl PictureEntry {
         format!("{} {} {} [{} {} {}] {} {} {}",
             if self.image_data.cover { "🌟" } else { "" },
             self.original_file_name(),
-            if self.image_data.selected { "△" } else { "" },
+            if self.image_data.selected { "✅" } else { "" },
             self.file_size,
             self.image_data.colors,
             self.image_data.rank.show(),
