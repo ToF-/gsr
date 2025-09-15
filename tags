@@ -251,6 +251,7 @@ parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/g
 paste_label_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn paste_label_current_entry(&mut self) -> Result<()> {$/;"	f
 picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn picture_entries(&self) -> &Vec<PictureEntry> {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
+picture_info_display	/Users/christophethibaut/Coding/gsr/src/display.rs	/^pub fn picture_info_display(entry: &PictureEntry) -> String {$/;"	f
 populate	/Users/christophethibaut/Coding/gsr/src/database.rs	/^    fn populate(&self, difference_opt: Option<HashSet<&String>>) -> Result<PictureEntries> {$/;"	f
 position_from_index	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f
 position_from_index	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    pub fn position_from_index(&self, index: usize) -> Coords {$/;"	f

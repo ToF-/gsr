@@ -30,15 +30,16 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
     let entry_display = &<PictureEntry as Clone>::clone(catalog.current_entry().unwrap()).title_display();
     let file_path = &<PictureEntry as Clone>::clone(catalog.current_entry().unwrap()).file_path;
     let display= format!(
-        "{} S:{} {} ordered by {} {}{}/{}{}  {} {} {} {}", 
+        "{}p{}/{}{} #{} {} S:{} {} ↑{} {} {} {} {}", 
+        if catalog.navigator().page_limit_on() { "[" } else { "" },
+        catalog.index().unwrap() / catalog.page_size() + 1,
+        catalog.last() / catalog.page_size()+1,
+        if catalog.navigator().page_limit_on() { "]" } else { "" },
+        catalog.index().unwrap(),
         directory_display(catalog, file_path),
         catalog.selected_count(),
         if catalog.navigator().start_index().is_some() { "…" } else { "" },
         if let Some(order) = catalog.order() { order.to_string() } else { "??".to_string() },
-        if catalog.navigator().page_limit_on() { "[" } else { "" },
-        catalog.index().unwrap(),
-        catalog.last(),
-        if catalog.navigator().page_limit_on() { "]" } else { "" },
         entry_display,
         if catalog.expand_on() { "□" } else { "" },
         if catalog.full_size_on() { "░" } else { "" },
@@ -101,3 +102,6 @@ pub fn info(catalog: &Catalog) {
     }
 }
 
+pub fn picture_info_display(entry: &PictureEntry) -> String {
+    format!("{}\n{} bytes\nlabel: {}\ntags:{:#?}", entry.file_path, entry.file_size, entry.image_data.label, entry.image_data.tags)
+}

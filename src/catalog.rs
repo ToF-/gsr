@@ -3,7 +3,7 @@ use anyhow::{anyhow, Result};
 use crate::args::Args;
 use crate::comment::Comment;
 use crate::database::Database;
-use crate::display::title_display;
+use crate::display::{picture_info_display, title_display};
 use crate::editor::{Editor};
 use crate::loader::load_picture_entries_from_source;
 use crate::navigator::Navigator;
@@ -374,7 +374,7 @@ impl Catalog {
     pub fn print_info(&self, editor: &Editor) {
         println!("{}", title_display(self, editor));
         println!("{}", self.current_entry().expect("can't access current entry").original_file_path());
-        println!("{:?}", self.current_entry().expect("can't access current entry"));
+        println!("{}", picture_info_display(self.current_entry().expect("can't access current entry")));
     }
     // updates
 
