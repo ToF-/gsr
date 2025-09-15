@@ -115,10 +115,6 @@ pub struct Args {
     #[arg(long, value_name="LABEL")]
     pub label: Option<String>,
 
-    /// import pictures from DIRECTORY in directory specified with add-files, in a 10x10 grid
-    #[arg(long, value_name="DIRECTORY")]
-    pub from_files: Option<String>,
-
     /// checks default directory for new pictures
     #[arg(long, default_value_t = false)]
     pub check: bool,
@@ -130,10 +126,6 @@ pub struct Args {
     /// move all duplicate files to TARGET_DIR
     #[arg(value_name = "TARGET_DIR")]
     pub deduplicate: Option<String>,
-
-    /// move selected files to TARGET_DIR
-    #[arg(long, value_name = "TARGET_DIR")]
-    pub move_selection: Option<String>,
 
     /// remove entries from the database when file no longer exits
     #[arg(long, default_value_t = false)]
@@ -220,14 +212,6 @@ impl Args {
                 },
             },
 
-            from_files: match &self.from_files {
-                None => None,
-                Some(dir) => match check_path(dir, ! ABSOLUTE_PATH) {
-                    Ok(_) => Some(dir.to_string()),
-                    Err(err) => return Err(err),
-                }
-            },
-
             grid: match self.grid {
                 None if !self.thumbnails => Some(1),
                 None if self.thumbnails => Some(10),
@@ -255,14 +239,6 @@ impl Args {
             info: self.info,
 
             label: self.label.clone(),
-
-            move_selection: match &self.move_selection {
-                None => None,
-                Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
-                    Ok(_) => Some(dir.to_string()),
-                    Err(err) => return Err(err),
-                },
-            },
 
             name: self.name,
 
