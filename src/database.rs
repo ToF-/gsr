@@ -408,13 +408,16 @@ impl Database {
     }
 
     pub fn insert_difference_from_directory(&mut self, directory: &str, in_std_dir:bool) -> Result<PictureEntries> {
+        println!("insert_difference_from_directory {} {}", directory, in_std_dir);
         let path = Path::new(directory);
         if path.has_root() {
             get_picture_file_paths(directory)
                 .and_then(|file_paths| {
+                    println!("{:?}", file_paths);
                     let directory_set: HashSet<String> = HashSet::from_iter(file_paths.iter().map(String::clone));
                     self.select_all_picture_file_paths()
                         .and_then(|database_set| {
+                            println!("database_set.count:{}", database_set.len());
                             let difference = directory_set.difference(&database_set)
                                 .filter(|s| !in_std_dir || is_prefix_path(&standard_directory(), s));
                             if difference.clone().count() > 0 {

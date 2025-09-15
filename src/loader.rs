@@ -1,3 +1,4 @@
+use crate::args::Operation;
 use regex::Regex;
 use std::path::PathBuf;
 use crate::picture_entry::PictureEntry;
@@ -97,7 +98,9 @@ pub fn load_single_picture_entry_from_file_system(file_path: &str) -> Result<Pic
 pub fn load_picture_entries_from_covers(database: &mut Database) -> Result<PictureEntries> {
     database.select_cover_picture_entries()
 }
+
 pub fn load_picture_entries_from_directory_into_db(database: &mut Database, directory: &str, in_std_dir: bool) -> Result<PictureEntries> {
+    println!("load_picture_entries_from_directory_into_db {}, {}", directory, in_std_dir);
     match database.insert_difference_from_directory(directory, in_std_dir) {
         Ok(picture_entries) => Ok(picture_entries),
         Err(err) => Err(anyhow!(err)),
@@ -109,8 +112,8 @@ pub fn load_picture_entries_from_source(database: &mut Database, args: &Args) ->
         load_single_picture_entry(database, file)
     } else if args.covers {
         load_picture_entries_from_covers(database)
-    } else if args.directory.is_some() && args.add_files.is_some() && args.from_files.is_some() {
-        load_picture_entries_from_directory_into_db(database, &args.clone().add_files.unwrap(), true)
+    } else if let Some(Operation::AddFiles { source_dir } ) = args.operation {
+        load_picture_entries_from_directory_into_db(database, &source_dir, true)
     } else if args.directory.is_some() {
         load_picture_entries_from_directory(database, &args.directory.clone().unwrap(), &args)
     } else  {

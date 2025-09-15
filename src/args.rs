@@ -1,5 +1,5 @@
 use crate::args::Operation::AddFiles;
-use anyhow::Result;
+use anyhow::{Result, anyhow};
 use clap::{Parser, Subcommand};
 use std::env;
 use crate::order::Order;
@@ -16,7 +16,7 @@ pub enum Operation {
     AddFiles {
         /// with an option
         #[arg(long, value_name="DIRECTORY")]
-        source_dir: Option<String>,
+        source_dir: String,
     },
 }
 
@@ -115,10 +115,6 @@ pub struct Args {
     #[arg(long, value_name="LABEL")]
     pub label: Option<String>,
 
-    /// add picture files data in DIRECTORY to the database
-    #[arg(long, value_name = "DIRECTORY")]
-    pub add_files: Option<String>,
-
     /// import pictures from DIRECTORY in directory specified with add-files, in a 10x10 grid
     #[arg(long, value_name="DIRECTORY")]
     pub from_files: Option<String>,
@@ -158,20 +154,14 @@ impl Args {
 
     pub fn checked_args(&mut self) -> Result<Args> {
         let result: Args = Args {
-            operation: self.operation.clone(),
-            add_files: match self.operation.clone() {
+            operation: match self.operation.clone() {
                 None => None,
                 Some(operation) => {
                     match operation {
-                        AddFiles { source_dir }  => source_dir,
-
-                        //  match source => {
-                        //  Some(dir) => match check_path(dir, ABSOLUTE_PATH) {
-                        //      Ok(_) => Some(AddFiles { source_dir: Some(dir.to_string()), }),
-                        //      Err(err) => return Err(err),
-                        //  }
-                        //  None => Some(AddFiles { source_dir: None }),
-                        // },
+                        AddFiles { source_dir }  => match check_path(&source_dir, ABSOLUTE_PATH) {
+                            Ok(_) => Some(AddFiles { source_dir: source_dir.to_string(), }),
+                            Err(err) => return Err(err),
+                        },
                     }
                 }
             },

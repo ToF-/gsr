@@ -105,6 +105,9 @@ pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {
 }
 
 pub fn copy_all_picture_files(source: &str, target: &str) -> Result<()> {
+    if source == target {
+        return Err(anyhow!(format!("cannot copy pictures files from {} to {}", source, target)));
+    };
     match get_picture_file_paths(source) {
         Ok(file_paths) => {
             for file_path in file_paths {
