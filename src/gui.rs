@@ -115,6 +115,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     multiple_view_grid.set_column_homogeneous(true);
     multiple_view_grid.set_hexpand(true);
     multiple_view_grid.set_vexpand(true);
+
     multiple_view_panel.attach(&left_button, 0, 0, 1, 1);
     multiple_view_panel.attach(&multiple_view_grid, 1, 0, 1, 1);
     multiple_view_panel.attach(&right_button, 2, 0, 1, 1);

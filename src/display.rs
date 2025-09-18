@@ -32,8 +32,8 @@ pub fn title_display(catalog: &Catalog, editor: &Editor) -> String {
     let display= format!(
         "{}p{}/{}{} #{} {} S:{} {} ↑{} {} {} {} {}", 
         if catalog.navigator().page_limit_on() { "[" } else { "" },
-        catalog.index().unwrap() / catalog.page_size() + 1,
-        catalog.last() / catalog.page_size()+1,
+        catalog.index().unwrap() / catalog.page_length() + 1,
+        catalog.last() / catalog.page_length()+1,
         if catalog.navigator().page_limit_on() { "]" } else { "" },
         catalog.index().unwrap(),
         directory_display(catalog, file_path),
