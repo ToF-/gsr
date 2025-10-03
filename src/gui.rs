@@ -1,3 +1,7 @@
+use crate::gui::Propagation::Proceed;
+use crate::glib::Propagation;
+use crate::glib::ControlFlow;
+use crate::glib::ControlFlow::Continue;
 use crate::display::title_display;
 use crate::editor::{Editor,InputKind};
 use crate::glib::timeout_add_local;
@@ -169,7 +173,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
                 let cell_box = gui.cell_box_at(col, row);
                 let gesture_left_click = gtk::GestureClick::new();
                 gesture_left_click.set_button(1);
-                gesture_left_click.connect_pressed(clone!(@strong col, @strong row, @strong gui_rc, @strong catalog_rc => move |_,_,_,_| {
+                gesture_left_click.connect_pressed(clone!(#[strong] col, #[strong] row, #[strong] gui_rc, #[strong] catalog_rc, move |_,_,_,_| {
                     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
                         if let Ok(gui) = gui_rc.try_borrow() {
                             let _ = left_click_command_view_mode(col as usize, row as usize, &gui, &mut catalog);
@@ -179,7 +183,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
                 cell_box.add_controller(gesture_left_click);
                 let gesture_right_click = gtk::GestureClick::new();
                 gesture_right_click.set_button(3);
-                gesture_right_click.connect_pressed(clone!(@strong col, @strong row, @strong gui_rc, @strong catalog_rc => move |_,_,_,_| {
+                gesture_right_click.connect_pressed(clone!(#[strong] col, #[strong] row, #[strong] gui_rc, #[strong] catalog_rc, move |_,_,_,_| {
                     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
                         if let Ok(gui) = gui_rc.try_borrow() {
                             let _ = right_click_command_view_mode(col as usize, row as usize, &gui, &mut catalog);
@@ -192,7 +196,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     }
     let left_gesture = gtk::GestureClick::new();
     left_gesture.set_button(1);
-    left_gesture.connect_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_,_,_,_| {
+    left_gesture.connect_pressed(clone!(#[strong] catalog_rc, #[strong] gui_rc, move |_,_,_,_| {
         {
             let mut catalog = catalog_rc.borrow_mut();
             catalog.mut_navigator().move_prev_page();
@@ -207,7 +211,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
 
     let right_gesture = gtk::GestureClick::new();
     right_gesture.set_button(1);
-    right_gesture.connect_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_,_,_,_| {
+    right_gesture.connect_pressed(clone!(#[strong] catalog_rc, #[strong] gui_rc, move |_,_,_,_| {
         {
             let mut catalog = catalog_rc.borrow_mut();
             catalog.mut_navigator().move_next_page();
@@ -221,18 +225,18 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
     right_button.add_controller(right_gesture);
 
     let evk = gtk::EventControllerKey::new();
-    evk.connect_key_pressed(clone!(@strong catalog_rc, @strong gui_rc => move |_, key, _, _| {
+    evk.connect_key_pressed(clone!(#[strong] catalog_rc, #[strong] gui_rc, move |_, key, _, _| {
         process_key(&catalog_rc, &gui_rc, key) 
     }));
     if let Some(seconds) = args.seconds {
-        timeout_add_local(Duration::new(seconds, 0), clone!(@strong catalog_rc, @strong gui_rc => move | | {
+        timeout_add_local(Duration::new(seconds, 0), clone!(#[strong] catalog_rc, #[strong] gui_rc, move | | {
             if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
                 if let Ok(gui) = gui_rc.try_borrow() {
                     catalog.mut_navigator().move_next_page();
                     refresh_view(&gui, &catalog);
                 }
             };
-            Continue(true)
+            ControlFlow::Continue
         }));
     };
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
@@ -256,7 +260,7 @@ pub fn startup_gui(_application: &gtk::Application) {
     );
 }
 
-fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {
+fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> Propagation {
     if let Ok(mut catalog) = catalog_rc.try_borrow_mut() {
         if let Ok(mut gui) = gui_rc.try_borrow_mut() {
             let refresh: bool = if gui.editor.editing() {
@@ -273,7 +277,7 @@ fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key
             if refresh { refresh_view(&gui, &catalog) }
         }
     }
-    gtk::Inhibit(false)
+    Propagation::Proceed
 }
 
 fn refresh_view(gui: &Gui, catalog: &Catalog) {
@@ -337,7 +341,7 @@ fn view_mode_process_key(key: Key, gui: &mut Gui, catalog: &mut Catalog) -> bool
         None => refresh = false,
         Some(key_name) =>
             match gui.shortcuts.get(&key_name.to_string()) {
-                None => println!("{}", key_name),
+                None => {},
                 Some(command) => {
                     let mut result: Result<()> = Ok(());
                     match command {
