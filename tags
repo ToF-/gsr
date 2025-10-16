@@ -163,6 +163,7 @@ get_palette	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn get_pale
 get_palette_from_a_picture_file	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^    fn get_palette_from_a_picture_file() {$/;"	f
 get_palette_from_picture	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn get_palette_from_picture(file_path: &str) -> Result<(Palette,Colors)> {$/;"	f
 get_picture_file_paths	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn get_picture_file_paths(source: &str) -> Result<Vec<String>> {$/;"	f
+home_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn home_path(file_path: &str) -> String {$/;"	f
 image_data_file_path	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn image_data_file_path(original_file_path: &str) -> String {$/;"	f
 image_data_file_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn image_data_file_path(&self) -> String {$/;"	f
 image_data_file_path_is_the_file_path_with_json_extension	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn image_data_file_path_is_the_file_path_with_json_extension() {$/;"	f
@@ -249,6 +250,7 @@ palette_to_blob	/Users/christophethibaut/Coding/gsr/src/palette.rs	/^pub fn pale
 parent_path	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    pub fn parent_path(&self) -> String {$/;"	f
 parent_path_is_the_file_path_without_file_name	/Users/christophethibaut/Coding/gsr/src/picture_entry.rs	/^    fn parent_path_is_the_file_path_without_file_name() {$/;"	f
 paste_label_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn paste_label_current_entry(&mut self) -> Result<()> {$/;"	f
+path_home	/Users/christophethibaut/Coding/gsr/src/path.rs	/^pub fn path_home(file_path: &str) -> String {$/;"	f
 picture_entries	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn picture_entries(&self) -> &Vec<PictureEntry> {$/;"	f
 picture_for_entry	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn picture_for_entry(entry: &PictureEntry, catalog: &Catalog) -> gtk::Picture {$/;"	f
 picture_info_display	/Users/christophethibaut/Coding/gsr/src/display.rs	/^pub fn picture_info_display(entry: &PictureEntry) -> String {$/;"	f
@@ -258,7 +260,7 @@ position_from_index	/Users/christophethibaut/Coding/gsr/src/navigator.rs	/^    p
 print_directories_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_directories_all(self) -> Result<()> {$/;"	f
 print_info	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_info(&self, editor: &Editor) {$/;"	f
 print_labels_all	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn print_labels_all(&mut self) -> Result<()> {$/;"	f
-process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> gtk::Inhibit {$/;"	f
+process_key	/Users/christophethibaut/Coding/gsr/src/gui.rs	/^fn process_key(catalog_rc: &Rc<RefCell<Catalog>>, gui_rc: &Rc<RefCell<Gui>>, key: Key) -> Propagation {$/;"	f
 prompt_yes_no	/Users/christophethibaut/Coding/gsr/src/prompt.rs	/^pub fn prompt_yes_no(message: &str) -> Result<Option<char>> {$/;"	f
 rank_current_entry	/Users/christophethibaut/Coding/gsr/src/catalog.rs	/^    pub fn rank_current_entry(&mut self, rank: Rank) -> Result<()> {$/;"	f
 read_file_info	/Users/christophethibaut/Coding/gsr/src/picture_io.rs	/^pub fn read_file_info(file_path: &str) -> Result<(FileSize, SystemTime)> {$/;"	f

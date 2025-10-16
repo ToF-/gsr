@@ -186,6 +186,31 @@ pub fn temp_directory() -> String {
     }
 }
 
+pub fn home_path(file_path: &str) -> String {
+    let mut chars = file_path.chars();
+    let first_char = chars.next().unwrap();
+    if first_char == '~' {
+        let remaining = chars.as_str();
+        match env::home_dir() {
+            Some(home) => home.display().to_string() + remaining,
+            None => file_path.to_string()
+        }
+    } else {
+        file_path.to_string()
+    }
+}
+
+pub fn path_home(file_path: &str) -> String {
+    match env::home_dir() {
+        None => file_path.to_string(),
+        Some(home) => {
+            let mut result: String = file_path.to_string();
+            let home_path = home.display().to_string();
+            result.replace(&home_path, "~")
+        },
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

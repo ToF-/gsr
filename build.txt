@@ -1,30 +1,293 @@
-   Compiling gsr v1.1.2 (/Users/christophethibaut/Coding/gsr)
-error[E0277]: a value of type `HashSet<std::string::String>` cannot be built from an iterator over elements of type `&std::string::String`
-    --> src/loader.rs:48:8
-     |
-48   |     }).collect())
-     |        ^^^^^^^ value of type `HashSet<std::string::String>` cannot be built from `std::iter::Iterator<Item=&std::string::String>`
-     |
-     = help: the trait `FromIterator<&std::string::String>` is not implemented for `HashSet<std::string::String>`
-             but trait `FromIterator<std::string::String>` is implemented for it
-     = help: for that trait implementation, expected `std::string::String`, found `&std::string::String`
-note: the method call chain might not have had the expected associated types
-    --> src/loader.rs:45:28
-     |
-45   |       Ok(database_file_paths.iter().filter(|file_path| {
-     |  ________-------------------_^^^^^^_-
-     | |        |                   |
-     | |        |                   `Iterator::Item` is `&String` here
-     | |        this expression has type `&HashSet<String>`
-46   | |         let path = PathBuf::from(file_path);
-47   | |         ! path.exists()
-48   | |     }).collect())
-     | |______- `Iterator::Item` remains `&String` here
-note: required by a bound in `std::iter::Iterator::collect`
-    --> /Users/christophethibaut/.rustup/toolchains/stable-x86_64-apple-darwin/lib/rustlib/src/rust/library/core/src/iter/traits/iterator.rs:1967:19
-     |
-1967 |     fn collect<B: FromIterator<Self::Item>>(self) -> B
-     |                   ^^^^^^^^^^^^^^^^^^^^^^^^ required by this bound in `Iterator::collect`
+   Compiling gsr v1.4.0 (/Users/christophethibaut/Coding/gsr)
+warning: unused import: `crate::loader::load_picture_entries_from_directory_into_db`
+ --> src/main.rs:3:5
+  |
+3 | use crate::loader::load_picture_entries_from_directory_into_db;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
 
-For more information about this error, try `rustc --explain E0277`.
-error: could not compile `gsr` (bin "gsr") due to 1 previous error
+warning: unused import: `crate::path::copy_all_picture_files`
+ --> src/main.rs:7:5
+  |
+7 | use crate::path::copy_all_picture_files;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `anyhow`
+ --> src/args.rs:2:22
+  |
+2 | use anyhow::{Result, anyhow};
+  |                      ^^^^^^
+
+warning: unused import: `crate::gui::Propagation::Proceed`
+ --> src/gui.rs:1:5
+  |
+1 | use crate::gui::Propagation::Proceed;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::glib::ControlFlow::Continue`
+ --> src/gui.rs:4:5
+  |
+4 | use crate::glib::ControlFlow::Continue;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/catalog.rs:886:13
+    |
+886 | ...   make_picture_entry(String::from("testdata/foo.jpeg"), 100, 5, day_d, Rank::NoStar, None, Some(String::from("foo")), false, false, f...
+    |       ^^^^^^^^^^^^^^^^^^                                                   ------------ expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+886 -             make_picture_entry(String::from("testdata/foo.jpeg"), 100, 5, day_d, Rank::NoStar, None, Some(String::from("foo")), false, false, false, HashSet::new()),
+886 +             make_picture_entry(String::from("testdata/foo.jpeg"), 100, day_d, /* image_data::ImageData */, false),
+    |
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/catalog.rs:887:13
+    |
+887 | ...   make_picture_entry(String::from("testdata/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars, None, None, false, false, false, HashSet::...
+    |       ^^^^^^^^^^^^^^^^^^                                                     ---------------- expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+887 -             make_picture_entry(String::from("testdata/bar.jpeg"), 1000, 15, day_b, Rank::ThreeStars, None, None, false, false, false, HashSet::new()),
+887 +             make_picture_entry(String::from("testdata/bar.jpeg"), 1000, day_b, /* image_data::ImageData */, false),
+    |
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/catalog.rs:888:13
+    |
+888 | ...   make_picture_entry(String::from("testdata/qux.jpeg"), 10, 25, day_c, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false,...
+    |       ^^^^^^^^^^^^^^^^^^                                                   -------------- expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+888 -             make_picture_entry(String::from("testdata/qux.jpeg"), 10, 25, day_c, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, false, HashSet::new()),
+888 +             make_picture_entry(String::from("testdata/qux.jpeg"), 10, day_c, /* image_data::ImageData */, false),
+    |
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/catalog.rs:889:13
+    |
+889 | ...   make_picture_entry(String::from("testdata/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo")),false, fal...
+    |       ^^^^^^^^^^^^^^^^^^                                                    ------------- expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+889 -             make_picture_entry(String::from("testdata/bub.jpeg"), 100, 25, day_a, Rank::OneStar, None, Some(String::from("xanadoo")),false, false, false, HashSet::new()))
+889 +             make_picture_entry(String::from("testdata/bub.jpeg"), 100, day_a, /* image_data::ImageData */,false))
+    |
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/catalog.rs:902:13
+    |
+902 | ...   make_picture_entry(String::from("testdata/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo")),false, false, fa...
+    |       ^^^^^^^^^^^^^^^^^^                                                   ------------ expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+902 -             make_picture_entry(String::from("testdata/joe.jpeg"), 100, 5, day_a, Rank::NoStar, None, Some(String::from("foo")),false, false, false, HashSet::new()),
+902 +             make_picture_entry(String::from("testdata/joe.jpeg"), 100, day_a, /* image_data::ImageData */,false),
+    |
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/catalog.rs:903:13
+    |
+903 | ...   make_picture_entry(String::from("testdata/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None, false, false, false, HashSet::...
+    |       ^^^^^^^^^^^^^^^^^^                                                     ---------------- expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+903 -             make_picture_entry(String::from("testdata/gus.jpeg"), 1000, 15, day_a, Rank::ThreeStars, None, None, false, false, false, HashSet::new()),
+903 +             make_picture_entry(String::from("testdata/gus.jpeg"), 1000, day_a, /* image_data::ImageData */, false),
+    |
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/catalog.rs:904:13
+    |
+904 | ...   make_picture_entry(String::from("testdata/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false,...
+    |       ^^^^^^^^^^^^^^^^^^                                                   -------------- expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+904 -             make_picture_entry(String::from("testdata/zoo.jpeg"), 10, 25, day_a, Rank::TwoStars, Some([1,1,1,1,1,1,1,1,1]), None, false, false, false, HashSet::new())];
+904 +             make_picture_entry(String::from("testdata/zoo.jpeg"), 10, day_a, /* image_data::ImageData */, false)];
+    |
+
+warning: use of deprecated method `gtk4::CssProvider::load_from_data`: Since 4.12
+  --> src/gui.rs:99:26
+   |
+99 |     buttons_css_provider.load_from_data(
+   |                          ^^^^^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+
+warning: use of deprecated method `gtk4::prelude::WidgetExt::style_context`: Since 4.10
+   --> src/gui.rs:113:17
+    |
+113 |     left_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    |                 ^^^^^^^^^^^^^
+
+warning: use of deprecated method `gtk4::prelude::StyleContextExt::add_provider`: Since 4.10
+   --> src/gui.rs:113:33
+    |
+113 |     left_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    |                                 ^^^^^^^^^^^^
+
+warning: use of deprecated method `gtk4::prelude::WidgetExt::style_context`: Since 4.10
+   --> src/gui.rs:114:18
+    |
+114 |     right_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    |                  ^^^^^^^^^^^^^
+
+warning: use of deprecated method `gtk4::prelude::StyleContextExt::add_provider`: Since 4.10
+   --> src/gui.rs:114:34
+    |
+114 |     right_button.style_context().add_provider(&buttons_css_provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    |                                  ^^^^^^^^^^^^
+
+warning: use of deprecated method `gtk4::CssProvider::load_from_data`: Since 4.12
+   --> src/gui.rs:255:18
+    |
+255 |     css_provider.load_from_data("window { background-color:black;} image { margin:1em ; } label { color:white; }");
+    |                  ^^^^^^^^^^^^^^
+
+error[E0061]: this function takes 5 arguments but 11 arguments were supplied
+   --> src/picture_entry.rs:255:9
+    |
+255 |         make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None, false, false, false, HashSet::new())
+    |         ^^^^^^^^^^^^^^^^^^                                       ------------ expected `ImageData`, found `Rank`
+    |
+note: function defined here
+   --> src/picture_entry.rs:25:8
+    |
+25  | pub fn make_picture_entry(file_path: String, file_size: u64, modified_time: SystemTime, image_data: ImageData, deleted: bool) -> PictureE...
+    |        ^^^^^^^^^^^^^^^^^^                                                               ---------------------
+help: remove the extra arguments
+    |
+255 -         make_picture_entry(String::from(file_path), 100, 5, day, Rank::NoStar, None, None, false, false, false, HashSet::new())
+255 +         make_picture_entry(String::from(file_path), 100, day, /* image_data::ImageData */, false)
+    |
+
+error[E0609]: no field `colors` on type `picture_entry::PictureEntry`
+   --> src/picture_entry.rs:303:33
+    |
+303 |         assert_eq!(37181, entry.colors);
+    |                                 ^^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+303 |         assert_eq!(37181, entry.image_data.colors);
+    |                                 +++++++++++
+
+error[E0609]: no field `palette` on type `picture_entry::PictureEntry`
+   --> src/picture_entry.rs:304:36
+    |
+304 |         assert_eq!(10257524, entry.palette[0]);
+    |                                    ^^^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+304 |         assert_eq!(10257524, entry.image_data.palette[0]);
+    |                                    +++++++++++
+
+error[E0609]: no field `colors` on type `picture_entry::PictureEntry`
+   --> src/picture_entry.rs:315:33
+    |
+315 |         assert_eq!(37181, entry.colors);
+    |                                 ^^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+315 |         assert_eq!(37181, entry.image_data.colors);
+    |                                 +++++++++++
+
+error[E0609]: no field `palette` on type `picture_entry::PictureEntry`
+   --> src/picture_entry.rs:316:36
+    |
+316 |         assert_eq!(10257524, entry.palette[0]);
+    |                                    ^^^^^^^ unknown field
+    |
+help: one of the expressions' fields has a field of the same name
+    |
+316 |         assert_eq!(10257524, entry.image_data.palette[0]);
+    |                                    +++++++++++
+
+error[E0063]: missing field `tags` in initializer of `image_data::ImageData`
+   --> src/picture_io.rs:213:24
+    |
+213 | ...   let expected = ImageData { colors: 15555, rank: Rank::NoStar, selected: false, cover: false, palette: [2565643, 4742662, 8034583, 8...
+    |                      ^^^^^^^^^ missing `tags`
+
+error[E0063]: missing field `tags` in initializer of `image_data::ImageData`
+   --> src/picture_io.rs:220:24
+    |
+220 |         let expected = ImageData {
+    |                        ^^^^^^^^^ missing `tags`
+
+error[E0277]: the trait bound `i64: From<rank::Rank>` is not satisfied
+  --> src/rank.rs:47:41
+   |
+47 |         let result: i64 = Rank::OneStar.into();
+   |                                         ^^^^ the trait `From<rank::Rank>` is not implemented for `i64`
+   |
+   = help: the following other types implement trait `From<T>`:
+             `i64` implements `From<ILong>`
+             `i64` implements `From<bool>`
+             `i64` implements `From<gtk4::glib::ExitCode>`
+             `i64` implements `From<i16>`
+             `i64` implements `From<i32>`
+             `i64` implements `From<i8>`
+             `i64` implements `From<u16>`
+             `i64` implements `From<u32>`
+           and 4 others
+   = note: required for `rank::Rank` to implement `Into<i64>`
+
+warning: unused variable: `expected_palette`
+   --> src/picture_io.rs:203:13
+    |
+203 |         let expected_palette: Palette = [ 0x9c8474, 0xaf382d, 0xccbcb4, 0xd4ab3e, 0xde777a, 0xde978a, 0xe3acb8, 0xeacac0, 0xfbfbfb];
+    |             ^^^^^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_expected_palette`
+    |
+    = note: `#[warn(unused_variables)]` on by default
+
+Some errors have detailed explanations: E0061, E0063, E0277, E0609.
+For more information about an error, try `rustc --explain E0061`.
+warning: `gsr` (bin "gsr" test) generated 12 warnings
+error: could not compile `gsr` (bin "gsr" test) due to 15 previous errors; 12 warnings emitted
