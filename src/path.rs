@@ -186,7 +186,7 @@ pub fn temp_directory() -> String {
     }
 }
 
-pub fn home_path(file_path: &str) -> String {
+pub fn replace_tilde_with_home(file_path: &str) -> String {
     let mut chars = file_path.chars();
     let first_char = chars.next().unwrap();
     if first_char == '~' {
@@ -200,7 +200,7 @@ pub fn home_path(file_path: &str) -> String {
     }
 }
 
-pub fn path_home(file_path: &str) -> String {
+pub fn replace_home_with_tilde(file_path: &str) -> String {
     match env::home_dir() {
         None => file_path.to_string(),
         Some(home) => {

@@ -2,8 +2,8 @@ use crate::image_data::ImageData;
 use anyhow::{anyhow, Result};
 use crate::palette::{palette_to_blob,blob_to_palette};
 use crate::path::file_name;
-use crate::path::home_path;
-use crate::path::path_home;
+use crate::path::replace_tilde_with_home;
+use crate::path::replace_home_with_tilde;
 use crate::path::get_picture_file_paths;
 use crate::path::{is_prefix_path, standard_directory,file_path_directory};
 use crate::picture_entry::make_picture_entry;
@@ -185,13 +185,13 @@ impl Database {
             "INSERT INTO Cover            \n\
              (Dir_Path, File_Name, Rank) \n\
              VALUES (?1, ?2, ?3);", 
-            params![path_home(dir_path), file_name, rank as i64])
+            params![replace_home_with_tilde(dir_path), file_name, rank as i64])
     }
 
     fn rusqlite_insert_or_update_cover(&mut self, dir_path: &str, file_name: &str, rank: Rank) -> Result<(),Error> {
         self.rusqlite_delete_cover(dir_path, file_name)
             .and_then(|_| {
-                self.rusqlite_insert_cover(&path_home(dir_path), file_name, rank)
+                self.rusqlite_insert_cover(&replace_home_with_tilde(dir_path), file_name, rank)
                     .map(|_| ())
             })
     }
@@ -199,7 +199,7 @@ impl Database {
     fn rusqlite_delete_tags_for_file_path(&mut self, file_path: &str) -> Result<(),Error> {
         self.connection.execute(
             "DELETE FROM Tag WHERE File_Path = ?1;",
-            params![path_home(file_path)])
+            params![replace_home_with_tilde(file_path)])
             .map(|_| ())
     }
 
@@ -208,7 +208,7 @@ impl Database {
             "INSERT INTO Tag      \n\
             (File_Path, Label)    \n\
             VALUES (?1, ?2);",
-            params![path_home(file_path), label])
+            params![replace_home_with_tilde(file_path), label])
             .map(|_| ())
     }
 
@@ -235,12 +235,12 @@ impl Database {
              entry.image_data.selected as i64,
              entry.deleted as i64,
              entry.image_data.cover,
-             &path_home(&*entry.file_path)])
+             &replace_home_with_tilde(&*entry.file_path)])
                  .and_then(|_| {
-                     self.rusqlite_delete_tags_for_file_path(&path_home(&entry.file_path))
+                     self.rusqlite_delete_tags_for_file_path(&entry.file_path)
                          .and_then(|_| {
                              for tag in entry.image_data.tags.iter() {
-                                 match self.rusqlite_insert_tag_label(&path_home(&entry.file_path), tag) {
+                                 match self.rusqlite_insert_tag_label(&entry.file_path, tag) {
                                      Ok(()) => {},
                                      Err(err) => return Err(err)
                                  }
@@ -261,7 +261,7 @@ impl Database {
     fn rusqlite_to_picture_entry(row: &Row) -> Result<PictureEntry,Error> {
         Ok(make_picture_entry(
                 { let file_path:String =row.get(0)?;
-                    home_path(&file_path)
+                    replace_tilde_with_home(&file_path)
                 },
                 row.get(1)?,
                 {
@@ -312,7 +312,7 @@ impl Database {
                     let mut result:HashSet<String> = HashSet::new();
                     while let Some(row) = rows.next()? {
                         let file_path:String = row.get(0)?;
-                        let _ = result.insert(home_path(&file_path));
+                        let _ = result.insert(replace_tilde_with_home(&file_path));
                     };
                     Ok(result)
                 })
@@ -329,17 +329,17 @@ impl Database {
     fn rusqlite_delete_picture(&self, file_path: &str) -> Result<(),Error> {
         self.connection.execute(
             "DELETE FROM Picture \n\
-             WHERE File_Path = ?1;", params![path_home(file_path)])
+             WHERE File_Path = ?1;", params![replace_home_with_tilde(file_path)])
             .and_then(|_| {
                 self.connection.execute(
                     "DELETE FROM Tag  \n\
-                     WHERE File_Path = ?1;", params![path_home(file_path)])
+                     WHERE File_Path = ?1;", params![replace_home_with_tilde(file_path)])
                     .map(|_| ())
             })
     }
 
     pub fn delete_picture(&self, file_path: &str) -> Result<()> {
-        match self.rusqlite_delete_picture(&path_home(file_path)) {
+        match self.rusqlite_delete_picture(&replace_home_with_tilde(file_path)) {
             Ok(()) => Ok(()),
             Err(err) => Err(anyhow!(err)),
         }
