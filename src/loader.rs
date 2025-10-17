@@ -1,3 +1,4 @@
+use crate::path::replace_home_with_tilde;
 use anyhow::{anyhow,Result};
 use crate::Database;
 use crate::args::Args;
@@ -141,7 +142,7 @@ pub fn load_picture_entries_from_db(database: &mut Database, args: &Args) -> Res
             let mut result:PictureEntries = vec![];
             for picture_entry in &mut picture_entries {
                 let file_path = picture_entry.file_path.clone();
-                match database.entry_tags(&picture_entry.file_path) {
+                match database.entry_tags(&replace_home_with_tilde(&picture_entry.file_path)) {
                     Ok(tags) => {
                         picture_entry.image_data.tags = tags
                     },

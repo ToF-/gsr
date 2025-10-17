@@ -252,7 +252,7 @@ pub fn build_gui(application: &gtk::Application, args: &Args, catalog_rc: &Rc<Re
 
 pub fn startup_gui(_application: &gtk::Application) {
     let css_provider = gtk::CssProvider::new();
-    css_provider.load_from_data("window { background-color:black;} image { margin:1em ; } label { color:white; }");
+    css_provider.load_from_data("window { background-color:black;} image { margin:1em ; } label { color:white; font-family:sans-serif; }");
     gtk::style_context_add_provider_for_display(
         &gdk::Display::default().unwrap(),
         &css_provider,
